@@ -2,7 +2,6 @@
 /** A number of important pieces of data about Flight Rising's breeding mechanics.*/
 var FRdata = FRdata || (function(){
 	
-	// private functions/etc here
 	
 	return {
 		// The average number of eggs per nest when the parents are
@@ -12,11 +11,76 @@ var FRdata = FRdata || (function(){
 		// the same modern breed.
 		avgEggsSameBreed: 2.54,
 		
+		// Data from: https://www1.flightrising.com/forums/gde/2866445#post_43461539
+		rarity_table: {
+			plentiful: {
+				plentiful: [0.5,0.5], common: [0.7,0.3], uncommon: [0.85,0.15],
+				limited: [0.97,0.03], rare: [0.99,0.01],
+			},
+			common: {
+				plentiful: [0.3,0.7], common: [0.5,0.5], uncommon: [0.75,0.25],
+				limited: [0.9,0.1], rare: [0.99,0.01],
+			},
+			uncommon: {
+				plentiful: [0.15,0.85], common: [0.25,0.75], uncommon: [0.5,0.5],
+				limited: [0.85,0.15], rare: [0.98,0.02],
+			},
+			limited: {
+				plentiful: [0.03,0.97], common: [0.1,0.9], uncommon: [0.15,0.85],
+				limited: [0.5,0.5], rare: [0.97,0.03],
+			},
+			rare: {
+				plentiful: [0.01,0.99], common: [0.01,0.99], uncommon: [0.02,0.98],
+				limited: [0.03,0.97], rare: [0.5,0.5],
+			},
+		},
+		
+		// Data from: https://www1.flightrising.com/wiki/wiki
+		breeds: {
+			modern: [
+				"bogsneak", "coatl", "fae", "guardian", "imperial", "mirror",
+				"nocturne", "pearlcatcher", "ridgeback", "skydancer", "snapper",
+				"spiral", "tundra", "wildclaw"
+			],
+			ancient: [
+				"gaoler", "banescale", "veilspun"
+			],
+			rarities: {
+				bogsneak: "uncommon",
+				coatl: "rare",
+				fae: "plentiful",
+				guardian: "plentiful",
+				imperial: "limited",
+				mirror: "plentiful",
+				nocturne: "limited",
+				pearlcatcher: "common",
+				ridgeback: "common",
+				skydancer: "uncommon",
+				snapper: "common",
+				spiral: "common",
+				tundra: "plentiful",
+				wildclaw: "rare",
+				
+				gaoler: "common",
+				banescale: "common",
+				veilspun: "common"
+			}
+		},
+		
 		// TODO the FR modern genes + their rarities
 		// TODO the FR gaoler genes + their rarities
 		// TODO the FR banescale genes + their rarities
 		// TODO the FR veilspun genes + their rarities
-		// TODO the FR breeds + their rarities
+		/*
+		genes: {
+			modern: [],
+			gaoler: [],
+			banescale: [],
+			veilspun: [],
+			rarities: {
+				
+			},
+		}, /**/
 		
 		// The game's colour wheel - each index holds a colour name
 		// alongside its hex code. This is a circular array.
