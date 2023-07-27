@@ -1,38 +1,155 @@
 
-/** A number of important pieces of data about Flight Rising's breeding mechanics.*/
+/** Data about Flight Rising's breeding mechanics, and helpful functions to perform common comparisons of the data.*/
 var FRdata = FRdata || (function(){
 	
 	/////////////////////////////////////////////////////
 	/////////////////// PRIVATE STUFF ///////////////////
 	/////////////////////////////////////////////////////
 	
-	// Source:https://www1.flightrising.com/forums/gde/2866445#post_43461539
+	// Source: https://www1.flightrising.com/forums/gde/2866445#post_43461539
 	// Letters mean Plentiful, Common, Uncommon, Limited, Rare
-	const rarity_table =
-		{
-			P: {
-				P: [0.5,0.5], C: [0.7,0.3], U: [0.85,0.15],
-				L: [0.97,0.03], R: [0.99,0.01]
-			},
-			C: {
-				C: [0.5,0.5], U: [0.75,0.25], L: [0.9,0.1],
-				R: [0.99,0.01]
-			},
-			U: {
-				U: [0.5,0.5], L: [0.85,0.15], R: [0.98,0.02]
-			},
-			L: {
-				L: [0.5,0.5], R: [0.97,0.03]
-			},
-			R: {
-				R: [0.5, 0.5]
-			}
-		};	
-		
+	const rarity_table = {
+		P: {
+			P: [0.5,0.5], C: [0.7,0.3], U: [0.85,0.15],
+			L: [0.97,0.03], R: [0.99,0.01]
+		},
+		C: {
+			C: [0.5,0.5], U: [0.75,0.25], L: [0.9,0.1],
+			R: [0.99,0.01]
+		},
+		U: {
+			U: [0.5,0.5], L: [0.85,0.15], R: [0.98,0.02]
+		},
+		L: {
+			L: [0.5,0.5], R: [0.97,0.03]
+		},
+		R: {
+			R: [0.5, 0.5]
+		}
+	};
+	
 	
 	/////////////////////////////////////////////////////
 	/////////////////// PUBLIC THINGS ///////////////////
 	/////////////////////////////////////////////////////
+	
+	///////////////////// Functions /////////////////////
+	
+	/** Looks up the probabilities of both possible outcomes when two rarities are compared.
+	 * If invalid rarities are given, returns undefined.
+	 * @param {string} rarity1 The first rarity in the comparison. One of "P", "C", "U", "L", "R".
+	 * @param {string} rarity2 The first rarity in the comparison. One of "P", "C", "U", "L", "R".*/
+	function rarityTableLookup(rarity1, rarity2) {
+		const r1 = rarity1[0].toUpperCase();
+		const r2 = rarity2[0].toUpperCase();
+		return rarity_table[r1][r2]
+			?? rarity_table[r2][r1]?.reverse();
+	}
+	
+	/** Calculates the probability of a target outcome occuring when two outcomes with rarities are being considered.
+	 * If the outcome indexes are invalid or the objects don't have rarities, returns null.
+	 * @param {array} arr An array of objects with rarities.
+	 * @param {number} one The index of the first possible outcome in the given array.
+	 * @param {number} two The index of the second possible outcome in the given array.
+	 * @param {number} target The index of the target outcome in the given array. Should equal one of the possible outcome indexes.*/
+	function calcRarityProb(arr, one, two, target) {
+		if (!(arr instanceof Array) || !(one in arr && two in arr)
+			|| !("rarity" in arr[one] && "rarity" in arr[two])) {
+			return null;
+		}
+		if (target !== one && target !== two){ // target isn't one of the two possible outcomes
+			return 0;
+		}
+		if (one === two && one === target) { // possible outcomes and target are all identical
+			return 1;
+		}
+		return rarityTableLookup(arr[one].rarity, arr[two].rarity)[(target == one) ? 0 : 1];
+	}
+	
+	/** Calculates the length of the shortest range between (and including) two colours.
+	 * If either of the parameters are not indexes in FRdata.colours, returns null.
+	 * @param {number} one The index of the first colour in the range.
+	 * @param {number} two The index of the last colour in the range.*/
+	function colourRangeLength(one, two) {
+		if (!(one in colours && two in colours)){
+			return null;
+		}
+		const absDist = Math.abs(one - two);
+		return 1 + Math.min(colours.length - absDist, absDist);
+	}
+	
+	/** Returns true if the target colour is in the shortest range between two given colours.
+	 * If any of the parameters are not indexes in FRdata.colours, returns null.
+	 * @param {number} one The index of the first colour in the range.
+	 * @param {number} two The index of the last colour in the range.
+	 * @param {number} target The index of the target colour.*/
+	function isColourInRange(one, two, target) {
+		if (!(one in colours && two in colours && target in colours)){
+			return null;
+		}
+		const absDist = Math.abs(one - two),
+			first = Math.min(one, two),
+			last = Math.max(one, two);
+		
+		// range does NOT cross array ends
+		if (absDist <= colours.length - absDist){
+			return (target >= first && target <= last);
+		}
+		// range DOES cross array ends
+		return (target <= first || target >= last);
+	}
+	
+	/** Returns true if the shortest range between two target colours is a sub-range of the shortest range between two other colours.
+	 * If any of the parameters are not indexes in FRdata.colours, returns null.
+	 * @param {number} one The index of the first colour in the range.
+	 * @param {number} two The index of the last colour in the range.
+	 * @param {number} target1 The index of the first colour in the target range.
+	 * @param {number} target2 The index of the last colour in the target range.*/
+	function isColourSubrangeInRange(one, two, target1, target2){
+		if (!(one in colours && two in colours && target1 in colours && target2 in colours)){
+			return null;
+		}
+		const absDist = Math.abs(one - two),
+			first = Math.min(one, two),
+			last = Math.max(one, two),
+			targAbsDist = Math.abs(target1 - target2),
+			targFirst = Math.min(target1, target2),
+			targLast = Math.max(target1, target2);
+		
+		// Whether or not the ranges wrap around the ends of the colour wheel array
+		const rangeCrossesEnds = (absDist > colours.length - absDist),
+			targCrossesEnds = (targAbsDist > colours.length - targAbsDist);
+		
+		if (rangeCrossesEnds && targCrossesEnds) {
+			return (first >= targFirst) && (targLast >= last);
+		}
+		else if (rangeCrossesEnds && !targCrossesEnds) {
+			return ((first <= targFirst) && (targLast < colours.length))
+				|| ((0 <= targFirst) && (targLast <= last));
+		}
+		else if (!rangeCrossesEnds && targCrossesEnds) {
+			return false;
+		}
+		else if (!rangeCrossesEnds && !targCrossesEnds) {
+			return (first <= targFirst) && (targLast <= last);
+		}
+	}
+	
+	/** Returns true if the two given breeds are compatible for breeding. Ie, true if they're two modern breeds or are the same ancient breed.
+	 * If any of the parameters are not indexes in FRdata.breeds, returns null.
+	 * @param {number} one The index of the first breed to compare.
+	 * @param {number} two The index of the second breed to compare.*/
+	function areBreedsCompatible(one, two) {
+		if (!(one in breeds && two in breeds)){
+			return null;
+		}
+		const b1 = breeds[one],
+			b2 = breeds[two];
+		
+		return (b1.type === "M" && b2.type == "M") || (b1 === b2);
+	}
+	
+	/////////////////////// Data ///////////////////////
 	
 	// Source: https://flightrising.fandom.com/wiki/Nesting_Grounds#Number_of_Eggs
 	const num_eggs_in_nest = {
@@ -93,7 +210,7 @@ var FRdata = FRdata || (function(){
 		{name: "Veilspun", type: "A", rarity: "C"}
 	];
 	
-	// TODO: add breed restrictions?
+	// TODO: add breed restrictions? + a compatibility checker func?
 	// Source:
 	//	https://www1.flightrising.com/forums/gde/3231610/1
 	//	https://docs.google.com/spreadsheets/d/1AxRC3OLrlqHyqL0_a5Qpa5wdks-SqWtxFxTNrraljak
@@ -507,6 +624,17 @@ var FRdata = FRdata || (function(){
 	////////////// RETURN THE PUBLIC STUFF //////////////
 	/////////////////////////////////////////////////////
 	return {
+		/////////////////// Functions ///////////////////
+		
+		rarityTableLookup: rarityTableLookup,
+		calcRarityProb: calcRarityProb,
+		colourRangeLength: colourRangeLength,
+		isColourInRange: isColourInRange,
+		isColourSubrangeInRange: isColourSubrangeInRange,
+		areBreedsCompatible: areBreedsCompatible,
+		
+		///////////////////// Data /////////////////////
+		
 		num_eggs_in_nest: num_eggs_in_nest,
 		eyes: eyes,
 		breeds: breeds,
