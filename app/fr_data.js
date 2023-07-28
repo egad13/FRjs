@@ -43,7 +43,7 @@ var FRdata = FRdata || (function(){
 		const r1 = rarity1[0].toUpperCase();
 		const r2 = rarity2[0].toUpperCase();
 		return rarity_table[r1][r2]
-			?? rarity_table[r2][r1]?.reverse();
+			?? [...rarity_table[r2][r1]]?.reverse(); // spread operator so reverse() doesn't change original table
 	}
 	
 	/** Calculates the probability of a target outcome occuring when two outcomes with rarities are being considered.
@@ -57,14 +57,14 @@ var FRdata = FRdata || (function(){
 			|| !("rarity" in arr[one] && "rarity" in arr[two])) {
 			return null;
 		}
-		if (target !== one && target !== two){ // target isn't one of the two possible outcomes
+		if (target !== one && target !== two) {
 			return 0;
 		}
-		if (one === two && one === target) { // possible outcomes and target are all identical
-			console.log(`${arr[one].name} and ${arr[two].name} are identical.`);
+		if (one === two && one === target) {
 			return 1;
 		}
-		return rarityTableLookup(arr[one].rarity, arr[two].rarity)[(target == one) ? 0 : 1];
+		const lookup = rarityTableLookup(arr[one].rarity, arr[two].rarity);
+		return lookup[(target === one) ? 0 : 1];
 	}
 	
 	/** Calculates the length of the shortest range between (and including) two colours.
