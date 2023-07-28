@@ -61,6 +61,7 @@ var FRdata = FRdata || (function(){
 			return 0;
 		}
 		if (one === two && one === target) { // possible outcomes and target are all identical
+			console.log(`${arr[one].name} and ${arr[two].name} are identical.`);
 			return 1;
 		}
 		return rarityTableLookup(arr[one].rarity, arr[two].rarity)[(target == one) ? 0 : 1];
@@ -117,20 +118,20 @@ var FRdata = FRdata || (function(){
 			targLast = Math.max(target1, target2);
 		
 		// Whether or not the ranges wrap around the ends of the colour wheel array
-		const rangeCrossesEnds = (absDist > colours.length - absDist),
-			targCrossesEnds = (targAbsDist > colours.length - targAbsDist);
+		const rangeWraps = (absDist > colours.length - absDist),
+			targWraps = (targAbsDist > colours.length - targAbsDist);
 		
-		if (rangeCrossesEnds && targCrossesEnds) {
+		if (rangeWraps && targWraps) {
 			return (first >= targFirst) && (targLast >= last);
 		}
-		else if (rangeCrossesEnds && !targCrossesEnds) {
+		else if (rangeWraps && !targWraps) {
 			return ((first <= targFirst) && (targLast < colours.length))
 				|| ((0 <= targFirst) && (targLast <= last));
 		}
-		else if (!rangeCrossesEnds && targCrossesEnds) {
+		else if (!rangeWraps && targWraps) {
 			return false;
 		}
-		else if (!rangeCrossesEnds && !targCrossesEnds) {
+		else if (!rangeWraps && !targWraps) {
 			return (first <= targFirst) && (targLast <= last);
 		}
 	}
@@ -149,37 +150,52 @@ var FRdata = FRdata || (function(){
 		return (b1.type === "M" && b2.type == "M") || (b1 === b2);
 	}
 	
+	/** Returns an array containing all possible nest sizes and their probabilities if dragons of the two given breeds are nested.
+	 * If either parameter is not an index in FRdata.breeds or the given breeds are incompatible, returns null.
+	 * @param {number} one The index of the first breed.
+	 * @param {number} one The index of the second breed.*/
+	function nestSizesForBreeds(one, two) {
+		if (!(one in breeds && two in breeds && areBreedsCompatible(one, two))){
+			return null;
+		}
+		const type = breeds[one].type;
+		
+		return (type === "M" && one === two)
+				? nest_sizes.same_breeds
+				: nest_sizes.diff_breeds;
+	}
+	
 	/////////////////////// Data ///////////////////////
 	
 	// Source: https://flightrising.fandom.com/wiki/Nesting_Grounds#Number_of_Eggs
-	const num_eggs_in_nest = {
+	const nest_sizes = {
 		same_breeds: [
-			{eggs: 1, probability: "0.1"},
-			{eggs: 2, probability: "0.38"},
-			{eggs: 3, probability: "0.4"},
-			{eggs: 4, probability: "0.12"}
+			{eggs: 1, probability: 0.1},
+			{eggs: 2, probability: 0.38},
+			{eggs: 3, probability: 0.4},
+			{eggs: 4, probability: 0.12}
 		],
 		diff_breeds: [ // ...or ancients
-			{eggs: 1, probability: "0.1"},
-			{eggs: 2, probability: "0.3"},
-			{eggs: 3, probability: "0.45"},
-			{eggs: 4, probability: "0.1"},
-			{eggs: 5, probability: "0.05"}
+			{eggs: 1, probability: 0.1},
+			{eggs: 2, probability: 0.3},
+			{eggs: 3, probability: 0.45},
+			{eggs: 4, probability: 0.1},
+			{eggs: 5, probability: 0.05}
 		]
 	};
 	
 	// Source: https://flightrising.fandom.com/wiki/Eye_Types#Odds
 	const eyes = [
-		{name: "Common", probability: "0.458"},
-		{name: "Uncommon", probability: "0.242"},
-		{name: "Unusual", probability: "0.139"},
-		{name: "Rare", probability: "0.091"},
-		{name: "Bright", probability: "0.022"},
-		{name: "Pastel", probability: "0.021"},
-		{name: "Goat", probability: "0.011"},
-		{name: "Faceted", probability: "0.007"},
-		{name: "Primal", probability: "0.005"},
-		{name: "Multi-Gaze", probability: "0.004"}
+		{name: "Common", probability: 0.458},
+		{name: "Uncommon", probability: 0.242},
+		{name: "Unusual", probability: 0.139},
+		{name: "Rare", probability: 0.091},
+		{name: "Bright", probability: 0.022},
+		{name: "Pastel", probability: 0.021},
+		{name: "Goat", probability: 0.011},
+		{name: "Faceted", probability: 0.007},
+		{name: "Primal", probability: 0.005},
+		{name: "Multi-Gaze", probability: 0.004}
 	];
 	
 	// Source: https://www1.flightrising.com/wiki/wiki
@@ -632,10 +648,11 @@ var FRdata = FRdata || (function(){
 		isColourInRange: isColourInRange,
 		isColourSubrangeInRange: isColourSubrangeInRange,
 		areBreedsCompatible: areBreedsCompatible,
+		nestSizesForBreeds: nestSizesForBreeds,
 		
 		///////////////////// Data /////////////////////
 		
-		num_eggs_in_nest: num_eggs_in_nest,
+		nest_sizes: nest_sizes,
 		eyes: eyes,
 		breeds: breeds,
 		genes: genes,
