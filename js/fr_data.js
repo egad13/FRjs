@@ -855,7 +855,19 @@ var FRdata = FRdata || (function(){
 	/////////////////////////////////////////////////////
 	////////////// RETURN THE PUBLIC STUFF //////////////
 	/////////////////////////////////////////////////////
-	return {
+
+	/**Render an object completely immutable. Used to make sure other code can't
+	 * manipulate FRdata.*/
+	function deepFreeze(obj) {
+		for (let [key, val] of Object.entries(obj)) {
+			if (obj.hasOwnProperty(key)
+					&& (typeof val == "object" || typeof val == "function")) {
+				deepFreeze(val);
+			}
+		}
+		return Object.freeze(obj);
+	}
+	return deepFreeze({
 		/////////////////// Functions ///////////////////
 
 		rarityTableLookup: rarityTableLookup,
@@ -873,6 +885,6 @@ var FRdata = FRdata || (function(){
 		breeds: breeds,
 		genes: genes,
 		colours: colours
-	};
+	});
 
 }());
