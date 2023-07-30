@@ -159,10 +159,59 @@ var FRdata = FRdata || (function(){
 			return null;
 		}
 		const type = breeds[one].type;
-
 		return (type === "M" && one === two)
 				? nest_sizes.same_breeds
 				: nest_sizes.diff_breeds;
+	}
+
+	/** Generator function which yields all genes available to the given breed in the given slot.
+	 * If the breed is not an index in FRdata.breeds AND is not "any", or the slot is invalid, yields nothing.
+	 * @param {number|string} breed The index of the breed, OR special value "any" which ignores breed restrictions and will yield all genes for the slot.
+	 * @param {string} slot The slot to retrieve genes for. One of "primary", "secondary", "tertiary". */
+	function* genesForBreed(breed, slot) {
+		const anyBreed = breed === "any";
+		if (!(anyBreed || breed in breeds) || !["primary", "secondary", "tertiary"].includes(slot)) {
+			return;
+		}
+		const isModern = breeds[breed]?.type === "M",
+			name = breeds[breed]?.name;
+		for(var i = 0; i < genes[slot].length; i++) {
+			const gene = genes[slot][i];
+			if (anyBreed || (isModern && gene.modern) || gene.ancient.includes(name)) {
+				yield Object.freeze({index: i, ...gene});
+			}
+		}
+	}
+
+	/** Generator function which yields all colours in the shortest range between the two given colours.
+	 * If either parameter is not an index in FRdata.colours, yields nothing.
+	 * @param {number} one The index of the first colour in the range.
+	 * @param {number} two The index of the last colour in the range.*/
+	function* colourRange(one, two) {
+		if (!(one in colours && two in colours)){
+			return;
+		}
+		const absDist = Math.abs(one - two);
+		const first = Math.min(one, two);
+		const last = Math.max(one, two);
+		var out = [];
+
+		// range does NOT cross array ends
+		if (absDist <= colours.length - absDist){
+			for(var i = first; i <= last; i++) {
+				yield Object.freeze({index: i, ...colours[i]});
+			}
+		}
+		// range DOES cross array ends
+		else {
+			for (var i = last; i < colours.length; i++) {
+				yield Object.freeze({index: i, ...colours[i]});
+			}
+			for (var i = 0; i <= first; i++) {
+				yield Object.freeze({index: i, ...colours[i]});
+			}
+		}
+		return out;
 	}
 
 	/////////////////////// Data ///////////////////////
@@ -877,6 +926,8 @@ var FRdata = FRdata || (function(){
 		isColourSubrangeInRange: isColourSubrangeInRange,
 		areBreedsCompatible: areBreedsCompatible,
 		nestSizesForBreeds: nestSizesForBreeds,
+		genesForBreed: genesForBreed,
+		colourRange: colourRange,
 
 		///////////////////// Data /////////////////////
 
