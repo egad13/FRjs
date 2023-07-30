@@ -1,11 +1,11 @@
 
 /** Data about Flight Rising's breeding mechanics, and helpful functions to perform common comparisons of the data.*/
 var FRdata = FRdata || (function(){
-	
+
 	/////////////////////////////////////////////////////
 	/////////////////// PRIVATE STUFF ///////////////////
 	/////////////////////////////////////////////////////
-	
+
 	// Source: https://www1.flightrising.com/forums/gde/2866445#post_43461539
 	// Letters mean Plentiful, Common, Uncommon, Limited, Rare
 	const rarity_table = {
@@ -27,14 +27,14 @@ var FRdata = FRdata || (function(){
 			R: [0.5, 0.5]
 		}
 	};
-	
-	
+
+
 	/////////////////////////////////////////////////////
 	/////////////////// PUBLIC THINGS ///////////////////
 	/////////////////////////////////////////////////////
-	
+
 	///////////////////// Functions /////////////////////
-	
+
 	/** Looks up the probabilities of both possible outcomes when two rarities are compared.
 	 * If invalid rarities are given, returns undefined.
 	 * @param {string} rarity1 The first rarity in the comparison. One of "P", "C", "U", "L", "R".
@@ -45,7 +45,7 @@ var FRdata = FRdata || (function(){
 		return rarity_table[r1][r2]
 			?? [...rarity_table[r2][r1]]?.reverse(); // spread operator so reverse() doesn't change original table
 	}
-	
+
 	/** Calculates the probability of a target outcome occuring when two outcomes with rarities are being considered.
 	 * If the outcome indexes are invalid or the objects don't have rarities, returns null.
 	 * @param {array} arr An array of objects with rarities.
@@ -66,7 +66,7 @@ var FRdata = FRdata || (function(){
 		const lookup = rarityTableLookup(arr[one].rarity, arr[two].rarity);
 		return lookup[(target === one) ? 0 : 1];
 	}
-	
+
 	/** Calculates the length of the shortest range between (and including) two colours.
 	 * If either of the parameters are not indexes in FRdata.colours, returns null.
 	 * @param {number} one The index of the first colour in the range.
@@ -78,7 +78,7 @@ var FRdata = FRdata || (function(){
 		const absDist = Math.abs(one - two);
 		return 1 + Math.min(colours.length - absDist, absDist);
 	}
-	
+
 	/** Returns true if the target colour is in the shortest range between two given colours.
 	 * If any of the parameters are not indexes in FRdata.colours, returns null.
 	 * @param {number} one The index of the first colour in the range.
@@ -91,7 +91,7 @@ var FRdata = FRdata || (function(){
 		const absDist = Math.abs(one - two),
 			first = Math.min(one, two),
 			last = Math.max(one, two);
-		
+
 		// range does NOT cross array ends
 		if (absDist <= colours.length - absDist){
 			return (target >= first && target <= last);
@@ -99,7 +99,7 @@ var FRdata = FRdata || (function(){
 		// range DOES cross array ends
 		return (target <= first || target >= last);
 	}
-	
+
 	/** Returns true if the shortest range between two target colours is a sub-range of the shortest range between two other colours.
 	 * If any of the parameters are not indexes in FRdata.colours, returns null.
 	 * @param {number} one The index of the first colour in the range.
@@ -116,11 +116,11 @@ var FRdata = FRdata || (function(){
 			targAbsDist = Math.abs(target1 - target2),
 			targFirst = Math.min(target1, target2),
 			targLast = Math.max(target1, target2);
-		
+
 		// Whether or not the ranges wrap around the ends of the colour wheel array
 		const rangeWraps = (absDist > colours.length - absDist),
 			targWraps = (targAbsDist > colours.length - targAbsDist);
-		
+
 		if (rangeWraps && targWraps) {
 			return (first >= targFirst) && (targLast >= last);
 		}
@@ -135,7 +135,7 @@ var FRdata = FRdata || (function(){
 			return (first <= targFirst) && (targLast <= last);
 		}
 	}
-	
+
 	/** Returns true if the two given breeds are compatible for breeding. Ie, true if they're two modern breeds or are the same ancient breed.
 	 * If any of the parameters are not indexes in FRdata.breeds, returns null.
 	 * @param {number} one The index of the first breed to compare.
@@ -146,10 +146,10 @@ var FRdata = FRdata || (function(){
 		}
 		const b1 = breeds[one],
 			b2 = breeds[two];
-		
+
 		return (b1.type === "M" && b2.type == "M") || (b1 === b2);
 	}
-	
+
 	/** Returns an array containing all possible nest sizes and their probabilities if dragons of the two given breeds are nested.
 	 * If either parameter is not an index in FRdata.breeds or the given breeds are incompatible, returns null.
 	 * @param {number} one The index of the first breed.
@@ -159,14 +159,14 @@ var FRdata = FRdata || (function(){
 			return null;
 		}
 		const type = breeds[one].type;
-		
+
 		return (type === "M" && one === two)
 				? nest_sizes.same_breeds
 				: nest_sizes.diff_breeds;
 	}
-	
+
 	/////////////////////// Data ///////////////////////
-	
+
 	// Source: https://flightrising.fandom.com/wiki/Nesting_Grounds#Number_of_Eggs
 	const nest_sizes = {
 		same_breeds: [
@@ -183,7 +183,7 @@ var FRdata = FRdata || (function(){
 			{eggs: 5, probability: 0.05}
 		]
 	};
-	
+
 	// Source: https://flightrising.fandom.com/wiki/Eye_Types#Odds
 	const eyes = [
 		{name: "Common", probability: 0.458},
@@ -197,7 +197,7 @@ var FRdata = FRdata || (function(){
 		{name: "Primal", probability: 0.005},
 		{name: "Multi-Gaze", probability: 0.004}
 	];
-	
+
 	// Source: https://www1.flightrising.com/wiki/wiki
 	// Types: A = ancient, M = modern
 	const breeds = [
@@ -216,7 +216,7 @@ var FRdata = FRdata || (function(){
 		{name: "Spiral", type: "M", rarity: "C"},
 		{name: "Tundra", type: "M", rarity: "P"},
 		{name: "Wildclaw", type: "M", rarity: "R"},
-		
+
 		{name: "Aberration", type: "A", rarity: "C"},
 		{name: "Aether", type: "A", rarity: "C"},
 		{name: "Banescale", type: "A", rarity: "C"},
@@ -225,236 +225,452 @@ var FRdata = FRdata || (function(){
 		{name: "Undertide", type: "A", rarity: "C"},
 		{name: "Veilspun", type: "A", rarity: "C"}
 	];
-	
+
 	// TODO: add breed restrictions? + a compatibility checker func?
 	// Source:
 	//	https://www1.flightrising.com/forums/gde/3231610/1
 	//	https://docs.google.com/spreadsheets/d/1AxRC3OLrlqHyqL0_a5Qpa5wdks-SqWtxFxTNrraljak
 	const genes = {
 		primary: [
-			{name: "Arapaima", rarity: "C"},
-			{name: "Arc", rarity: "U"},
-			{name: "Bar", rarity: "U"},
-			{name: "Basic", rarity: "P"},
-			{name: "Boa", rarity: "U"},
-			{name: "Boulder", rarity: "L"},
-			{name: "Bright", rarity: "U"},
-			{name: "Candy", rarity: "L"},
-			{name: "Candycane", rarity: "L"},
-			{name: "Checkers", rarity: "C"},
-			{name: "Cherub", rarity: "U"},
-			{name: "Chevron", rarity: "U"},
-			{name: "Cinder", rarity: "U"},
-			{name: "Clown", rarity: "C"},
-			{name: "Crystal", rarity: "R"},
-			{name: "Diamond", rarity: "L"},
-			{name: "Fade", rarity: "C"},
-			{name: "Falcon", rarity: "C"},
-			{name: "Fern", rarity: "L"},
-			{name: "Flaunt", rarity: "U"},
-			{name: "Giraffe", rarity: "U"},
-			{name: "Ground", rarity: "L"},
-			{name: "Harlequin", rarity: "R"},
-			{name: "Iridescent", rarity: "R"},
-			{name: "Jaguar", rarity: "U"},
-			{name: "Jupiter", rarity: "U"},
-			{name: "Laced", rarity: "C"},
-			{name: "Leopard", rarity: "C"},
-			{name: "Lionfish", rarity: "U"},
-			{name: "Marble", rarity: "C"},
-			{name: "Metallic", rarity: "R"},
-			{name: "Mosaic", rarity: "U"},
-			{name: "Octopus", rarity: "L"},
-			{name: "Orb", rarity: "L"},
-			{name: "Petals", rarity: "R"},
-			{name: "Phantom", rarity: "L"},
-			{name: "Pharaoh", rarity: "R"},
-			{name: "Piebald", rarity: "C"},
-			{name: "Pinstripe", rarity: "L"},
-			{name: "Poison", rarity: "L"},
-			{name: "Python", rarity: "U"},
-			{name: "Ragged", rarity: "U"},
-			{name: "Rattlesnake", rarity: "U"},
-			{name: "Ribbon", rarity: "U"},
-			{name: "Ripple", rarity: "U"},
-			{name: "Sailfish", rarity: "L"},
-			{name: "Savannah", rarity: "C"},
-			{name: "Shaggy", rarity: "C"},
-			{name: "Shell", rarity: "U"},
-			{name: "Skink", rarity: "L"},
-			{name: "Slime", rarity: "L"},
-			{name: "Speckle", rarity: "C"},
-			{name: "Sphinxmoth", rarity: "U"},
-			{name: "Spool", rarity: "C"},
-			{name: "Starmap", rarity: "R"},
-			{name: "Stitched", rarity: "L"},
-			{name: "Swirl", rarity: "C"},
-			{name: "Tapir", rarity: "C"},
-			{name: "Tide", rarity: "L"},
-			{name: "Tiger", rarity: "C"},
-			{name: "Twinkle", rarity: "R"},
-			{name: "Vipera", rarity: "U"},
-			{name: "Wasp", rarity: "R"},
-			{name: "Wolf", rarity: "U"},
-			{name: "Wrought", rarity: "C"}
-		],
+			{name: "Arapaima", rarity: "C", modern: false,
+				ancient: []},
+			{name: "Arc", rarity: "U", modern: false,
+				ancient: ["Veilspun"]},
+			{name: "Bar", rarity: "U", modern: true,
+				ancient: ["Aberration", "Aether", "Banescale", "Gaoler", "Undertide", "Veilspun"]},
+			{name: "Basic", rarity: "P", modern: true,
+				ancient: ["Aberration", "Aether", "Banescale", "Gaoler", "Sandsurge", "Undertide", "Veilspun"]},
+			{name: "Boa", rarity: "U", modern: false,
+				ancient: ["Gaoler", "Sandsurge", "Undertide"]},
+			{name: "Boulder", rarity: "L", modern: true,
+				ancient: ["Aether", "Sandsurge", "Undertide"]},
+			{name: "Bright", rarity: "U", modern: false,
+				ancient: ["Veilspun"]},
+			{name: "Candy", rarity: "L", modern: false,
+				ancient: ["Aether"]},
+			{name: "Candycane", rarity: "L", modern: false,
+				ancient: ["Banescale"]},
+			{name: "Checkers", rarity: "C", modern: false,
+				ancient: ["Undertide"]},
+			{name: "Cherub", rarity: "U", modern: true,
+				ancient: ["Banescale", "Sandsurge", "Undertide"]},
+			{name: "Chevron", rarity: "U", modern: false,
+				ancient: ["Banescale"]},
+			{name: "Cinder", rarity: "U", modern: false,
+				ancient: ["Aether"]},
+			{name: "Clown", rarity: "C", modern: true,
+				ancient: ["Aether", "Banescale", "Gaoler", "Sandsurge", "Veilspun"]},
+			{name: "Crystal", rarity: "R", modern: true,
+				ancient: ["Aberration", "Banescale", "Gaoler", "Undertide", "Veilspun"]},
+			{name: "Diamond", rarity: "L", modern: false,
+				ancient: ["Aberration"]},
+			{name: "Fade", rarity: "C", modern: true,
+				ancient: ["Aberration", "Aether", "Banescale", "Gaoler", "Sandsurge", "Undertide", "Veilspun"]},
+			{name: "Falcon", rarity: "C", modern: true,
+				ancient: ["Aberration", "Banescale", "Gaoler", "Undertide", "Veilspun"]},
+			{name: "Fern", rarity: "L", modern: true,
+				ancient: ["Banescale", "Veilspun"]},
+			{name: "Flaunt", rarity: "U", modern: true,
+				ancient: ["Aberration", "Aether", "Gaoler", "Sandsurge"]},
+			{name: "Giraffe", rarity: "U", modern: true,
+				ancient: ["Aberration", "Banescale", "Gaoler", "Undertide", "Veilspun"]},
+			{name: "Ground", rarity: "L", modern: true,
+				ancient: ["Aberration", "Sandsurge"]},
+			{name: "Harlequin", rarity: "R", modern: true,
+				ancient: ["Sandsurge"]},
+			{name: "Iridescent", rarity: "R", modern: true,
+				ancient: []},
+			{name: "Jaguar", rarity: "U", modern: true,
+				ancient: ["Aberration", "Aether", "Banescale", "Gaoler", "Sandsurge"]},
+			{name: "Jupiter", rarity: "U", modern: true,
+				ancient: ["Aether", "Sandsurge", "Veilspun"]},
+			{name: "Laced", rarity: "C", modern: true,
+				ancient: ["Aether", "Banescale", "Gaoler", "Veilspun"]},
+			{name: "Leopard", rarity: "C", modern: true,
+				ancient: ["Banescale", "Gaoler", "Veilspun"]},
+			{name: "Lionfish", rarity: "U", modern: true,
+				ancient: ["Aberration", "Aether", "Sandsurge", "Undertide"]},
+			{name: "Marble", rarity: "C", modern: false,
+				ancient: ["Banescale"]},
+			{name: "Metallic", rarity: "R", modern: true,
+				ancient: ["Aether", "Banescale"]},
+			{name: "Mosaic", rarity: "U", modern: true,
+				ancient: ["Aether", "Gaoler", "Sandsurge"]},
+			{name: "Octopus", rarity: "L", modern: false,
+				ancient: ["Undertide"]},
+			{name: "Orb", rarity: "L", modern: false,
+				ancient: ["Aberration"]},
+			{name: "Petals", rarity: "R", modern: true,
+				ancient: ["Aether", "Banescale", "Veilspun"]},
+			{name: "Phantom", rarity: "L", modern: false,
+				ancient: ["Gaoler"]},
+			{name: "Pharaoh", rarity: "R", modern: true,
+				ancient: ["Aberration", "Banescale", "Undertide"]},
+			{name: "Piebald", rarity: "C", modern: true,
+				ancient: ["Aether", "Gaoler", "Sandsurge"]},
+			{name: "Pinstripe", rarity: "L", modern: true,
+				ancient: ["Banescale", "Gaoler", "Sandsurge", "Undertide"]},
+			{name: "Poison", rarity: "L", modern: true,
+				ancient: ["Banescale", "Gaoler", "Undertide", "Veilspun"]},
+			{name: "Python", rarity: "U", modern: true,
+				ancient: ["Aether"]},
+			{name: "Ragged", rarity: "U", modern: false,
+				ancient: ["Banescale"]},
+			{name: "Rattlesnake", rarity: "U", modern: false,
+				ancient: []},
+			{name: "Ribbon", rarity: "U", modern: true,
+				ancient: ["Aberration", "Banescale", "Gaoler", "Undertide"]},
+			{name: "Ripple", rarity: "U", modern: true,
+				ancient: ["Banescale", "Gaoler", "Undertide"]},
+			{name: "Sailfish", rarity: "L", modern: false,
+				ancient: ["Sandsurge"]},
+			{name: "Savannah", rarity: "C", modern: true,
+				ancient: ["Aberration", "Banescale", "Gaoler", "Sandsurge", "Undertide"]},
+			{name: "Shaggy", rarity: "C", modern: false,
+				ancient: ["Gaoler"]},
+			{name: "Shell", rarity: "U", modern: false,
+				ancient: ["Veilspun"]},
+			{name: "Skink", rarity: "L", modern: true,
+				ancient: ["Aether", "Banescale", "Gaoler", "Veilspun"]},
+			{name: "Slime", rarity: "L", modern: true,
+				ancient: ["Aberration", "Gaoler", "Sandsurge", "Veilspun"]},
+			{name: "Speckle", rarity: "C", modern: true,
+				ancient: ["Aberration", "Banescale", "Undertide", "Veilspun"]},
+			{name: "Sphinxmoth", rarity: "U", modern: false,
+				ancient: ["Veilspun"]},
+			{name: "Spool", rarity: "C", modern: false,
+				ancient: ["Aether"]},
+			{name: "Starmap", rarity: "R", modern: true,
+				ancient: ["Aether", "Veilspun"]},
+			{name: "Stitched", rarity: "L", modern: true,
+				ancient: ["Aberration", "Aether", "Gaoler", "Veilspun"]},
+			{name: "Swirl", rarity: "C", modern: true,
+				ancient: ["Aberration", "Gaoler", "Sandsurge", "Undertide"]},
+			{name: "Tapir", rarity: "C", modern: true,
+				ancient: ["Aberration", "Banescale", "Gaoler", "Sandsurge", "Veilspun"]},
+			{name: "Tide", rarity: "L", modern: true,
+				ancient: ["Aether", "Banescale", "Gaoler", "Undertide"]},
+			{name: "Tiger", rarity: "C", modern: true,
+				ancient: ["Banescale", "Gaoler", "Sandsurge"]},
+			{name: "Twinkle", rarity: "R", modern: false,
+				ancient: ["Aether"]},
+			{name: "Vipera", rarity: "U", modern: true,
+				ancient: ["Aberration", "Veilspun"]},
+			{name: "Wasp", rarity: "R", modern: true,
+				ancient: ["Aberration", "Gaoler", "Sandsurge", "Undertide", "Veilspun"]},
+			{name: "Wolf", rarity: "U", modern: false,
+				ancient: ["Undertide"]},
+			{name: "Wrought", rarity: "C", modern: false,
+				ancient: []}
+		  ],
 		secondary: [
-			{name: "Alloy", rarity: "R"},
-			{name: "Arowana", rarity: "C"},
-			{name: "Arrow", rarity: "U"},
-			{name: "Basic", rarity: "P"},
-			{name: "Bee", rarity: "R"},
-			{name: "Blaze", rarity: "U"},
-			{name: "Blend", rarity: "C"},
-			{name: "Breakup", rarity: "U"},
-			{name: "Butterfly", rarity: "R"},
-			{name: "Chess", rarity: "C"},
-			{name: "Clouded", rarity: "C"},
-			{name: "Constellation", rarity: "R"},
-			{name: "Current", rarity: "U"},
-			{name: "Daub", rarity: "U"},
-			{name: "Diamondback", rarity: "U"},
-			{name: "Edged", rarity: "C"},
-			{name: "Eel", rarity: "U"},
-			{name: "Eye Spots", rarity: "C"},
-			{name: "Facet", rarity: "R"},
-			{name: "Fissure", rarity: "L"},
-			{name: "Flair", rarity: "U"},
-			{name: "Flicker", rarity: "R"},
-			{name: "Foam", rarity: "L"},
-			{name: "Freckle", rarity: "C"},
-			{name: "Hawkmoth", rarity: "U"},
-			{name: "Hex", rarity: "U"},
-			{name: "Hypnotic", rarity: "U"},
-			{name: "Icing", rarity: "L"},
-			{name: "Jester", rarity: "R"},
-			{name: "Loop", rarity: "U"},
-			{name: "Marbled", rarity: "C"},
-			{name: "Marlin", rarity: "L"},
-			{name: "Morph", rarity: "U"},
-			{name: "Mottle", rarity: "C"},
-			{name: "Myrid", rarity: "L"},
-			{name: "Noxtide", rarity: "U"},
-			{name: "Pack", rarity: "U"},
-			{name: "Paint", rarity: "C"},
-			{name: "Paisley", rarity: "L"},
-			{name: "Patchwork", rarity: "L"},
-			{name: "Peregrine", rarity: "C"},
-			{name: "Rings", rarity: "L"},
-			{name: "Rosette", rarity: "U"},
-			{name: "Saddle", rarity: "U"},
-			{name: "Safari", rarity: "C"},
-			{name: "Sarcophagus", rarity: "R"},
-			{name: "Saturn", rarity: "U"},
-			{name: "Seraph", rarity: "U"},
-			{name: "Shimmer", rarity: "R"},
-			{name: "Sludge", rarity: "L"},
-			{name: "Spade", rarity: "L"},
-			{name: "Spinner", rarity: "L"},
-			{name: "Spire", rarity: "C"},
-			{name: "Spirit", rarity: "L"},
-			{name: "Streak", rarity: "C"},
-			{name: "Striation", rarity: "C"},
-			{name: "Stripes", rarity: "C"},
-			{name: "Sugarplum", rarity: "L"},
-			{name: "Tear", rarity: "U"},
-			{name: "Thread", rarity: "C"},
-			{name: "Toxin", rarity: "L"},
-			{name: "Trail", rarity: "L"},
-			{name: "Vivid", rarity: "U"},
-			{name: "Weaver", rarity: "L"},
-			{name: "Web", rarity: "U"}
-		],
+			{name: "Alloy", rarity: "R", modern: true,
+				ancient: ["Aether", "Banescale"]},
+			{name: "Arowana", rarity: "C", modern: false,
+				ancient: []},
+			{name: "Arrow", rarity: "U", modern: false,
+				ancient: ["Banescale"]},
+			{name: "Basic", rarity: "P", modern: true,
+				ancient: ["Aberration", "Aether", "Banescale", "Gaoler", "Sandsurge", "Undertide", "Veilspun"]},
+			{name: "Bee", rarity: "R", modern: true,
+				ancient: ["Aberration", "Gaoler", "Sandsurge", "Undertide", "Veilspun"]},
+			{name: "Blaze", rarity: "U", modern: false,
+				ancient: ["Aether"]},
+			{name: "Blend", rarity: "C", modern: true,
+				ancient: ["Aberration", "Aether", "Banescale", "Gaoler", "Sandsurge", "Undertide", "Veilspun"]},
+			{name: "Breakup", rarity: "U", modern: true,
+				ancient: ["Aether", "Gaoler", "Sandsurge"]},
+			{name: "Butterfly", rarity: "R", modern: true,
+				ancient: ["Aether", "Banescale", "Veilspun"]},
+			{name: "Chess", rarity: "C", modern: false,
+				ancient: ["Undertide"]},
+			{name: "Clouded", rarity: "C", modern: true,
+				ancient: ["Banescale", "Gaoler", "Veilspun"]},
+			{name: "Constellation", rarity: "R", modern: true,
+				ancient: ["Aether", "Veilspun"]},
+			{name: "Current", rarity: "U", modern: true,
+				ancient: ["Banescale", "Gaoler", "Undertide"]},
+			{name: "Daub", rarity: "U", modern: true,
+				ancient: ["Aberration", "Aether", "Banescale", "Gaoler", "Undertide", "Veilspun"]},
+			{name: "Diamondback", rarity: "U", modern: false,
+				ancient: []},
+			{name: "Edged", rarity: "C", modern: true,
+				ancient: ["Aether", "Banescale", "Gaoler", "Veilspun"]},
+			{name: "Eel", rarity: "U", modern: true,
+				ancient: ["Aberration", "Banescale", "Gaoler", "Undertide"]},
+			{name: "Eye Spots", rarity: "C", modern: true,
+				ancient: ["Aether", "Banescale", "Gaoler", "Sandsurge", "Veilspun"]},
+			{name: "Facet", rarity: "R", modern: true,
+				ancient: ["Aberration", "Banescale", "Gaoler", "Undertide", "Veilspun"]},
+			{name: "Fissure", rarity: "L", modern: true,
+				ancient: ["Aberration", "Sandsurge"]},
+			{name: "Flair", rarity: "U", modern: true,
+				ancient: ["Aberration", "Aether", "Gaoler", "Sandsurge"]},
+			{name: "Flicker", rarity: "R", modern: false,
+				ancient: ["Aether"]},
+			{name: "Foam", rarity: "L", modern: true,
+				ancient: ["Aether", "Banescale", "Gaoler", "Undertide"]},
+			{name: "Freckle", rarity: "C", modern: true,
+				ancient: ["Aberration", "Banescale", "Undertide", "Veilspun"]},
+			{name: "Hawkmoth", rarity: "U", modern: false,
+				ancient: ["Veilspun"]},
+			{name: "Hex", rarity: "U", modern: true,
+				ancient: ["Aberration", "Banescale", "Gaoler", "Undertide", "Veilspun"]},
+			{name: "Hypnotic", rarity: "U", modern: true,
+				ancient: ["Aberration", "Veilspun"]},
+			{name: "Icing", rarity: "L", modern: false,
+				ancient: ["Aether"]},
+			{name: "Jester", rarity: "R", modern: true,
+				ancient: ["Sandsurge"]},
+			{name: "Loop", rarity: "U", modern: false,
+				ancient: ["Veilspun"]},
+			{name: "Marbled", rarity: "C", modern: true,
+				ancient: ["Aberration", "Gaoler", "Sandsurge", "Undertide"]},
+			{name: "Marlin", rarity: "L", modern: false,
+				ancient: ["Sandsurge"]},
+			{name: "Morph", rarity: "U", modern: true,
+				ancient: ["Aether"]},
+			{name: "Mottle", rarity: "C", modern: false,
+				ancient: ["Banescale"]},
+			{name: "Myrid", rarity: "L", modern: true,
+				ancient: ["Aether", "Sandsurge", "Undertide"]},
+			{name: "Noxtide", rarity: "U", modern: true,
+				ancient: ["Aberration", "Aether", "Sandsurge", "Undertide"]},
+			{name: "Pack", rarity: "U", modern: false,
+				ancient: ["Undertide"]},
+			{name: "Paint", rarity: "C", modern: true,
+				ancient: ["Aether", "Gaoler", "Sandsurge"]},
+			{name: "Paisley", rarity: "L", modern: true,
+				ancient: ["Banescale", "Veilspun"]},
+			{name: "Patchwork", rarity: "L", modern: true,
+				ancient: ["Aberration", "Aether", "Gaoler", "Veilspun"]},
+			{name: "Peregrine", rarity: "C", modern: true,
+				ancient: ["Aberration", "Banescale", "Gaoler", "Undertide", "Veilspun"]},
+			{name: "Rings", rarity: "L", modern: false,
+				ancient: ["Undertide"]},
+			{name: "Rosette", rarity: "U", modern: true,
+				ancient: ["Aberration", "Aether", "Banescale", "Gaoler", "Sandsurge"]},
+			{name: "Saddle", rarity: "U", modern: false,
+				ancient: ["Gaoler", "Sandsurge", "Undertide"]},
+			{name: "Safari", rarity: "C", modern: true,
+				ancient: ["Aberration", "Banescale", "Gaoler", "Sandsurge", "Undertide"]},
+			{name: "Sarcophagus", rarity: "R", modern: true,
+				ancient: ["Aberration", "Banescale", "Undertide"]},
+			{name: "Saturn", rarity: "U", modern: true,
+				ancient: ["Aether", "Sandsurge", "Veilspun"]},
+			{name: "Seraph", rarity: "U", modern: true,
+				ancient: ["Banescale", "Sandsurge", "Undertide"]},
+			{name: "Shimmer", rarity: "R", modern: true,
+				ancient: []},
+			{name: "Sludge", rarity: "L", modern: true,
+				ancient: ["Aberration", "Gaoler", "Sandsurge", "Veilspun"]},
+			{name: "Spade", rarity: "L", modern: false,
+				ancient: ["Aberration"]},
+			{name: "Spinner", rarity: "L", modern: true,
+				ancient: ["Aether", "Banescale", "Gaoler", "Veilspun"]},
+			{name: "Spire", rarity: "C", modern: false,
+				ancient: []},
+			{name: "Spirit", rarity: "L", modern: false,
+				ancient: ["Gaoler"]},
+			{name: "Streak", rarity: "C", modern: false,
+				ancient: ["Gaoler"]},
+			{name: "Striation", rarity: "C", modern: true,
+				ancient: ["Aberration", "Banescale", "Gaoler", "Sandsurge", "Veilspun"]},
+			{name: "Stripes", rarity: "C", modern: true,
+				ancient: ["Banescale", "Gaoler", "Sandsurge"]},
+			{name: "Sugarplum", rarity: "L", modern: false,
+				ancient: ["Banescale"]},
+			{name: "Tear", rarity: "U", modern: false,
+				ancient: ["Banescale"]},
+			{name: "Thread", rarity: "C", modern: false,
+				ancient: ["Aether"]},
+			{name: "Toxin", rarity: "L", modern: true,
+				ancient: ["Banescale", "Gaoler", "Undertide", "Veilspun"]},
+			{name: "Trail", rarity: "L", modern: true,
+				ancient: ["Banescale", "Gaoler", "Sandsurge", "Undertide"]},
+			{name: "Vivid", rarity: "U", modern: false,
+				ancient: ["Veilspun"]},
+			{name: "Weaver", rarity: "L", modern: false,
+				ancient: ["Aberration"]},
+			{name: "Web", rarity: "U", modern: false,
+				ancient: ["Veilspun"]}
+		  ],
 		tertiary: [
-			{name: "Angler", rarity: "L"},
-			{name: "Augment", rarity: "R"},
-			{name: "Basic", rarity: "P"},
-			{name: "Beard", rarity: "U"},
-			{name: "Beetle", rarity: "L"},
-			{name: "Blossom", rarity: "L"},
-			{name: "Braids", rarity: "U"},
-			{name: "Branches", rarity: "L"},
-			{name: "Brightshine", rarity: "L"},
-			{name: "Capsule", rarity: "L"},
-			{name: "Carnivore", rarity: "L"},
-			{name: "Chitin", rarity: "C"},
-			{name: "Circuit", rarity: "R"},
-			{name: "Contour", rarity: "C"},
-			{name: "Crackle", rarity: "U"},
-			{name: "Crest", rarity: "U"},
-			{name: "Darts", rarity: "C"},
-			{name: "Diaphanous", rarity: "R"},
-			{name: "Fangs", rarity: "U"},
-			{name: "Fans", rarity: "R"},
-			{name: "Featherbeard", rarity: "L"},
-			{name: "Filigree", rarity: "R"},
-			{name: "Firebreather", rarity: "L"},
-			{name: "Firefly", rarity: "L"},
-			{name: "Fishbone", rarity: "U"},
-			{name: "Flecks", rarity: "U"},
-			{name: "Flutter", rarity: "L"},
-			{name: "Frills", rarity: "R"},
-			{name: "Gembond", rarity: "U"},
-			{name: "Ghost", rarity: "U"},
-			{name: "Gliders", rarity: "L"},
-			{name: "Glimmer", rarity: "R"},
-			{name: "Glowtail", rarity: "R"},
-			{name: "Gnarlhorns", rarity: "R"},
-			{name: "Jewels", rarity: "R"},
-			{name: "Keel", rarity: "L"},
-			{name: "Koi", rarity: "R"},
-			{name: "Kumo", rarity: "C"},
-			{name: "Lace", rarity: "U"},
-			{name: "Mandibles", rarity: "L"},
-			{name: "Monarch", rarity: "R"},
-			{name: "Mop", rarity: "R"},
-			{name: "Mucous", rarity: "L"},
-			{name: "Nudibranch", rarity: "L"},
-			{name: "Okapi", rarity: "U"},
-			{name: "Opal", rarity: "R"},
-			{name: "Peacock", rarity: "C"},
-			{name: "Pinions", rarity: "R"},
-			{name: "Plating", rarity: "U"},
-			{name: "Plumage", rarity: "R"},
-			{name: "Points", rarity: "C"},
-			{name: "Polkadot", rarity: "L"},
-			{name: "Polypore", rarity: "L"},
-			{name: "Porcupine", rarity: "L"},
-			{name: "Pufferfish", rarity: "U"},
-			{name: "Remora", rarity: "R"},
-			{name: "Ringlets", rarity: "U"},
-			{name: "Runes", rarity: "L"},
-			{name: "Sailfin", rarity: "R"},
-			{name: "Scales", rarity: "L"},
-			{name: "Scorpion", rarity: "L"},
-			{name: "Shardflank", rarity: "C"},
-			{name: "Shark", rarity: "L"},
-			{name: "Skeletal", rarity: "L"},
-			{name: "Smirch", rarity: "L"},
-			{name: "Smoke", rarity: "U"},
-			{name: "Soap", rarity: "R"},
-			{name: "Space", rarity: "R"},
-			{name: "Sparkle", rarity: "U"},
-			{name: "Spectre", rarity: "R"},
-			{name: "Spines", rarity: "U"},
-			{name: "Squiggle", rarity: "L"},
-			{name: "Stained", rarity: "R"},
-			{name: "Stinger", rarity: "U"},
-			{name: "Tentacles", rarity: "R"},
-			{name: "Thorns", rarity: "U"},
-			{name: "Thundercrack", rarity: "L"},
-			{name: "Thylacine", rarity: "C"},
-			{name: "Trimmings", rarity: "C"},
-			{name: "Underbelly", rarity: "C"},
-			{name: "Veined", rarity: "L"},
-			{name: "Weathered", rarity: "L"},
-			{name: "Whiskers", rarity: "U"},
-			{name: "Wintercoat", rarity: "U"},
-			{name: "Wish", rarity: "R"},
-			{name: "Wraith", rarity: "R"}
+			{name: "Angler", rarity: "L", modern: false,
+				ancient: ["Gaoler", "Veilspun"]},
+			{name: "Augment", rarity: "R", modern: false,
+				ancient: ["Sandsurge"]},
+			{name: "Basic", rarity: "P", modern: true,
+				ancient: ["Aberration", "Aether", "Banescale", "Gaoler", "Sandsurge", "Undertide", "Veilspun"]},
+			{name: "Beard", rarity: "U", modern: false,
+				ancient: []},
+			{name: "Beetle", rarity: "L", modern: false,
+				ancient: ["Veilspun"]},
+			{name: "Blossom", rarity: "L", modern: false,
+				ancient: ["Gaoler"]},
+			{name: "Braids", rarity: "U", modern: false,
+				ancient: ["Gaoler"]},
+			{name: "Branches", rarity: "L", modern: false,
+				ancient: ["Sandsurge", "Veilspun"]},
+			{name: "Brightshine", rarity: "L", modern: false,
+				ancient: ["Undertide", "Veilspun"]},
+			{name: "Capsule", rarity: "L", modern: true,
+				ancient: ["Aberration", "Banescale", "Gaoler", "Undertide", "Veilspun"]},
+			{name: "Carnivore", rarity: "L", modern: false,
+				ancient: ["Aberration", "Aether", "Banescale", "Gaoler", "Undertide", "Veilspun"]},
+			{name: "Chitin", rarity: "C", modern: false,
+				ancient: []},
+			{name: "Circuit", rarity: "R", modern: true,
+				ancient: ["Aether", "Undertide"]},
+			{name: "Contour", rarity: "C", modern: true,
+				ancient: ["Aether", "Banescale", "Gaoler"]},
+			{name: "Crackle", rarity: "U", modern: true,
+				ancient: ["Banescale", "Undertide", "Veilspun"]},
+			{name: "Crest", rarity: "U", modern: false,
+				ancient: []},
+			{name: "Darts", rarity: "C", modern: false,
+				ancient: []},
+			{name: "Diaphanous", rarity: "R", modern: false,
+				ancient: ["Veilspun"]},
+			{name: "Fangs", rarity: "U", modern: false,
+				ancient: ["Aberration"]},
+			{name: "Fans", rarity: "R", modern: false,
+				ancient: ["Banescale", "Gaoler"]},
+			{name: "Featherbeard", rarity: "L", modern: false,
+				ancient: ["Undertide"]},
+			{name: "Filigree", rarity: "R", modern: true,
+				ancient: ["Banescale", "Undertide", "Veilspun"]},
+			{name: "Firebreather", rarity: "L", modern: true,
+				ancient: []},
+			{name: "Firefly", rarity: "L", modern: true,
+				ancient: ["Aberration", "Veilspun"]},
+			{name: "Fishbone", rarity: "U", modern: false,
+				ancient: []},
+			{name: "Flecks", rarity: "U", modern: true,
+				ancient: ["Aberration", "Undertide", "Veilspun"]},
+			{name: "Flutter", rarity: "L", modern: false,
+				ancient: ["Aether"]},
+			{name: "Frills", rarity: "R", modern: false,
+				ancient: ["Aberration"]},
+			{name: "Gembond", rarity: "U", modern: true,
+				ancient: ["Aether", "Undertide"]},
+			{name: "Ghost", rarity: "U", modern: true,
+				ancient: ["Aberration", "Banescale", "Gaoler", "Undertide", "Veilspun"]},
+			{name: "Gliders", rarity: "L", modern: false,
+				ancient: ["Banescale"]},
+			{name: "Glimmer", rarity: "R", modern: true,
+				ancient: ["Aberration", "Banescale", "Gaoler", "Veilspun"]},
+			{name: "Glowtail", rarity: "R", modern: true,
+				ancient: ["Aberration", "Aether"]},
+			{name: "Gnarlhorns", rarity: "R", modern: false,
+				ancient: ["Gaoler"]},
+			{name: "Jewels", rarity: "R", modern: false,
+				ancient: ["Aberration"]},
+			{name: "Keel", rarity: "L", modern: true,
+				ancient: ["Aether", "Sandsurge"]},
+			{name: "Koi", rarity: "R", modern: true,
+				ancient: ["Veilspun"]},
+			{name: "Kumo", rarity: "C", modern: false,
+				ancient: ["Aberration", "Sandsurge"]},
+			{name: "Lace", rarity: "U", modern: true,
+				ancient: ["Aether", "Banescale", "Sandsurge"]},
+			{name: "Mandibles", rarity: "L", modern: false,
+				ancient: ["Aether"]},
+			{name: "Monarch", rarity: "R", modern: false,
+				ancient: ["Aether", "Banescale"]},
+			{name: "Mop", rarity: "R", modern: false,
+				ancient: ["Veilspun"]},
+			{name: "Mucous", rarity: "L", modern: false,
+				ancient: ["Aberration"]},
+			{name: "Nudibranch", rarity: "L", modern: false,
+				ancient: ["Undertide"]},
+			{name: "Okapi", rarity: "U", modern: true,
+				ancient: ["Sandsurge", "Undertide", "Veilspun"]},
+			{name: "Opal", rarity: "R", modern: true,
+				ancient: ["Gaoler", "Veilspun"]},
+			{name: "Peacock", rarity: "C", modern: true,
+				ancient: ["Aberration", "Banescale", "Sandsurge", "Veilspun"]},
+			{name: "Pinions", rarity: "R", modern: false,
+				ancient: ["Gaoler"]},
+			{name: "Plating", rarity: "U", modern: false,
+				ancient: ["Undertide"]},
+			{name: "Plumage", rarity: "R", modern: false,
+				ancient: ["Banescale"]},
+			{name: "Points", rarity: "C", modern: true,
+				ancient: ["Aether"]},
+			{name: "Polkadot", rarity: "L", modern: true,
+				ancient: ["Aberration"]},
+			{name: "Polypore", rarity: "L", modern: false,
+				ancient: ["Aberration"]},
+			{name: "Porcupine", rarity: "L", modern: false,
+				ancient: ["Banescale"]},
+			{name: "Pufferfish", rarity: "U", modern: false,
+				ancient: ["Undertide"]},
+			{name: "Remora", rarity: "R", modern: false,
+				ancient: ["Undertide"]},
+			{name: "Ringlets", rarity: "U", modern: true,
+				ancient: ["Banescale", "Gaoler", "Undertide"]},
+			{name: "Runes", rarity: "L", modern: true,
+				ancient: ["Gaoler", "Undertide", "Veilspun"]},
+			{name: "Sailfin", rarity: "R", modern: false,
+				ancient: ["Undertide"]},
+			{name: "Scales", rarity: "L", modern: true,
+				ancient: ["Aberration", "Aether"]},
+			{name: "Scorpion", rarity: "L", modern: false,
+				ancient: ["Gaoler"]},
+			{name: "Shardflank", rarity: "C", modern: false,
+				ancient: ["Gaoler"]},
+			{name: "Shark", rarity: "L", modern: false,
+				ancient: ["Sandsurge"]},
+			{name: "Skeletal", rarity: "L", modern: false,
+				ancient: ["Banescale"]},
+			{name: "Smirch", rarity: "L", modern: true,
+				ancient: ["Aether", "Sandsurge"]},
+			{name: "Smoke", rarity: "U", modern: true,
+				ancient: ["Aether", "Gaoler"]},
+			{name: "Soap", rarity: "R", modern: true,
+				ancient: ["Banescale", "Sandsurge", "Undertide"]},
+			{name: "Space", rarity: "R", modern: false,
+				ancient: ["Aether"]},
+			{name: "Sparkle", rarity: "U", modern: true,
+				ancient: ["Aberration", "Aether", "Banescale", "Gaoler", "Sandsurge", "Undertide", "Veilspun"]},
+			{name: "Spectre", rarity: "R", modern: false,
+				ancient: ["Sandsurge"]},
+			{name: "Spines", rarity: "U", modern: true,
+				ancient: ["Aether", "Banescale", "Sandsurge"]},
+			{name: "Squiggle", rarity: "L", modern: false,
+				ancient: ["Banescale"]},
+			{name: "Stained", rarity: "R", modern: true,
+				ancient: ["Aether", "Banescale", "Gaoler", "Sandsurge", "Undertide", "Veilspun"]},
+			{name: "Stinger", rarity: "U", modern: false,
+				ancient: ["Aether"]},
+			{name: "Tentacles", rarity: "R", modern: false,
+				ancient: ["Undertide"]},
+			{name: "Thorns", rarity: "U", modern: false,
+				ancient: ["Veilspun"]},
+			{name: "Thundercrack", rarity: "L", modern: false,
+				ancient: ["Gaoler"]},
+			{name: "Thylacine", rarity: "C", modern: true,
+				ancient: ["Aberration", "Gaoler", "Sandsurge"]},
+			{name: "Trimmings", rarity: "C", modern: false,
+				ancient: ["Banescale"]},
+			{name: "Underbelly", rarity: "C", modern: true,
+				ancient: ["Aberration", "Aether", "Banescale", "Gaoler", "Sandsurge", "Undertide", "Veilspun"]},
+			{name: "Veined", rarity: "L", modern: true,
+				ancient: ["Aberration", "Gaoler", "Undertide", "Veilspun"]},
+			{name: "Weathered", rarity: "L", modern: false,
+				ancient: ["Gaoler"]},
+			{name: "Whiskers", rarity: "U", modern: false,
+				ancient: ["Aether"]},
+			{name: "Wintercoat", rarity: "U", modern: false,
+				ancient: ["Gaoler"]},
+			{name: "Wish", rarity: "R", modern: false,
+				ancient: ["Aether"]},
+			{name: "Wraith", rarity: "R", modern: false,
+				ancient: ["Banescale"]}
 		]
 	};
-	
+
 	// The game's colour wheel - treat as a circular array.
 	const colours = [
 		{name: "Maize", hex: "fffdea"},
@@ -635,13 +851,13 @@ var FRdata = FRdata || (function(){
 		{name: "Rose", hex: "ffd6f6"},
 		{name: "Pearl", hex: "fbe9f8"}
 	];
-	
+
 	/////////////////////////////////////////////////////
 	////////////// RETURN THE PUBLIC STUFF //////////////
 	/////////////////////////////////////////////////////
 	return {
 		/////////////////// Functions ///////////////////
-		
+
 		rarityTableLookup: rarityTableLookup,
 		calcRarityProb: calcRarityProb,
 		colourRangeLength: colourRangeLength,
@@ -649,14 +865,14 @@ var FRdata = FRdata || (function(){
 		isColourSubrangeInRange: isColourSubrangeInRange,
 		areBreedsCompatible: areBreedsCompatible,
 		nestSizesForBreeds: nestSizesForBreeds,
-		
+
 		///////////////////// Data /////////////////////
-		
+
 		nest_sizes: nest_sizes,
 		eyes: eyes,
 		breeds: breeds,
 		genes: genes,
 		colours: colours
 	};
-	
+
 }());
