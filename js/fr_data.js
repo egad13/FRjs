@@ -1,13 +1,15 @@
 
-/** Data about Flight Rising's breeding mechanics, and helpful functions to perform common comparisons of the data.*/
-var FRdata = FRdata || (function(){
+/** Data about Flight Rising's breeding mechanics, and helpful functions to perform common comparisons of the data.
+ * @module FRdata */
+const FRdata = (/** @lends module:FRdata */function(){
 
 	/////////////////////////////////////////////////////
 	/////////////////// PRIVATE STUFF ///////////////////
 	/////////////////////////////////////////////////////
 
-	// Source: https://www1.flightrising.com/forums/gde/2866445#post_43461539
-	// Letters mean Plentiful, Common, Uncommon, Limited, Rare
+	/** Lookup table for rarity comparisons. Letters mean Plentiful, Common, Uncommon,
+	 * Limited, Rare. [Data Source]{@link https://www1.flightrising.com/forums/gde/2866445#post_43461539}
+	 * @see rarityTableLookup */
 	const rarity_table = {
 		P: {
 			P: [0.5,0.5], C: [0.7,0.3], U: [0.85,0.15],
@@ -28,6 +30,24 @@ var FRdata = FRdata || (function(){
 		}
 	};
 
+	/** Possible nest sizes and their probabilities of happening when dragons are nested.
+	 * [Data Source]{@link https://flightrising.fandom.com/wiki/Nesting_Grounds#Number_of_Eggs} */
+	const nest_sizes = {
+		same_breeds: [
+			{ eggs: 1, probability: 0.1 },
+			{ eggs: 2, probability: 0.38 },
+			{ eggs: 3, probability: 0.4 },
+			{ eggs: 4, probability: 0.12 }
+		],
+		diff_breeds: [ // ...or ancients
+			{ eggs: 1, probability: 0.1 },
+			{ eggs: 2, probability: 0.3 },
+			{ eggs: 3, probability: 0.45 },
+			{ eggs: 4, probability: 0.1 },
+			{ eggs: 5, probability: 0.05 }
+		]
+	};
+
 
 	/////////////////////////////////////////////////////
 	/////////////////// PUBLIC THINGS ///////////////////
@@ -35,27 +55,33 @@ var FRdata = FRdata || (function(){
 
 	///////////////////// Functions /////////////////////
 
-	/** Looks up the probabilities of both possible outcomes when two rarities are compared.
-	 * If invalid rarities are given, returns undefined.
-	 * @param {string} rarity1 The first rarity in the comparison. One of "P", "C", "U", "L", "R".
-	 * @param {string} rarity2 The first rarity in the comparison. One of "P", "C", "U", "L", "R".*/
+	/** Looks up the probabilities of both possible outcomes when two rarities are
+	 * compared. If invalid rarities are given, returns undefined.
+	 * @param {"P"|"C"|"U"|"L"|"R"} rarity1 The first rarity in the comparison.
+	 * @param {"P"|"C"|"U"|"L"|"R"} rarity2 The second rarity in the comparison.
+	 * @returns {number[]|undefined} The probability that each outcome will occur.
+	 * @memberof module:FRdata */
 	function rarityTableLookup(rarity1, rarity2) {
 		const r1 = rarity1[0].toUpperCase();
 		const r2 = rarity2[0].toUpperCase();
 		return rarity_table[r1][r2]
-			?? [...rarity_table[r2][r1]]?.reverse(); // spread operator so reverse() doesn't change original table
+			?? [...rarity_table[r2][r1]]?.reverse(); // spread so reverse() doesn't change original table
 	}
 
-	/** Calculates the probability of a target outcome occuring when two outcomes with rarities are being considered.
-	 * If the outcome indexes are invalid or the objects don't have rarities, returns null.
-	 * @param {array} arr An array of objects with rarities.
-	 * @param {number} one The index of the first possible outcome in the given array.
-	 * @param {number} two The index of the second possible outcome in the given array.
-	 * @param {number} target The index of the target outcome in the given array. Should equal one of the possible outcome indexes.*/
+	/** Given a pair of possible outcomes with rarities and a target outcome, returns the
+	 * probability of the target outcome occurring. If the indexes aren't in the array or
+	 * the array members don't have rarities, `undefined`.
+	 * @param {Array.<{rarity:("P"|"C"|"U"|"L"|"R")}>} arr An array of objects with rarities.
+	 * @param {number} one The index of the first possible outcome in `arr`.
+	 * @param {number} two The index of the second possible outcome in `arr`.
+	 * @param {number} target The index of the target outcome in `arr`. Should be
+	 *		identical to either `one` or `two`.
+	 * @returns {number|undefined} The probability of the target outcome occurring.
+	 * @memberof module:FRdata */
 	function calcRarityProb(arr, one, two, target) {
 		if (!(arr instanceof Array) || !(one in arr && two in arr)
 			|| !("rarity" in arr[one] && "rarity" in arr[two])) {
-			return null;
+			return;
 		}
 		if (target !== one && target !== two) {
 			return 0;
@@ -67,10 +93,12 @@ var FRdata = FRdata || (function(){
 		return lookup[(target === one) ? 0 : 1];
 	}
 
-	/** Calculates the length of the shortest range between (and including) two colours.
-	 * If either of the parameters are not indexes in FRdata.colours, returns null.
+	/** Calculates the length of the shortest range between two colours (inclusive).
+	 * If either parameter is not an index in {@link FRdata.colours}, returns null.
 	 * @param {number} one The index of the first colour in the range.
-	 * @param {number} two The index of the last colour in the range.*/
+	 * @param {number} two The index of the last colour in the range.
+	 * @returns {number} The length of the shortest range between the two colours.
+	 * @memberof module:FRdata */
 	function colourRangeLength(one, two) {
 		if (!(one in colours && two in colours)){
 			return null;
@@ -79,14 +107,17 @@ var FRdata = FRdata || (function(){
 		return 1 + Math.min(colours.length - absDist, absDist);
 	}
 
-	/** Returns true if the target colour is in the shortest range between two given colours.
-	 * If any of the parameters are not indexes in FRdata.colours, returns null.
-	 * @param {number} one The index of the first colour in the range.
-	 * @param {number} two The index of the last colour in the range.
-	 * @param {number} target The index of the target colour.*/
+	/** Checks if the target colour is in the shortest range between two given
+	 * colours (inclusive).
+	 * @param {number} one The index (in {@link FRdata.colours}) of the first colour in the range.
+	 * @param {number} two The index (in {@link FRdata.colours}) of the last colour in the range.
+	 * @param {number} target The index of the target colour in the range.
+	 * @returns {boolean|undefined} True if `target` is in the colour range `one`-`two`,
+	 *		`false` if not, `undefined` if any parameter is not an index in {@link FRdata.colours}.
+	 * @memberof module:FRdata */
 	function isColourInRange(one, two, target) {
 		if (!(one in colours && two in colours && target in colours)){
-			return null;
+			return;
 		}
 		const absDist = Math.abs(one - two),
 			first = Math.min(one, two),
@@ -100,15 +131,19 @@ var FRdata = FRdata || (function(){
 		return (target <= first || target >= last);
 	}
 
-	/** Returns true if the shortest range between two target colours is a sub-range of the shortest range between two other colours.
-	 * If any of the parameters are not indexes in FRdata.colours, returns null.
-	 * @param {number} one The index of the first colour in the range.
-	 * @param {number} two The index of the last colour in the range.
-	 * @param {number} target1 The index of the first colour in the target range.
-	 * @param {number} target2 The index of the last colour in the target range.*/
+	/** Checks if the shortest range between two target colours is a sub-range of the
+	 * shortest range between two other colours. Both ranges are inclusive.
+	 * @param {number} one The index (in {@link FRdata.colours}) of the first colour in the range.
+	 * @param {number} two The index (in {@link FRdata.colours}) of the last colour in the range.
+	 * @param {number} target1 The index (in {@link FRdata.colours}) of the first colour in the target range.
+	 * @param {number} target2 The index (in {@link FRdata.colours}) of the last colour in the target range.
+	 * @returns {boolean|undefined} `true` if the colour range `target1`-`target2` is a
+	 *		subrange of the colour range `one`-`two`, `false` if not, `undefined` if
+	 *		any parameter is not an index in {@link FRdata.colours}.
+	 * @memberof module:FRdata */
 	function isColourSubrangeInRange(one, two, target1, target2){
 		if (!(one in colours && two in colours && target1 in colours && target2 in colours)){
-			return null;
+			return;
 		}
 		const absDist = Math.abs(one - two),
 			first = Math.min(one, two),
@@ -136,13 +171,16 @@ var FRdata = FRdata || (function(){
 		}
 	}
 
-	/** Returns true if the two given breeds are compatible for breeding. Ie, true if they're two modern breeds or are the same ancient breed.
-	 * If any of the parameters are not indexes in FRdata.breeds, returns null.
-	 * @param {number} one The index of the first breed to compare.
-	 * @param {number} two The index of the second breed to compare.*/
+	/** Checks if the two given breeds are compatible for breeding; meaning either
+	 * they're both modern breeds, or they're the same ancient breed.
+	 * @param {number} one The index (in {@link FRdata.breeds}) of the first breed.
+	 * @param {number} two The index (in {@link FRdata.breeds}) of the second breed.
+	 * @returns {boolean|undefined} `true` if the given breeds are compatible, `false` if
+	 *		they aren't, `undefined` if either parameter is not an index in {@link FRdata.breeds}.
+	 * @memberof module:FRdata */
 	function areBreedsCompatible(one, two) {
 		if (!(one in breeds && two in breeds)){
-			return null;
+			return;
 		}
 		const b1 = breeds[one],
 			b2 = breeds[two];
@@ -150,13 +188,17 @@ var FRdata = FRdata || (function(){
 		return (b1.type === "M" && b2.type == "M") || (b1 === b2);
 	}
 
-	/** Returns an array containing all possible nest sizes and their probabilities if dragons of the two given breeds are nested.
-	 * If either parameter is not an index in FRdata.breeds or the given breeds are incompatible, returns null.
-	 * @param {number} one The index of the first breed.
-	 * @param {number} one The index of the second breed.*/
+	// TODO finish the type def for the return
+	/** Returns an array containing possible nest sizes and their probabilities if dragons
+	 * of the two given breeds are nested.
+	 * @param {number} one The index (in {@link FRdata.breeds}) of the first breed.
+	 * @param {number} one The index (in {@link FRdata.breeds}) of the second breed.
+	 * @returns {Object|undefined} An array of possible nest sizes and their probabilities,
+	 *		or `undefined` if either parameter is not an index in {@link FRdata.breeds}.
+	 * @memberof module:FRdata */
 	function nestSizesForBreeds(one, two) {
 		if (!(one in breeds && two in breeds && areBreedsCompatible(one, two))){
-			return null;
+			return;
 		}
 		const type = breeds[one].type;
 		return (type === "M" && one === two)
@@ -164,10 +206,14 @@ var FRdata = FRdata || (function(){
 				: nest_sizes.diff_breeds;
 	}
 
-	/** Generator function which yields all genes available to the given breed in the given slot.
-	 * If the breed is not an index in FRdata.breeds AND is not "any", or the slot is invalid, yields nothing.
-	 * @param {number|string} breed The index of the breed, OR special value "any" which ignores breed restrictions and will yield all genes for the slot.
-	 * @param {string} slot The slot to retrieve genes for. One of "primary", "secondary", "tertiary". */
+	/** Yields all genes available to a breed in a specific slot. If the breed isn't an
+	 * index in {@link FRdata.breeds} AND is not "any", or the slot is invalid, yields nothing.
+	 * @param {number|"any"} breed The index of the breed, OR "any". "any" ignores breed
+	 *		restrictions and asks for ALL genes in that slot.
+	 * @param {"primary"|"secondary"|"tertiary"} slot The slot to retrieve genes for.
+	 * @yields {{name:string,rarity:string,modern:boolean,ancient:string[],index:number}}
+	 *		Genes available to the given breed in the given slot.
+	 * @memberof module:FRdata */
 	function* genesForBreed(breed, slot) {
 		const anyBreed = breed === "any";
 		if (!(anyBreed || breed in breeds) || !["primary", "secondary", "tertiary"].includes(slot)) {
@@ -178,15 +224,17 @@ var FRdata = FRdata || (function(){
 		for(var i = 0; i < genes[slot].length; i++) {
 			const gene = genes[slot][i];
 			if (anyBreed || (isModern && gene.modern) || gene.ancient.includes(name)) {
-				yield Object.freeze({index: i, ...gene});
+				yield {index: i, ...gene};
 			}
 		}
 	}
 
-	/** Generator function which yields all colours in the shortest range between the two given colours.
-	 * If either parameter is not an index in FRdata.colours, yields nothing.
-	 * @param {number} one The index of the first colour in the range.
-	 * @param {number} two The index of the last colour in the range.*/
+	/** Yields all colours in the shortest range between the two given colours. If either
+	 * parameter is not an index in {@link FRdata.colours}, yields nothing.
+	 * @param {number} one The index (in {@link FRdata.colours}) of the first colour in the range.
+	 * @param {number} two The index (in {@link FRdata.colours}) of the last colour in the range.
+	 * @yields {{name:string,hex:string,index:number}} Colours in the given range.
+	 * @memberof module:FRdata */
 	function* colourRange(one, two) {
 		if (!(one in colours && two in colours)){
 			return;
@@ -199,16 +247,16 @@ var FRdata = FRdata || (function(){
 		// range does NOT cross array ends
 		if (absDist <= colours.length - absDist){
 			for(var i = first; i <= last; i++) {
-				yield Object.freeze({index: i, ...colours[i]});
+				yield {index: i, ...colours[i]};
 			}
 		}
 		// range DOES cross array ends
 		else {
 			for (var i = last; i < colours.length; i++) {
-				yield Object.freeze({index: i, ...colours[i]});
+				yield {index: i, ...colours[i]};
 			}
 			for (var i = 0; i <= first; i++) {
-				yield Object.freeze({index: i, ...colours[i]});
+				yield {index: i, ...colours[i]};
 			}
 		}
 		return out;
@@ -216,24 +264,10 @@ var FRdata = FRdata || (function(){
 
 	/////////////////////// Data ///////////////////////
 
-	// Source: https://flightrising.fandom.com/wiki/Nesting_Grounds#Number_of_Eggs
-	const nest_sizes = {
-		same_breeds: [
-			{eggs: 1, probability: 0.1},
-			{eggs: 2, probability: 0.38},
-			{eggs: 3, probability: 0.4},
-			{eggs: 4, probability: 0.12}
-		],
-		diff_breeds: [ // ...or ancients
-			{eggs: 1, probability: 0.1},
-			{eggs: 2, probability: 0.3},
-			{eggs: 3, probability: 0.45},
-			{eggs: 4, probability: 0.1},
-			{eggs: 5, probability: 0.05}
-		]
-	};
-
-	// Source: https://flightrising.fandom.com/wiki/Eye_Types#Odds
+	/** All possible eye types and their probabilities of occurring.
+	 * Sorted by probability (descending).
+	 * [Data Source]{@link https://flightrising.fandom.com/wiki/Eye_Types#Odds}
+	 * @memberof module:FRdata */
 	const eyes = [
 		{name: "Common", probability: 0.458},
 		{name: "Uncommon", probability: 0.242},
@@ -247,12 +281,19 @@ var FRdata = FRdata || (function(){
 		{name: "Multi-Gaze", probability: 0.004}
 	];
 
-	// Source: https://www1.flightrising.com/wiki/wiki
-	// Types: A = ancient, M = modern
+	/** All available breeds, their rarities, and a type specifying if they're ancient or
+	 * modern. M = modern, A = ancient.
+	 * Sorted by name (ascending).
+	 * [Data Source]{@link https://www1.flightrising.com/wiki/wiki}
+	 * @memberof module:FRdata */
 	const breeds = [
+		{name: "Aberration", type: "A", rarity: "C"},
+		{name: "Aether", type: "A", rarity: "C"},
+		{name: "Banescale", type: "A", rarity: "C"},
 		{name: "Bogsneak", type: "M", rarity: "U"},
 		{name: "Coatl", type: "M", rarity: "R"},
 		{name: "Fae", type: "M", rarity: "P"},
+		{name: "Gaoler", type: "A", rarity: "C"},
 		{name: "Guardian", type: "M", rarity: "P"},
 		{name: "Imperial", type: "M", rarity: "L"},
 		{name: "Mirror", type: "M", rarity: "P"},
@@ -260,25 +301,22 @@ var FRdata = FRdata || (function(){
 		{name: "Obelisk", type: "M", rarity: "U"},
 		{name: "Pearlcatcher", type: "M", rarity: "C"},
 		{name: "Ridgeback", type: "M", rarity: "U"},
+		{name: "Sandsurge", type: "A", rarity: "C"},
 		{name: "Skydancer", type: "M", rarity: "U"},
 		{name: "Snapper", type: "M", rarity: "C"},
 		{name: "Spiral", type: "M", rarity: "C"},
 		{name: "Tundra", type: "M", rarity: "P"},
-		{name: "Wildclaw", type: "M", rarity: "R"},
-
-		{name: "Aberration", type: "A", rarity: "C"},
-		{name: "Aether", type: "A", rarity: "C"},
-		{name: "Banescale", type: "A", rarity: "C"},
-		{name: "Gaoler", type: "A", rarity: "C"},
-		{name: "Sandsurge", type: "A", rarity: "C"},
 		{name: "Undertide", type: "A", rarity: "C"},
-		{name: "Veilspun", type: "A", rarity: "C"}
+		{name: "Veilspun", type: "A", rarity: "C"},
+		{name: "Wildclaw", type: "M", rarity: "R"}
 	];
 
-	// TODO: add breed restrictions? + a compatibility checker func?
-	// Source:
-	//	https://www1.flightrising.com/forums/gde/3231610/1
-	//	https://docs.google.com/spreadsheets/d/1AxRC3OLrlqHyqL0_a5Qpa5wdks-SqWtxFxTNrraljak
+	/** All available genes, organized into primary, secondary, and tertiary slots. Each
+	 * gene includes its name, rarity, a boolean indicating if it's available on modern
+	 * breeds, and a list of ancient breeds it's available on (if any).
+	 * Each slot is sorted by name (ascending).
+	 * [Data Source]{@link https://www1.flightrising.com/forums/gde/3231610}
+	 * @memberof module:FRdata */
 	const genes = {
 		primary: [
 			{name: "Arapaima", rarity: "C", modern: false,
@@ -721,6 +759,9 @@ var FRdata = FRdata || (function(){
 	};
 
 	// The game's colour wheel - treat as a circular array.
+	/** All available colours and their hex codes. Treat as a circular array. Hex codes
+	 * are not prefixed. Ordered as they are in-game.
+	 * @memberof module:FRdata */
 	const colours = [
 		{name: "Maize", hex: "fffdea"},
 		{name: "Cream", hex: "ffefdc"},
@@ -905,8 +946,8 @@ var FRdata = FRdata || (function(){
 	////////////// RETURN THE PUBLIC STUFF //////////////
 	/////////////////////////////////////////////////////
 
-	/**Render an object completely immutable. Used to make sure other code can't
-	 * manipulate FRdata.*/
+	/** Render an object completely immutable. Used to make sure other code can't
+	 * manipulate FRdata. */
 	function deepFreeze(obj) {
 		for (let [key, val] of Object.entries(obj)) {
 			if (obj.hasOwnProperty(key)
@@ -931,7 +972,6 @@ var FRdata = FRdata || (function(){
 
 		///////////////////// Data /////////////////////
 
-		nest_sizes: nest_sizes,
 		eyes: eyes,
 		breeds: breeds,
 		genes: genes,
