@@ -2,7 +2,7 @@
  * Data about Flight Rising's dragon attributes and breeding mechanics, and functions to perform common comparisons of that data.
  * @module FRdata
  * @author egad13
- * @version 0.0.1
+ * @version 0.0.2
  */
 
 /////////////////////////////////////////////////////
@@ -339,7 +339,7 @@ export const genes = deepFreeze(
 			{name: "Checkers", rarity: "C", modern: false, ancient: ["Undertide"]},
 			{name: "Cherub", rarity: "U", modern: true, ancient: ["Banescale", "Sandsurge", "Undertide"]},
 			{name: "Chevron", rarity: "U", modern: false, ancient: ["Banescale"]},
-			{name: "Cinder", rarity: "U", modern: false, ancient: ["Aether"]},
+			{ name: "Cinder", rarity: "U", modern: true, ancient: ["Aberration", "Aether", "Banescale", "Gaoler", "Sandsurge", "Undertide", "Veilspun"]},
 			{name: "Clown", rarity: "C", modern: true, ancient: ["Aether", "Banescale", "Gaoler", "Sandsurge", "Veilspun"]},
 			{name: "Crystal", rarity: "R", modern: true, ancient: ["Aberration", "Banescale", "Gaoler", "Undertide", "Veilspun"]},
 			{name: "Diamond", rarity: "L", modern: false, ancient: ["Aberration"]},
@@ -399,7 +399,7 @@ export const genes = deepFreeze(
 			{name: "Arrow", rarity: "U", modern: false, ancient: ["Banescale"]},
 			{name: "Basic", rarity: "P", modern: true, ancient: ["Aberration", "Aether", "Banescale", "Gaoler", "Sandsurge", "Undertide", "Veilspun"]},
 			{name: "Bee", rarity: "R", modern: true, ancient: ["Aberration", "Gaoler", "Sandsurge", "Undertide", "Veilspun"]},
-			{name: "Blaze", rarity: "U", modern: false, ancient: ["Aether"]},
+			{ name: "Blaze", rarity: "U", modern: false, ancient: ["Aberration", "Aether", "Banescale", "Gaoler", "Sandsurge", "Undertide", "Veilspun"]},
 			{name: "Blend", rarity: "C", modern: true, ancient: ["Aberration", "Aether", "Banescale", "Gaoler", "Sandsurge", "Undertide", "Veilspun"]},
 			{name: "Breakup", rarity: "U", modern: true, ancient: ["Aether", "Gaoler", "Sandsurge"]},
 			{name: "Butterfly", rarity: "R", modern: true, ancient: ["Aether", "Banescale", "Veilspun"]},
