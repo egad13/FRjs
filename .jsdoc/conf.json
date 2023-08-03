@@ -1,0 +1,66 @@
+{
+	"plugins": [ "plugins/markdown" ],
+	"recurseDepth": 10,
+	"source": {
+		"includePattern": ".+\\.js(doc|x)?$",
+		"excludePattern": "(^|\\/|\\\\)_"
+	},
+	"sourceType": "module",
+	"tags": {
+		"allowUnknownTags": true,
+		"dictionaries": [ "jsdoc", "closure" ]
+	},
+	"templates": {
+		"cleverLinks": true,
+		"monospaceLinks": false
+	},
+	"opts": {
+		"encoding": "utf8",
+		"theme_opts": {
+			"homepageTitle": "Kay's FR Tools Docs",
+			"displayModuleHeader": true,
+			"includeFilesListInHomepage": true,
+			"default_theme": "dark",
+			"title": "Kay's FR Tools Docs",
+			"include_css": [ "./.jsdoc/tweaks.css" ],
+			"sections": [
+				"Modules",
+				"Namespaces",
+				"Interfaces",
+				"Classes",
+				"Events",
+				"Mixins",
+				"Global",
+				"Externals",
+				"Tutorials"
+			],
+			"menu": [
+				{
+					"title": "Github",
+					"link": "https://github.com/egad13/FR-Hatchling-Probability",
+					"target": "_blank"
+				},
+				{
+					"title": "Live Website",
+					"link": "../",
+					"target": "_blank"
+				}
+			],
+			"meta": [
+				{
+					"name": "author",
+					"content": "egad13"
+				},
+				{
+					"name": "description",
+					"content": "Documentation for the javascript under the hood of Kay's Flight Rising Tools"
+				}
+			]
+		}
+	},
+	"markdown": {
+		"idInHeadings": true,
+		"hardwrap": "false",
+		"tags": [ "yields" ]
+	}
+}

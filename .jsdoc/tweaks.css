@@ -1,0 +1,62 @@
+/*
+ * Personal tweaks for clean-jsdoc-theme. Makes text and the sidebar more compact,
+ * changes navbar colours.
+ * 
+ * author: egad13
+*/
+
+/* || Typography */
+
+html body, html body .main-wrapper,
+body h1,
+body h2,
+body h3,
+body h4,
+body h5,
+body h6 {
+	line-height: 1.5;
+}
+body h1 {
+	font-size: 3rem;
+}
+body .main-wrapper article ul {
+	list-style: initial;
+}
+/* Re-center navbar link text */
+nav.navbar div.navbar-item {
+	display: flex;
+	align-items: center;
+}
+
+/* || Layout */
+
+div.sidebar > div.sidebar-items-container {
+	margin-top: 3rem;
+}
+body nav.navbar {
+	border-radius: 1rem;
+}
+
+/* || Colours (dark) */
+
+body.dark nav.navbar {
+	background-color: #222;
+}
+body.dark nav.navbar div.navbar-item:hover {
+	background-color: #333;
+}
+body.dark nav.navbar div.navbar-item:active {
+	background-color: #444;
+}
+
+/* || Colours (light) */
+
+body.light nav.navbar {
+	background-color: #f7f7f7;
+}
+body.light nav.navbar div.navbar-item:hover {
+	background-color: #ddd;
+}
+body.light nav.navbar div.navbar-item:active {
+	background-color: #ccc;
+}
