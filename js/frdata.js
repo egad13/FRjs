@@ -1,6 +1,6 @@
 /**
  * Data about Flight Rising's dragon attributes and breeding mechanics, and functions to perform common comparisons of that data.
- * @module FRdata
+ * @module frdata
  * @author egad13
  * @version 0.0.2
  */
@@ -327,7 +327,7 @@ export const breeds = deepFreeze(
 export const genes = deepFreeze(
 	{
 		primary: [
-			{name: "Arapaima", rarity: "C", modern: false, ancient: []},
+			{name: "Arapaima", rarity: "C", modern: false, ancient: ["Sandsurge"]},
 			{name: "Arc", rarity: "U", modern: false, ancient: ["Veilspun"]},
 			{name: "Bar", rarity: "U", modern: true, ancient: ["Aberration", "Aether", "Banescale", "Gaoler", "Undertide", "Veilspun"]},
 			{name: "Basic", rarity: "P", modern: true, ancient: ["Aberration", "Aether", "Banescale", "Gaoler", "Sandsurge", "Undertide", "Veilspun"]},
@@ -369,7 +369,7 @@ export const genes = deepFreeze(
 			{name: "Poison", rarity: "L", modern: true, ancient: ["Banescale", "Gaoler", "Undertide", "Veilspun"]},
 			{name: "Python", rarity: "U", modern: true, ancient: ["Aether"]},
 			{name: "Ragged", rarity: "U", modern: false, ancient: ["Banescale"]},
-			{name: "Rattlesnake", rarity: "U", modern: false, ancient: []},
+			{name: "Rattlesnake", rarity: "U", modern: false, ancient: ["Sandsurge"]},
 			{name: "Ribbon", rarity: "U", modern: true, ancient: ["Aberration", "Banescale", "Gaoler", "Undertide"]},
 			{name: "Ripple", rarity: "U", modern: true, ancient: ["Banescale", "Gaoler", "Undertide"]},
 			{name: "Sailfish", rarity: "L", modern: false, ancient: ["Sandsurge"]},
@@ -391,11 +391,11 @@ export const genes = deepFreeze(
 			{name: "Vipera", rarity: "U", modern: true, ancient: ["Aberration", "Veilspun"]},
 			{name: "Wasp", rarity: "R", modern: true, ancient: ["Aberration", "Gaoler", "Sandsurge", "Undertide", "Veilspun"]},
 			{name: "Wolf", rarity: "U", modern: false, ancient: ["Undertide"]},
-			{name: "Wrought", rarity: "C", modern: false, ancient: []}
+			{name: "Wrought", rarity: "C", modern: false, ancient: ["Sandsurge"]}
 		],
 		secondary: [
 			{name: "Alloy", rarity: "R", modern: true, ancient: ["Aether", "Banescale"]},
-			{name: "Arowana", rarity: "C", modern: false, ancient: []},
+			{name: "Arowana", rarity: "C", modern: false, ancient: ["Sandsurge"]},
 			{name: "Arrow", rarity: "U", modern: false, ancient: ["Banescale"]},
 			{name: "Basic", rarity: "P", modern: true, ancient: ["Aberration", "Aether", "Banescale", "Gaoler", "Sandsurge", "Undertide", "Veilspun"]},
 			{name: "Bee", rarity: "R", modern: true, ancient: ["Aberration", "Gaoler", "Sandsurge", "Undertide", "Veilspun"]},
@@ -408,13 +408,10 @@ export const genes = deepFreeze(
 			{name: "Constellation", rarity: "R", modern: true, ancient: ["Aether", "Veilspun"]},
 			{name: "Current", rarity: "U", modern: true, ancient: ["Banescale", "Gaoler", "Undertide"]},
 			{name: "Daub", rarity: "U", modern: true, ancient: ["Aberration", "Aether", "Banescale", "Gaoler", "Undertide", "Veilspun"]},
-			{name: "Diamondback", rarity: "U", modern: false, ancient: []},
+			{name: "Diamondback", rarity: "U", modern: false, ancient: ["Sandsurge"]},
 			{name: "Edged", rarity: "C", modern: true, ancient: ["Aether", "Banescale", "Gaoler", "Veilspun"]},
 			{name: "Eel", rarity: "U", modern: true, ancient: ["Aberration", "Banescale", "Gaoler", "Undertide"]},
-			{
-				name: "Eye Spots", rarity: "C", modern: true,
-				ancient: ["Aether", "Banescale", "Gaoler", "Sandsurge", "Veilspun"]
-			},
+			{name: "Eye Spots", rarity: "C", modern: true, ancient: ["Aether", "Banescale", "Gaoler", "Sandsurge", "Veilspun"]},
 			{name: "Facet", rarity: "R", modern: true, ancient: ["Aberration", "Banescale", "Gaoler", "Undertide", "Veilspun"]},
 			{name: "Fissure", rarity: "L", modern: true, ancient: ["Aberration", "Sandsurge"]},
 			{name: "Flair", rarity: "U", modern: true, ancient: ["Aberration", "Aether", "Gaoler", "Sandsurge"]},
@@ -449,7 +446,7 @@ export const genes = deepFreeze(
 			{name: "Sludge", rarity: "L", modern: true, ancient: ["Aberration", "Gaoler", "Sandsurge", "Veilspun"]},
 			{name: "Spade", rarity: "L", modern: false, ancient: ["Aberration"]},
 			{name: "Spinner", rarity: "L", modern: true, ancient: ["Aether", "Banescale", "Gaoler", "Veilspun"]},
-			{name: "Spire", rarity: "C", modern: false, ancient: []},
+			{name: "Spire", rarity: "C", modern: false, ancient: ["Sandsurge"]},
 			{name: "Spirit", rarity: "L", modern: false, ancient: ["Gaoler"]},
 			{name: "Streak", rarity: "C", modern: false, ancient: ["Gaoler"]},
 			{name: "Striation", rarity: "C", modern: true, ancient: ["Aberration", "Banescale", "Gaoler", "Sandsurge", "Veilspun"]},
@@ -467,7 +464,7 @@ export const genes = deepFreeze(
 			{name: "Angler", rarity: "L", modern: false, ancient: ["Gaoler", "Veilspun"]},
 			{name: "Augment", rarity: "R", modern: false, ancient: ["Sandsurge"]},
 			{name: "Basic", rarity: "P", modern: true, ancient: ["Aberration", "Aether", "Banescale", "Gaoler", "Sandsurge", "Undertide", "Veilspun"]},
-			{name: "Beard", rarity: "U", modern: false, ancient: []},
+			{name: "Beard", rarity: "U", modern: false, ancient: ["Sandsurge"]},
 			{name: "Beetle", rarity: "L", modern: false, ancient: ["Veilspun"]},
 			{name: "Blossom", rarity: "L", modern: false, ancient: ["Gaoler"]},
 			{name: "Braids", rarity: "U", modern: false, ancient: ["Gaoler"]},
@@ -475,12 +472,12 @@ export const genes = deepFreeze(
 			{name: "Brightshine", rarity: "L", modern: false, ancient: ["Undertide", "Veilspun"]},
 			{name: "Capsule", rarity: "L", modern: true, ancient: ["Aberration", "Banescale", "Gaoler", "Undertide", "Veilspun"]},
 			{name: "Carnivore", rarity: "L", modern: false, ancient: ["Aberration", "Aether", "Banescale", "Gaoler", "Undertide", "Veilspun"]},
-			{name: "Chitin", rarity: "C", modern: false, ancient: []},
+			{name: "Chitin", rarity: "C", modern: false, ancient: ["Sandsurge"]},
 			{name: "Circuit", rarity: "R", modern: true, ancient: ["Aether", "Undertide"]},
 			{name: "Contour", rarity: "C", modern: true, ancient: ["Aether", "Banescale", "Gaoler"]},
 			{name: "Crackle", rarity: "U", modern: true, ancient: ["Banescale", "Undertide", "Veilspun"]},
-			{name: "Crest", rarity: "U", modern: false, ancient: []},
-			{name: "Darts", rarity: "C", modern: false, ancient: []},
+			{name: "Crest", rarity: "U", modern: false, ancient: ["Sandsurge"]},
+			{name: "Darts", rarity: "C", modern: false, ancient: ["Sandsurge"]},
 			{name: "Diaphanous", rarity: "R", modern: false, ancient: ["Veilspun"]},
 			{name: "Fangs", rarity: "U", modern: false, ancient: ["Aberration"]},
 			{name: "Fans", rarity: "R", modern: false, ancient: ["Banescale", "Gaoler"]},
@@ -488,7 +485,7 @@ export const genes = deepFreeze(
 			{name: "Filigree", rarity: "R", modern: true, ancient: ["Banescale", "Undertide", "Veilspun"]},
 			{name: "Firebreather", rarity: "L", modern: true, ancient: []},
 			{name: "Firefly", rarity: "L", modern: true, ancient: ["Aberration", "Veilspun"]},
-			{name: "Fishbone", rarity: "U", modern: false, ancient: []},
+			{name: "Fishbone", rarity: "U", modern: false, ancient: ["Sandsurge"]},
 			{name: "Flecks", rarity: "U", modern: true, ancient: ["Aberration", "Undertide", "Veilspun"]},
 			{name: "Flutter", rarity: "L", modern: false, ancient: ["Aether"]},
 			{name: "Frills", rarity: "R", modern: false, ancient: ["Aberration"]},
