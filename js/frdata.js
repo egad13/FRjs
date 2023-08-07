@@ -5,26 +5,6 @@
  * @version 0.0.2
  */
 
-/////////////////////////////////////////////////////
-// PRIVATE FUNCTIONS
-//
-// (Technically not private, but not relevant to
-// anyone using the module.)
-/////////////////////////////////////////////////////
-
-/** Render an object completely immutable. Used to make sure the exported data in this
- * module can't be manipulated.
- * @private */
-function deepFreeze(obj) {
-	for (let [key, val] of Object.entries(obj)) {
-		if (obj.hasOwnProperty(key)
-			&& (typeof val == "object" || typeof val == "function")) {
-			deepFreeze(val);
-		}
-	}
-	return Object.freeze(obj);
-}
-
 
 /////////////////////////////////////////////////////
 // PRIVATE DATA
@@ -269,8 +249,7 @@ export function* colourRange(one, two) {
 /** All possible eye types and their probabilities of occurring. Sorted by probability (descending). [Data Source]{@link https://flightrising.fandom.com/wiki/Eye_Types#Odds}
  * @readonly
  * @type {Array.<{name:string,probability:number}>} */
-export const eyes = deepFreeze(
-	[
+export const eyes = [
 		{name: "Common", probability: 0.458},
 		{name: "Uncommon", probability: 0.242},
 		{name: "Unusual", probability: 0.139},
@@ -281,14 +260,12 @@ export const eyes = deepFreeze(
 		{name: "Faceted", probability: 0.007},
 		{name: "Primal", probability: 0.005},
 		{name: "Multi-Gaze", probability: 0.004}
-	]
-);
+];
 
 /** All available breeds, their rarities, and a type specifying if they're ancient or modern. M = modern, A = ancient. Sorted by name (ascending). [Data Source]{@link https://www1.flightrising.com/wiki/wiki}
  * @readonly
  * @type {Array.<{name:string,type:("A"|"M"),rarity:("P"|"C"|"U"|"L"|"R")}>} */
-export const breeds = deepFreeze(
-	[
+export const breeds = [
 		{name: "Aberration", type: "A", rarity: "C"},
 		{name: "Aether", type: "A", rarity: "C"},
 		{name: "Banescale", type: "A", rarity: "C"},
@@ -311,8 +288,7 @@ export const breeds = deepFreeze(
 		{name: "Undertide", type: "A", rarity: "C"},
 		{name: "Veilspun", type: "A", rarity: "C"},
 		{name: "Wildclaw", type: "M", rarity: "R"}
-	]
-);
+];
 
 /** All available genes, organized into primary, secondary, and tertiary slots. Each gene has a name, rarity, boolean indicating if it's available on modern breeds, and list of ancient breeds it's available on (if any). Each slot is sorted by name (ascending). [Data Source]{@link https://www1.flightrising.com/forums/gde/3231610}
  * 
@@ -324,8 +300,7 @@ export const breeds = deepFreeze(
  * }```
  * @readonly
  * @type {{primary:Array.<{name:string,rarity:("P"|"C"|"U"|"L"|"R"),modern:boolean,ancient:string[]}>,secondary:Array.<{name:string,rarity:("P"|"C"|"U"|"L"|"R"),modern:boolean,ancient:string[]}>,tertiary:Array.<{name:string,rarity:("P"|"C"|"U"|"L"|"R"),modern:boolean,ancient:string[]}>}} */
-export const genes = deepFreeze(
-	{
+export const genes = {
 		primary: [
 			{name: "Arapaima", rarity: "C", modern: false, ancient: ["Sandsurge"]},
 			{name: "Arc", rarity: "U", modern: false, ancient: ["Veilspun"]},
@@ -548,14 +523,12 @@ export const genes = deepFreeze(
 			{name: "Wish", rarity: "R", modern: false, ancient: ["Aether"]},
 			{name: "Wraith", rarity: "R", modern: false, ancient: ["Banescale"]}
 		]
-	}
-);
+};
 
 /** All available colours and their hex codes. Treat as a circular array. Hex codes are NOT prefixed. Ordered as they are in-game.
  * @readonly
  * @type {Array.<{name:string,hex:string}>} */
-export const colours = deepFreeze(
-	[
+export const colours = [
 		{name: "Maize", hex: "fffdea"},
 		{name: "Cream", hex: "ffefdc"},
 		{name: "Antique", hex: "d8d6cd"},
@@ -733,5 +706,4 @@ export const colours = deepFreeze(
 		{name: "Bubblegum", hex: "eaa9ff"},
 		{name: "Rose", hex: "ffd6f6"},
 		{name: "Pearl", hex: "fbe9f8"}
-	]
-);
+];
