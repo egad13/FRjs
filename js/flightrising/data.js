@@ -188,15 +188,15 @@ export function nestSizesForBreeds(one, two) {
 		: nest_sizes.diff_breeds;
 }
 
-/** Yields all genes available to a breed in a specific slot. If no breed provided, ignores restrictions and yields all genes. If the slot is invalid, or a breed is specified that isn't an index in {@link FRdata.breeds}, yields nothing.
+/** Yields all genes available to a breed in a specific slot. If no breed or a non-existent breed is provided, ignores restrictions and yields all genes for this slot. If the slot is invalid, yields nothing.
  * @param {"primary"|"secondary"|"tertiary"} slot The slot to retrieve genes for.
  * @param {number} [breed] The index of the breed to retrieve genes for.
  * @yields {{name:string,rarity:string,modern:boolean,ancient:string[],index:number}}
  *		Genes available to the given breed in the given slot. Object structure is:
  *		`{ name: string, rarity: string, modern: boolean, ancient: string[], index: number }` */
 export function* genesForBreed(slot, breed) {
-	const anyBreed = breed == undefined;
-	if (!(anyBreed || breed in breeds) || !["primary", "secondary", "tertiary"].includes(slot)) {
+	const anyBreed = !(breed in breeds);
+	if (!["primary", "secondary", "tertiary"].includes(slot)) {
 		return;
 	}
 	const isModern = breeds[breed]?.type === "M",
