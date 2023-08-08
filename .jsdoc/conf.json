@@ -19,10 +19,12 @@
 		"theme_opts": {
 			"homepageTitle": "Kay's FR Tools Docs",
 			"displayModuleHeader": true,
+			"prefixModuleToSidebarItems_experimental": true,
 			"includeFilesListInHomepage": true,
 			"default_theme": "dark",
 			"title": "Kay's FR Tools Docs",
 			"include_css": [ "./.jsdoc/tweaks.css" ],
+			"include_js": [ "./.jsdoc/tweaks.js" ],
 			"sections": [
 				"Modules",
 				"Namespaces",

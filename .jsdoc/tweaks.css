@@ -60,3 +60,33 @@ body.light nav.navbar div.navbar-item:hover {
 body.light nav.navbar div.navbar-item:active {
 	background-color: #ccc;
 }
+
+/* || Custom ToC in Sidebar */
+
+.sidebar-section-children>div {
+	margin: 0 !important;
+}
+
+#sidebar .node-name--H1,
+#mobile-sidebar .node-name--H1 {
+	display: none;
+}
+
+#sidebar .toc-link,
+#mobile-sidebar .toc-link {
+	padding-top: .1em;
+	padding-bottom: .1em;
+	color: #aaa;
+}
+.light #sidebar .toc-link,
+.light #mobile-sidebar .toc-link {
+	color: #555;
+}
+#sidebar .toc-link.is-active-link,
+#mobile-sidebar .toc-link.is-active-link {
+	color: #fff;
+}
+.light #sidebar .toc-link.is-active-link,
+.light #mobile-sidebar .toc-link.is-active-link {
+	color: #111;
+}
