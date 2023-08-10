@@ -22,6 +22,13 @@ body h1 {
 body .main-wrapper article ul {
 	list-style: initial;
 }
+body .main-wrapper header ol,
+body .main-wrapper article ol {
+	padding-left: 2.5em;
+}
+code {
+	tab-size: 4;
+}
 /* Re-center navbar link text */
 nav.navbar div.navbar-item {
 	display: flex;
@@ -35,6 +42,13 @@ div.sidebar > div.sidebar-items-container {
 }
 body nav.navbar {
 	border-radius: 1rem;
+}
+/* Collapse p margins with the padding on the td */
+td p:first-child {
+	margin-top: 0;
+}
+td p:last-child {
+	margin-bottom: 0;
 }
 
 /* || Colours (dark) */
@@ -67,8 +81,8 @@ body.light nav.navbar div.navbar-item:active {
 	margin: 0 !important;
 }
 
-#sidebar .node-name--H1,
-#mobile-sidebar .node-name--H1 {
+#sidebar div>ol>li:first-child>a,
+#mobile-sidebar div>ol>li:first-child>a {
 	display: none;
 }
 
@@ -89,4 +103,30 @@ body.light nav.navbar div.navbar-item:active {
 .light #sidebar .toc-link.is-active-link,
 .light #mobile-sidebar .toc-link.is-active-link {
 	color: #111;
+}
+
+/* || Custom Note & Warning Boxes */
+
+p.note::before, p.warning::before {
+	font-family: "heading";
+	display: block;
+	margin-bottom: .5em;
+}
+p.note, p.warning {
+	border-radius: 1rem;
+	padding: 1rem 1.5rem;
+}
+
+p.note:before {
+	content: "\1F6C8  Note:";
+}
+p.note {
+	background: rgb(47,129,247,.25);
+}
+
+p.warning:before {
+	content: "\26A0  Warning:";
+}
+p.warning {
+	background: rgba(210,153,34,.25);
 }

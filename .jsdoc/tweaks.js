@@ -51,14 +51,17 @@
 
 		// Change behaviour of current page sidebar links - just bring us back to the top
 		// of the page, rather than reloading it
+		const pageTopHref = tocDiv.querySelector("a.node-name--H1")?.href
+			?? tocDiv.querySelector("a.node-name--H2")?.href
+			?? tocDiv.querySelector("a.node-name--H3")?.href;
 		function closeMobileMenu(ev) {
 			if (mediaMobile.matches) {
 				hideMobileMenu();
 			}
 		}
-		mobileDiv.firstChild.href = tocDiv.querySelector("a.node-name--H1").href;
+		mobileDiv.firstChild.href = pageTopHref;
 		mobileDiv.firstChild.addEventListener("click", ev => closeMobileMenu);
-		sidebarDiv.firstChild.href = tocDiv.querySelector("a.node-name--H1").href;
+		sidebarDiv.firstChild.href = pageTopHref;
 		sidebarDiv.firstChild.addEventListener("click", ev => closeMobileMenu);
 
 		// Create screen size watchers
