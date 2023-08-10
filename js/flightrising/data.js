@@ -1,6 +1,6 @@
 /**
  * Data about Flight Rising's dragon attributes and breeding mechanics, and functions to perform common comparisons of that data.
- * @module frdata
+ * @module fr/data
  * @author egad13
  * @version 0.0.2
  */
@@ -67,7 +67,7 @@ export function rarityTableLookup(rarity1, rarity2) {
 	const r1 = rarity1[0].toUpperCase();
 	const r2 = rarity2[0].toUpperCase();
 	return rarity_table[r1][r2]
-		?? [...rarity_table[r2][r1]]?.reverse(); // spread so reverse() doesn't change original table
+		?? rarity_table[r2][r1]?.toReversed();
 }
 
 /** Given a pair of possible outcomes with rarities and a target outcome, returns the probability of the target outcome occurring. If the indexes aren't in the array or the array members don't have rarities, `undefined`.
