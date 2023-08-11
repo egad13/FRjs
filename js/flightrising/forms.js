@@ -103,6 +103,8 @@ class BreedSelect extends HTMLSelectElement {
 		if (!this.isConnected) {
 			return;
 		}
+
+		// Initial population + event listener
 		if (!this.#isPopulated) {
 			this.#isPopulated = true;
 
@@ -122,7 +124,6 @@ class BreedSelect extends HTMLSelectElement {
 				}
 			}
 			this.append(modern, ancient);
-			this.#prevValue = this.value;
 
 			this.addEventListener("change", () => {
 				if (FR.areBreedsCompatible(this.value, this.#prevValue)) {
@@ -134,12 +135,23 @@ class BreedSelect extends HTMLSelectElement {
 				}
 			});
 		}
-		this.dispatchEvent(new Event("change", { view: window, bubbles: true, cancelable: true }));
+		this.#prevValue = this.value;
+
+		// Look for gene dropdowns that are linked, or SHOULD be and aren't. Repopulate them + reestablish any broken links
+		const selects = document.body.querySelectorAll("select");
+		this.#associatedGenes = [];
+		for (const elt of selects) {
+			if (elt instanceof GeneSelect && elt.getAttribute("breed") === this.id) {
+				this.addGene(elt);
+			}
+		}
 	}
 
 	addGene(gene, doRepop = true) {
-		if (gene && gene instanceof GeneSelect && this.#associatedGenes.indexOf(gene) < 0) {
-			this.#associatedGenes.push(gene);
+		if (gene && gene instanceof GeneSelect) {
+			if (this.#associatedGenes.indexOf(gene) < 0) {
+				this.#associatedGenes.push(gene);
+			}
 			if (doRepop) {
 				gene.repopulate();
 			}
