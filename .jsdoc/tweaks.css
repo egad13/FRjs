@@ -130,3 +130,66 @@ p.warning:before {
 p.warning {
 	background: rgba(210,153,34,.25);
 }
+
+/* || Custom Sub-tutorial Navigation Section */
+
+article > nav {
+	border-radius: 1rem;
+	padding: 1rem 1.5rem;
+}
+article > nav h2 {
+	margin: 0;
+	font-size: 1.5rem;
+}
+article > nav ul {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: start;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+article > nav li {
+	display: flex;
+	align-items: center;
+	border-radius: .5rem;
+}
+article > nav a {
+	padding: .5rem 1rem;
+	text-decoration: none;
+	transition: .3s;
+}
+article > nav a:hover {
+	text-decoration: none;
+}
+article > nav a:active {
+	text-decoration: none;
+}
+
+body.dark article > nav {
+	background-color: #222;
+}
+body.dark article > nav li:hover {
+	background-color: #333;
+}
+body.dark article > nav li:active {
+	background-color: #444;
+}
+body.dark article > nav a {
+	color: #999;
+}
+
+body.light article > nav {
+	background-color: #f7f7f7;
+}
+body.light article > nav li:hover {
+	background-color: #ddd;
+}
+body.light article > nav li:active {
+	background-color: #ccc;
+}
+body.light article > nav a {
+	color: #222;
+}
+
+

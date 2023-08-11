@@ -16,6 +16,7 @@
 	},
 	"opts": {
 		"encoding": "utf8",
+		"tutorials": "./.jsdoc/tutorials",
 		"theme_opts": {
 			"homepageTitle": "Kay's FR Tools Docs",
 			"displayModuleHeader": true,

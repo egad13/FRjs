@@ -1,0 +1,11 @@
+{
+	"fr-forms": {
+		"title": "Getting Started: fr/forms",
+
+		"children": {
+			"geneselect": {
+				"title": "Automatic Gene Dropdowns"
+			}
+		}
+	}
+}
