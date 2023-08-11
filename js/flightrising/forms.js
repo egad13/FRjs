@@ -21,7 +21,6 @@ if (!supportsCBI) {
 	await import("https://unpkg.com/@webcomponents/custom-elements");
 }
 
-import { createElt } from "../domutils.js";
 import * as FR from "./data.js";
 
 
@@ -35,7 +34,10 @@ class EyeSelect extends HTMLSelectElement {
 			return;
 		}
 		for (const [i, elt] of FR.eyes.entries()) {
-			this.add(createElt("option", { value: i, text: elt.name }));
+			const op = document.createElement("option");
+			op.value = i;
+			op.textContent = elt.name;
+			this.add(op);
 		}
 		this.#isPopulated = true;
 	}
@@ -51,10 +53,11 @@ class ColourSelect extends HTMLSelectElement {
 			return;
 		}
 		for (const [i, elt] of FR.colours.entries()) {
-			this.add(createElt("option", {
-				value: i, text: elt.name,
-				style: `background:#${elt.hex};color:#${ColourSelect.#textColourForBg(elt.hex)}`
-			}));
+			const op = document.createElement("option");
+			op.value = i;
+			op.text = elt.name;
+			op.style = `background:#${elt.hex};color:#${ColourSelect.#textColourForBg(elt.hex)}`;
+			this.add(op);
 		}
 		this.#isPopulated = true;
 	}
@@ -100,10 +103,15 @@ class BreedSelect extends HTMLSelectElement {
 		if (!this.#isPopulated) {
 			this.#isPopulated = true;
 
-			const modern = createElt("optgroup", { label: "Modern" }),
-				ancient = createElt("optgroup", { label: "Ancient" });
+			const modern = document.createElement("optgroup"),
+				ancient = document.createElement("optgroup");
+			modern.label = "Modern";
+			ancient.label = "Ancient";
+
 			for (const [i, elt] of FR.breeds.entries()) {
-				const opt = createElt("option", { value: i, text: elt.name });
+				const opt = document.createElement("option");
+				opt.value = i;
+				opt.textContent = elt.name;
 				if (elt.type === "M") {
 					modern.append(opt);
 				} else {
@@ -200,7 +208,7 @@ class GeneSelect extends HTMLSelectElement {
 		let oldVal, defVal;
 
 		let breedVal = this.#breedSelect?.value
-			?? (this.#breedName ? FR.breeds.findIndex(x => x.name.toLowerCase() === this.#breedName));
+			?? (this.#breedName ? FR.breeds.findIndex(x => x.name.toLowerCase() === this.#breedName) : null);
 		
 		for (let i = this.length - 1; i >= 0; i--) {
 			if (this[i].dataset.auto) { this.remove(i); }
@@ -220,7 +228,9 @@ class GeneSelect extends HTMLSelectElement {
 			if (name.toLowerCase() === this.#defaultName) {
 				defVal = index;
 			}
-			const op = createElt("option", { value: index, text: name });
+			const op = document.createElement("option");
+			op.value = index;
+			op.textContent = name;
 			op.dataset.auto = true;
 			this.add(op);
 		}
