@@ -2,6 +2,8 @@
  *
  * Customized Built-in Elements are not natively supported in Safari, but this module should work in Safari anyway, as it loads a polyfill if CBIE support is not detected.
  *
+ * @tutorial fr-forms
+ *
  * @module fr/forms
  * @requires module:fr/data
  * @author egad13
@@ -22,27 +24,30 @@ if (!supportsCBI) {
 import { createElt } from "../domutils.js";
 import * as FR from "./data.js";
 
+
 /** A customized variant of the `<select>` element which self-populates with options representing all of Flight Rising's eye types, in order of increasing rarity.
  */
 class EyeSelect extends HTMLSelectElement {
-	#connectedOnce = false;
+	#isPopulated = false;
+	
 	connectedCallback() {
-		if (this.#connectedOnce) {
+		if (this.#isPopulated) {
 			return;
 		}
 		for (const [i, elt] of FR.eyes.entries()) {
 			this.add(createElt("option", { value: i, text: elt.name }));
 		}
-		this.#connectedOnce = true;
+		this.#isPopulated = true;
 	}
 }
 
 /** A customized variant of the `<select>` element which self-populates with options representing all of Flight Rising's colours, in order of the on-site colour wheel.
  */
 class ColourSelect extends HTMLSelectElement {
-	#connectedOnce = false;
+	#isPopulated = false;
+
 	connectedCallback() {
-		if (this.#connectedOnce) {
+		if (this.#isPopulated) {
 			return;
 		}
 		for (const [i, elt] of FR.colours.entries()) {
@@ -51,7 +56,7 @@ class ColourSelect extends HTMLSelectElement {
 				style: `background:#${elt.hex};color:#${ColourSelect.#textColourForBg(elt.hex)}`
 			}));
 		}
-		this.#connectedOnce = true;
+		this.#isPopulated = true;
 	}
 
 	/** Determines whether text placed on the given background colour should be black or
@@ -86,40 +91,45 @@ class ColourSelect extends HTMLSelectElement {
 class BreedSelect extends HTMLSelectElement {
 	#associatedGenes = [];
 	#prevValue;
-	#connectedOnce = false;
+	#isPopulated = false;
+	
 	connectedCallback() {
-		if (this.#connectedOnce) {
+		if (!this.isConnected) {
 			return;
 		}
-		const modern = createElt("optgroup", { label: "Modern" }),
-			ancient = createElt("optgroup", { label: "Ancient" });
-		for (const [i, elt] of FR.breeds.entries()) {
-			const opt = createElt("option", { value: i, text: elt.name });
-			if (elt.type === "M") {
-				modern.append(opt);
-			} else {
-				ancient.append(opt);
-			}
-		}
-		this.append(modern, ancient);
-		this.#prevValue = this.value;
+		if (!this.#isPopulated) {
+			this.#isPopulated = true;
 
-		this.addEventListener("change", evt => {
-			if (FR.areBreedsCompatible(this.value, this.#prevValue)) {
-				return;
+			const modern = createElt("optgroup", { label: "Modern" }),
+				ancient = createElt("optgroup", { label: "Ancient" });
+			for (const [i, elt] of FR.breeds.entries()) {
+				const opt = createElt("option", { value: i, text: elt.name });
+				if (elt.type === "M") {
+					modern.append(opt);
+				} else {
+					ancient.append(opt);
+				}
 			}
+			this.append(modern, ancient);
 			this.#prevValue = this.value;
-			for (const gene of this.#associatedGenes) {
-				gene.repopulate();
-			}
-		});
-		this.#connectedOnce = true;
+
+			this.addEventListener("change", () => {
+				if (FR.areBreedsCompatible(this.value, this.#prevValue)) {
+					return;
+				}
+				this.#prevValue = this.value;
+				for (const gene of this.#associatedGenes) {
+					gene.repopulate();
+				}
+			});
+		}
+		this.dispatchEvent(new Event("change", { view: window, bubbles: true, cancelable: true }));
 	}
 
-	addGene(gene) {
-		if (gene && gene instanceof GeneSelect) {
+	addGene(gene, doRepop = true) {
+		if (gene && gene instanceof GeneSelect && this.#associatedGenes.indexOf(gene) < 0) {
 			this.#associatedGenes.push(gene);
-			if (gene.connectedOnce) {
+			if (doRepop) {
 				gene.repopulate();
 			}
 		}
@@ -134,63 +144,68 @@ class BreedSelect extends HTMLSelectElement {
 }
 
 /** A customized variant of the `<select>` element which self-populates with options representing Flight Rising's genes, ordered alphabetically.
- *  */
+ */
 class GeneSelect extends HTMLSelectElement {
-	#connectedOnce = false;
 	#defaultName = "basic";
 	#slot = "primary";
-	/** @type {BreedSelect?} */
-	#breedSelect = null;
 	/** @type {string?} */
 	#breedName = null;
-	get connectedOnce() { return this.#connectedOnce; }
-	/** Defines the custom attributes this element supports; `slot`, `breed`, and `default`.
-	 * @returns {string[]} */
-	static get observedAttributes() { return ["slot", "breed", "default"] }
+	/** @type {string?} */
+	#breedSelectID = null;
+	/** @type {BreedSelect?} */
+	#breedSelect = null;
 
+	static get observedAttributes() { return ["slot", "breed", "breed-name", "default"] }
 
 	attributeChangedCallback(name, oldValue, newValue) {
 		if (name === "default") {
-			this.#defaultName = newValue ?? "basic";
+			this.#defaultName = newValue?.toLowerCase() ?? "basic";
 		}
-		else if (name === "breed" && oldValue !== newValue) {
+		else if (name === "breed") {
 			this.#breedSelect?.removeGene(this);
-			this.#breedName = newValue?.toLowerCase();
+			this.#breedSelectID = newValue;
 			this.#breedSelect = document.querySelector(`#${newValue}`);
 			this.#breedSelect?.addGene(this);
-			if (!this.#breedSelect) {
+		}
+		else if (name === "breed-name") {
+			this.#breedName = newValue?.toLowerCase();
+			if (!this.#breedSelectID) {
 				this.repopulate();
 			}
 		}
-		else if (name === "slot" && oldValue !== newValue) {
+		else if (name === "slot") {
 			this.#slot = newValue ?? "primary";
-			if (this.#connectedOnce) {
-				this.repopulate();
-			}
+			this.repopulate();
 		}
 	}
 
 	connectedCallback() {
-		if (this.#connectedOnce) {
-			return;
-		}
 		this.repopulate();
-		this.#connectedOnce = true;
 	}
 
 	repopulate() {
+		// If we have a breed select id, but not an actual breed select, we may have been
+		// linked to a BreedSelect while it was disconnected from the document; try to
+		// find it and complete the link
+		if (this.#breedSelectID && !this.#breedSelect) {
+			this.#breedSelect = document.querySelector(`#${this.#breedSelectID}`);
+			this.#breedSelect?.addGene(this, false);
+		}
+
+		if (!this.isConnected) {
+			return;
+		}
+
 		const oldSelectedVal = (this.length === 0 ? null : this.value);
 		let oldVal, defVal;
-		let breedVal =
-			this.#breedSelect?.value
-			??
-			FR.breeds.findIndex(x => x.name.toLowerCase() === this.#breedName);
 
+		let breedVal = this.#breedSelect?.value
+			?? (this.#breedName ? FR.breeds.findIndex(x => x.name.toLowerCase() === this.#breedName));
+		
 		for (let i = this.length - 1; i >= 0; i--) {
 			if (this[i].dataset.auto) { this.remove(i); }
 		}
 
-		// Check if any non-auto-generated options are the default
 		for (const op of this.options) {
 			if (op.text == this.#defaultName) {
 				defVal = op.value;
@@ -198,12 +213,11 @@ class GeneSelect extends HTMLSelectElement {
 			}
 		}
 
-		// Add all genes for the current slot and breed
 		for (const { index, name } of FR.genesForBreed(this.#slot, breedVal)) {
 			if (index == oldSelectedVal) { // DON'T do === , select val is a string
 				oldVal = index;
 			}
-			if (name === this.#defaultName) {
+			if (name.toLowerCase() === this.#defaultName) {
 				defVal = index;
 			}
 			const op = createElt("option", { value: index, text: name });
