@@ -5,11 +5,11 @@ For basic setup of the module, see {@tutorial fr-forms}.
 
 This tutorial covers how to use the Automatic Gene Dropdowns. (In the source code, this is the {@link module:fr/forms~GeneSelect GeneSelect} class.)
 
-A dropdown of this type automatically populates itself with options representing Flight Rising's genes. By setting a few attributes, you can add constraints on which slot (primary/secondary/tertiary) and breed to display genes for. You can also link it to a {@link module:fr/forms~BreedSelect BreedSelect} to cause them to dynamically repopulate to reflect the currently chosen breed.
+A dropdown of this type automatically populates itself with options representing Flight Rising's genes. By setting a few attributes, you can add constraints on which slot (primary/secondary/tertiary) and breed to display genes for. You can also link it to a {@link module:fr/forms~BreedSelect BreedSelect} to cause it to dynamically repopulate to reflect the currently chosen breed.
 
 ## Basic Usage
 
-After importing the {@link module:fr/forms fr/forms} module, there are two methods for creating a GeneSelect.
+After importing the `fr/forms` module, there are two methods for creating a GeneSelect.
 
 ### In HTML
 
@@ -46,18 +46,6 @@ In addition to all standard attributes available for `<select>` elements, `GeneS
 | **`breed-name`** | string | null              | Case insensitive. Puts a breed constraint on this element; ie, it will only contain genes available on the given breed. |
 | **`breed`**   | string   | null               | <p>Specifies, by ID, a {@link module:fr/forms~BreedSelect BreedSelect} whose value will be used as a breed constraint; ie, it will only contain genes available on that BreedSelect's currently selected breed.</p><p><strong>This attribute takes precedence over `breed-name`.</strong></p> |
 
-## Repopulation Behaviour
-
-The GeneSelect has the unique functionality to automatically repopulate itself when the constraints placed on it change. If you modify the `slot`, or `breed` attributes, or the `breed-name` while `breed` is unset, all auto-generated options are removed and new ones are generated.
-
- If this is set to the ID of a BreedSelect that is attached to the document, `breed-name` has no effect; if this has a value that does not match the ID of an attached BreedSelect, it will fall back to `breed-name` if that is set.
-
-When this element repopulates, it ONLY removes options that it added to itself automatically. Options you added yourself will be preserved (so long as you do not give them the attribute `data-auto="true"`), but will moved to the top of the option list if they weren't there already.
-
-<p class="note">
-Repopulation only occurs if the element is currently attached to a document. If, in a script, you change an attribute on a GeneSelect that isn't currently attached to a document, you must attach it in order to generate and access the updated options.
-</p>
-
 ## Linking to a {@link module:fr/forms~BreedSelect BreedSelect}
 
 Like the Custom Attributes section mentioned, this element has the built-in ability to **automatically repopulate itself** based on what the currently selected option of a `BreedSelect` is.
@@ -70,7 +58,32 @@ This works similarly to setting the `for` attribute on a `<label>` to the id of 
 
 If you intend to create a GeneSelect that's linked to a BreedSelect, the best way is with HTML markup.
 
-You can do it with a script instead, but you have to be more careful about the order of operations if you do. For best performance you should set the GeneSelect's attributes before attaching <em>either</em> element to the document, and attach the BreedSelect to the document <em>before</em> the linked GeneSelect.
+You can do it with a script instead, but you have to be more careful about the order of operations if you do. For best performance you should set the GeneSelect's attributes before attaching *either* element to the document, and attach the BreedSelect to the document *before* the linked GeneSelect.
+
+## Repopulation Behaviour
+
+The GeneSelect has the unique functionality to automatically repopulate itself when the constraints placed on it change.
+
+The following events will cause a GeneSelect to populate or repopulate itself:
+
+- It gets attached to the document. *(ie when being created in HTML, or appended with a script)*
+- Its already attached to the document and the `slot` attribute changes.
+- Its already attached to the document and the `breed` attribute changes to indicate a BreedSelect which is already attached to the document.
+- Its already attached to the document and the `breed-name` attribute changes, provided there's no linked BreedSelect available to draw from.
+- Its already attached to the document and its linked BreedSelect, which is already attached to the document, fires a `change` event.
+- Its already attached to the document and its linked BreedSelect, which was not yet attached to the document, *gets* attached to the document.
+
+In short, if something about it changes while it's on the page, it will generate new options.
+
+For this reason, the simplest and most performant way to place constraints on a GeneSelect, including linking it to a BreedSelect, is to set its attributes in the HTML markup upfront.
+
+If you're creating a GeneSelect with a script, for best performance you should set all the custom attributes you need *before* attaching it to the document, to avoid triggering multiple repopulate events.
+
+If you're also creating its linked BreedSelect with a script, for best performance you should attach the BreedSelect to the document *before* any GeneSelects linked to it; that way you trigger one repopulation event (GeneSelect attached) instead of two (GeneSelect attached, then BreedSelect attached).
+
+<p class="note">
+This element marks its automatically generated options with the attribute `data-auto="true"`. When it repopulates, it ONLY removes options that have that attribute. Options you added yourself will be preserved, but will moved to the top of the option list if they weren't there already.
+</p>
 
 ## Examples
 
@@ -92,7 +105,7 @@ Create a gene dropdown containing primary genes, whose default option is "Basic"
 ```html
 <select is="fr-breeds" id="dragon-breed"></select>
 
-<select is="fr-genes" slot="primary" breed="dragon-breed></select>
+<select is="fr-genes" slot="primary" breed="dragon-breed"></select>
 ```
 
 ### Javascript

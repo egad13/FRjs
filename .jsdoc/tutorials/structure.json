@@ -4,7 +4,10 @@
 
 		"children": {
 			"geneselect": {
-				"title": "Automatic Gene Dropdowns"
+				"title": "Using Gene Dropdowns"
+			},
+			"breedselect": {
+				"title": "Using Breed Dropdowns"
 			}
 		}
 	}
