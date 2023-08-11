@@ -515,7 +515,7 @@ export const genes = {
 		gene("Pufferfish", "U", false, ["Undertide"]),
 		gene("Remora", "R", false, ["Undertide"]),
 		gene("Ringlets", "U", true, ["Banescale", "Gaoler", "Undertide"]),
-		gene("Runes", "L", true, ["Gaoler", "Undertide", "Veilspun"]),
+		gene("Runes", "U", true, ["Gaoler", "Undertide", "Veilspun"]),
 		gene("Sailfin", "R", false, ["Undertide"]),
 		gene("Scales", "L", true, ["Aberration", "Aether"]),
 		gene("Scorpion", "L", false, ["Gaoler"]),
