@@ -51,18 +51,50 @@ class EyeSelect extends HTMLSelectElement {
 class ColourSelect extends HTMLSelectElement {
 	#isPopulated = false;
 
+	static get observedAttributes() { return ["option-styling"] }
+
+	attributeChangedCallback(name, oldValue, newValue) {
+		console.log("name", name, "; old", oldValue, "; new", newValue, "; truthy? ", !!newValue);
+		if (name === "option-styling" && this.#isPopulated) {
+			if (newValue === "false") {
+				for (const op of this) {
+					op.dataset.bg = op.style.background;
+					op.dataset.fg = op.style.color;
+					op.removeAttribute("style");
+				}
+			} else if (this[0].hasAttribute("data-fg")) {
+				for (const op of this.options) {
+					op.style = `background:${op.dataset.bg};color:${op.dataset.fg}`;
+					op.removeAttribute("data-bg");
+					op.removeAttribute("data-fg");
+				}
+			}
+		}
+	}
+
 	connectedCallback() {
 		if (this.#isPopulated) {
 			return;
 		}
+		this.#isPopulated = true;
+
+		const attr = this.getAttribute("option-styling");
+		console.log(attr, this);
+		const noStyle = (attr == "false");
+
 		for (const [i, elt] of FR.colours.entries()) {
+			const fg = ColourSelect.#textColourForBg(elt.hex);
 			const op = document.createElement("option");
 			op.value = i;
 			op.text = elt.name;
-			op.style = `background:#${elt.hex};color:#${ColourSelect.#textColourForBg(elt.hex)}`;
+			if (noStyle) {
+				op.dataset.bg = elt.hex;
+				op.dataset.fg = fg;
+			} else {
+				op.style = `background:#${elt.hex};color:#${fg}`;
+			}
 			this.add(op);
 		}
-		this.#isPopulated = true;
 	}
 
 	/** Determines whether text placed on the given background colour should be black or
