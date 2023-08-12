@@ -25,7 +25,7 @@ This dropdown will populate with all breeds when the page loads.
 
 To create a `<select>` that uses this functionality in a script:
 1. Create a select element with `document.createElement()` and set the `is` option to `fr-breeds`.
-2. Use `.setAttribute()` to set any of the standard attributes you need. Add any options you want to have in addition to the genes.
+2. Use `.setAttribute()` to set any of the standard attributes you need. Add any options you want to have in addition to the breeds.
 3. Attach it to the document.
 
 ```js

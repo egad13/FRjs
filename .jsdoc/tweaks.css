@@ -28,6 +28,7 @@ body .main-wrapper article ol {
 }
 code {
 	tab-size: 4;
+	font-size: 1em !important;
 }
 /* Re-center navbar link text */
 nav.navbar div.navbar-item {

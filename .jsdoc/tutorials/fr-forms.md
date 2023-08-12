@@ -7,10 +7,10 @@ Since these are *extenstions* of the native `<select>`, they look and function j
 
 There are four available dropdown extensions in this module. See their individual tutorials for more information on each one.
 
-1. **Breeds** (`"fr-breeds"`): Auto-populates options for all of Flight Rising's breeds, separated into Modern and Ancient `<optgroup>`s and ordered alphabetically.
-1. **Eye Types** (`"fr-eyes"`): Auto-populates options for all of Flight Rising's eye types, ordered by increasing rarity.
-1. **Colours** (`"fr-colours"`): Auto-populates options for all of Flight Rising's colours, in on-site colour wheel order. Options will be styled with the same background colours they have on site!
-1. **Genes** (`"fr-genes"`): Auto-populates options for all Flight Rising genes in a specific slot (primary/secondary/tertiary). Can be optionally restricted to show only genes available to a specific breed, or linked to a breed dropdown! See {@tutorial geneselect} or {@link geneselect this tutorial} for details.
+1. **Eye Types** (`"fr-eyes"`): Auto-populates options for all of Flight Rising's eye types, ordered by increasing rarity.  See {@tutorial eyeselect} for details.
+1. **Colours** (`"fr-colours"`): Auto-populates options for all of Flight Rising's colours, in on-site colour wheel order. Options may optionally be styled with the same background colours they have on site. See {@tutorial colourselect} for details.
+1. **Breeds** (`"fr-breeds"`): Auto-populates options for all of Flight Rising's breeds, separated into Modern and Ancient `<optgroup>`s and ordered alphabetically. See {@tutorial breedselect} for details.
+1. **Genes** (`"fr-genes"`): Auto-populates options for all Flight Rising genes in a specific slot (primary/secondary/tertiary). Can be optionally restricted to show only genes available to a specific breed, or linked to a breed dropdown! See {@tutorial geneselect} for details.
 
 ## Usage
 
@@ -90,6 +90,16 @@ document.body.append(colourDropdown);
 <p class="note">
 When creating any of these <code>&lt;select&gt;</code> variants programmatically, they will only self-populate after they're added to the document. You can't access the self-populated options before adding the element.
 </p>
+
+## A Note on Styling (and `querySelector`)
+
+These custom `<select>`s will use whatever styles you set on regular `<select>` elements too, since they have the same HTML tag.
+
+If you want to do special styles for these custom elements, or search the DOM for them in javascript, there's one extra detail to consider: whether you're adding the element directly to your HTML, or creating it with Javascript.
+
+Any of these elements created direct in HTML will have an `is` attribute, which you can write CSS selectors to target in style sheets or with `document.querySelector()`. For example, the selector `select[is=fr-colours]` will target any/all colour dropdowns which were in the original HTML markup; `select[is|=fr]` will target any/all of these custom elements regardless of their specific type.
+
+However, if you're creating them with scripts, *they do not have an `is` attribute.* You'll have to add a class name or otherwise differentiate them from normal selects if you want to target specifically one/all of the custom elements with a CSS selector.
 
 ## More Information
 

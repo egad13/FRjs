@@ -54,7 +54,6 @@ class ColourSelect extends HTMLSelectElement {
 	static get observedAttributes() { return ["option-styling"] }
 
 	attributeChangedCallback(name, oldValue, newValue) {
-		console.log("name", name, "; old", oldValue, "; new", newValue, "; truthy? ", !!newValue);
 		if (name === "option-styling" && this.#isPopulated) {
 			if (newValue === "false") {
 				for (const op of this) {
@@ -79,7 +78,6 @@ class ColourSelect extends HTMLSelectElement {
 		this.#isPopulated = true;
 
 		const attr = this.getAttribute("option-styling");
-		console.log(attr, this);
 		const noStyle = (attr == "false");
 
 		for (const [i, elt] of FR.colours.entries()) {

@@ -3,11 +3,17 @@
 		"title": "Getting Started: fr/forms",
 
 		"children": {
-			"geneselect": {
-				"title": "Using Gene Dropdowns"
+			"eyeselect": {
+				"title": "Using Eye Type Dropdowns"
+			},
+			"colourselect": {
+				"title": "Using Colour Dropdowns"
 			},
 			"breedselect": {
 				"title": "Using Breed Dropdowns"
+			},
+			"geneselect": {
+				"title": "Using Gene Dropdowns"
 			}
 		}
 	}
