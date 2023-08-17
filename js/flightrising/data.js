@@ -67,7 +67,9 @@ export function rarityTableLookup(rarity1, rarity2) {
 	const r1 = rarity1[0].toUpperCase();
 	const r2 = rarity2[0].toUpperCase();
 	return rarity_table[r1][r2]
-		?? rarity_table[r2][r1]?.toReversed();
+		?? [...rarity_table[r2][r1]].reverse();
+		// spread operator so it doesn't modify original
+		// not toReversed() bc recent safari versions lack support
 }
 
 /** Given a pair of possible outcomes with rarities and a target outcome, returns the probability of the target outcome occurring. If the indexes aren't in the array or the array members don't have rarities, `undefined`.

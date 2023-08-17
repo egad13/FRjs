@@ -19,7 +19,7 @@ try {
 	});
 } catch (e) { console.error(e); }
 if (!supportsCBI) {
-	await import("https://unpkg.com/@webcomponents/custom-elements");
+	await import("https://unpkg.com/@ungap/custom-elements");
 }
 
 import * as FR from "./data.js";
@@ -263,7 +263,9 @@ class GeneSelect extends HTMLSelectElement {
 		}
 		else if (name === "breed") {
 			this.#breedSelectID = newValue;
-			this.#unsubFunc();
+			if (this.#unsubFunc) {
+				this.#unsubFunc();
+			}
 			this.#unsubFunc = bgPubSub.subscribe(newValue, this.#callback);
 		}
 		else if (name === "breed-name") {
