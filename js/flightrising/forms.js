@@ -9,12 +9,13 @@
  * @requires module:fr/data
  * @author egad13
  * @version 0.0.2
-*/
+ */
 
 // Polyfill customized built-in elements for safari
 let supportsCBI = false;
 try {
-	document.createElement('div', {
+	document.createElement("div", {
+		// eslint-disable-next-line getter-return
 		get is() { supportsCBI = true; }
 	});
 } catch (e) { console.error(e); }
@@ -47,7 +48,7 @@ class PubSub {
 		}
 		return () => {
 			this.#messages.delete(channel);
-		}
+		};
 	}
 
 	/** Check the last message sent to a given channel.
@@ -113,7 +114,7 @@ class EyeSelect extends HTMLSelectElement {
 class ColourSelect extends HTMLSelectElement {
 	#isPopulated = false;
 
-	static get observedAttributes() { return ["option-styling"] }
+	static get observedAttributes() { return ["option-styling"]; }
 
 	attributeChangedCallback(name, oldValue, newValue) {
 		if (name === "option-styling" && this.#isPopulated) {
@@ -134,17 +135,15 @@ class ColourSelect extends HTMLSelectElement {
 	}
 
 	connectedCallback() {
-		if (this.#isPopulated) {
-			return;
-		}
+		if (this.#isPopulated) { return; }
 		this.#isPopulated = true;
 
-		const attr = this.getAttribute("option-styling");
-		const noStyle = (attr == "false");
+		const attr = this.getAttribute("option-styling"),
+			noStyle = attr == "false";
 
 		for (const [i, elt] of FR.colours.entries()) {
-			const fg = ColourSelect.#textColourForBg(elt.hex);
-			const op = document.createElement("option");
+			const fg = ColourSelect.#textColourForBg(elt.hex),
+				op = document.createElement("option");
 			op.value = i;
 			op.text = elt.name;
 			if (noStyle) {
@@ -164,16 +163,16 @@ class ColourSelect extends HTMLSelectElement {
 	 * read text colour when placed on the given background colour. */
 	static #textColourForBg(bgHex) {
 		// Convert to RGB
-		bgHex = +("0x" + bgHex);
+		bgHex = +(`0x${bgHex}`);
 		const r = bgHex >> 16,
 			g = bgHex >> 8 & 255,
 			b = bgHex & 255;
 
 		// Perceived brightness equation from http://alienryderflex.com/hsp.html
 		const perceivedBrightness = Math.sqrt(
-			0.299 * (r * r) +
-			0.587 * (g * g) +
-			0.114 * (b * b)
+			0.299 * (r * r)
+			+ 0.587 * (g * g)
+			+ 0.114 * (b * b)
 		);
 
 		if (perceivedBrightness > 110) {
@@ -191,12 +190,10 @@ class ColourSelect extends HTMLSelectElement {
 class BreedSelect extends HTMLSelectElement {
 	#prevValue;
 	#isPopulated = false;
-	#deleteMsgFunc = () => { };
+	#deleteMsg = () => { };
 
 	connectedCallback() {
-		if (!this.isConnected) {
-			return;
-		}
+		if (!this.isConnected) { return; }
 
 		// Initial population + event listener
 		if (!this.#isPopulated) {
@@ -229,14 +226,12 @@ class BreedSelect extends HTMLSelectElement {
 
 		// Send message every time we're reattached
 		this.#prevValue = this.value;
-		this.#deleteMsgFunc = bgPubSub.sendMessage(this.id, this.value);
+		this.#deleteMsg = bgPubSub.sendMessage(this.id, this.value);
 	}
 
-	// Delete our last message when we're detached
 	disconnectedCallback() {
-		this.#deleteMsgFunc();
+		this.#deleteMsg();
 	}
-
 }
 
 /** A customized variant of the `<select>` element which self-populates with options representing Flight Rising's genes, ordered alphabetically. Registered as `fr-genes`.
@@ -252,29 +247,25 @@ class GeneSelect extends HTMLSelectElement {
 	#breedName;
 	/** @type {string?} */
 	#breedSelectID;
-	#unsubFunc = () => { };
-	#callback = this.#repopulate.bind(this);
+	#unsubFromChannel = () => { };
 
-	static get observedAttributes() { return ["slot", "breed", "breed-name", "default"] }
+	#resubscribe(newChannel) {
+		this.#unsubFromChannel?.();
+		this.#unsubFromChannel = bgPubSub.subscribe(newChannel, this.#repopulate.bind(this));
+	}
+
+	static get observedAttributes() { return ["slot", "breed", "breed-name", "default"]; }
 
 	attributeChangedCallback(name, oldValue, newValue) {
 		if (name === "default") {
 			this.#defaultName = newValue?.toLowerCase() ?? "basic";
-		}
-		else if (name === "breed") {
+		} else if (name === "breed") {
 			this.#breedSelectID = newValue;
-			if (this.#unsubFunc) {
-				this.#unsubFunc();
-			}
-			this.#unsubFunc = bgPubSub.subscribe(newValue, this.#callback);
-		}
-		else if (name === "breed-name") {
+			this.#resubscribe(newValue);
+		} else if (name === "breed-name") {
 			this.#breedName = newValue?.toLowerCase();
-			if (!this.#breedSelectID) {
-				this.#repopulate();
-			}
-		}
-		else if (name === "slot") {
+			if (!this.#breedSelectID) { this.#repopulate(); }
+		} else if (name === "slot") {
 			this.#slot = newValue ?? "primary";
 			this.#repopulate();
 		}
@@ -282,11 +273,13 @@ class GeneSelect extends HTMLSelectElement {
 
 	connectedCallback() {
 		this.#isPopulated = true;
-		this.#unsubFunc = bgPubSub.subscribe(this.#breedSelectID, this.#callback);
+		this.#resubscribe(this.#breedSelectID);
 	}
 
 	disconnectedCallback() {
-		this.#unsubFunc();
+		if (this.#unsubFromChannel) {
+			this.#unsubFromChannel();
+		}
 	}
 
 	#repopulate(breedVal) {
@@ -294,7 +287,7 @@ class GeneSelect extends HTMLSelectElement {
 			return;
 		}
 
-		const oldSelectedVal = (this.length === 0 ? null : this.value);
+		const oldSelectedVal = this.value;
 		let oldVal, defVal;
 
 		if (!breedVal) {
@@ -307,17 +300,17 @@ class GeneSelect extends HTMLSelectElement {
 		}
 
 		for (const op of this.options) {
-			if (op.text.toLowerCase() == this.#defaultName) {
+			if (op.text.toLowerCase() === this.#defaultName) {
 				defVal = op.value;
 				break;
 			}
 		}
 
 		for (const { index, name } of FR.genesForBreed(this.#slot, breedVal)) {
-			if (index == oldSelectedVal) { // DON'T do === , select val is a string
+			if (!oldVal && index == oldSelectedVal) { // DON'T do === , select val is a string
 				oldVal = index;
 			}
-			if (name.toLowerCase() === this.#defaultName) {
+			if (!defVal && name.toLowerCase() === this.#defaultName) {
 				defVal = index;
 			}
 			const op = document.createElement("option");

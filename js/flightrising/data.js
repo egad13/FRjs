@@ -16,14 +16,12 @@
 /** Lookup table for rarity comparisons. Letters mean Plentiful, Common, Uncommon,
  * Limited, Rare. [Data Source]{@link https://www1.flightrising.com/forums/gde/2866445#post_43461539}
  * @private */
-const rarity_table = {
+const rarityTable = {
 	P: {
-		P: [0.5, 0.5], C: [0.7, 0.3], U: [0.85, 0.15],
-		L: [0.97, 0.03], R: [0.99, 0.01]
+		P: [0.5, 0.5], C: [0.7, 0.3], U: [0.85, 0.15], L: [0.97, 0.03], R: [0.99, 0.01]
 	},
 	C: {
-		C: [0.5, 0.5], U: [0.75, 0.25], L: [0.9, 0.1],
-		R: [0.99, 0.01]
+		C: [0.5, 0.5], U: [0.75, 0.25], L: [0.9, 0.1], R: [0.99, 0.01]
 	},
 	U: {
 		U: [0.5, 0.5], L: [0.85, 0.15], R: [0.98, 0.02]
@@ -39,14 +37,14 @@ const rarity_table = {
 /** Possible nest sizes and their probabilities of happening when dragons are nested.
  * [Data Source]{@link https://flightrising.fandom.com/wiki/Nesting_Grounds#Number_of_Eggs}
  * @private */
-const nest_sizes = {
-	same_breeds: [
+const nestSizes = {
+	sameBreeds: [
 		{ eggs: 1, probability: 0.1 },
 		{ eggs: 2, probability: 0.38 },
 		{ eggs: 3, probability: 0.4 },
 		{ eggs: 4, probability: 0.12 }
 	],
-	diff_breeds: [ // ...or ancients
+	diffBreeds: [ // ...or ancients
 		{ eggs: 1, probability: 0.1 },
 		{ eggs: 2, probability: 0.3 },
 		{ eggs: 3, probability: 0.45 },
@@ -64,12 +62,12 @@ const nest_sizes = {
  * @param {"P"|"C"|"U"|"L"|"R"} rarity2 The second rarity in the comparison.
  * @returns {number[]|undefined} The probability that each outcome will occur. */
 export function rarityTableLookup(rarity1, rarity2) {
-	const r1 = rarity1[0].toUpperCase();
-	const r2 = rarity2[0].toUpperCase();
-	return rarity_table[r1][r2]
-		?? [...rarity_table[r2][r1]].reverse();
-		// spread operator so it doesn't modify original
-		// not toReversed() bc recent safari versions lack support
+	const r1 = rarity1[0].toUpperCase(),
+		r2 = rarity2[0].toUpperCase();
+	return rarityTable[r1][r2]
+		?? [...rarityTable[r2][r1]].reverse();
+	// spread operator so it doesn't modify original
+	// not toReversed() bc recent safari versions lack support
 }
 
 /** Given a pair of possible outcomes with rarities and a target outcome, returns the probability of the target outcome occurring. If the indexes aren't in the array or the array members don't have rarities, `undefined`.
@@ -93,10 +91,10 @@ export function calcRarityProb(arr, one, two, target) {
 	return lookup[(target === one) ? 0 : 1];
 }
 
-/** Calculates the length of the shortest range between two colours. If either parameter is not an index in {@link FRdata.colours}, returns `undefined`.
- * @param {number} one The index (in {@link FRdata.colours}) of the first colour in the range.
- * @param {number} two The index (in {@link FRdata.colours}) of the last colour in the range.
- * @returns {number|undefined} The length of the shortest range between the two colours, `undefined` if either parameter is not an index in {@link FRdata.colours}. */
+/** Calculates the length of the shortest range between two colours. If either parameter is not an index in {@link module:fr/data.colours fr/data.colours}, returns `undefined`.
+ * @param {number} one The index (in {@link module:fr/data.colours fr/data.colours}) of the first colour in the range.
+ * @param {number} two The index (in {@link module:fr/data.colours fr/data.colours}) of the last colour in the range.
+ * @returns {number|undefined} The length of the shortest range between the two colours, `undefined` if either parameter is not an index in {@link module:fr/data.colours fr/data.colours}. */
 export function colourRangeLength(one, two) {
 	if (!(one in colours && two in colours)) {
 		return;
@@ -106,10 +104,10 @@ export function colourRangeLength(one, two) {
 }
 
 /** Checks if the target colour is in the shortest range between two given colours.
- * @param {number} one The index (in {@link FRdata.colours}) of the first colour in the range.
- * @param {number} two The index (in {@link FRdata.colours}) of the last colour in the range.
+ * @param {number} one The index (in {@link module:fr/data.colours fr/data.colours}) of the first colour in the range.
+ * @param {number} two The index (in {@link module:fr/data.colours fr/data.colours}) of the last colour in the range.
  * @param {number} target The index of the target colour in the range.
- * @returns {boolean|undefined} `true` if `target` is in the colour range `one`-`two`, `false` if not, `undefined` if any parameter is not an index in {@link FRdata.colours}. */
+ * @returns {boolean|undefined} `true` if `target` is in the colour range `one`-`two`, `false` if not, `undefined` if any parameter is not an index in {@link module:fr/data.colours fr/data.colours}. */
 export function isColourInRange(one, two, target) {
 	if (!(one in colours && two in colours && target in colours)) {
 		return;
@@ -120,18 +118,18 @@ export function isColourInRange(one, two, target) {
 
 	// range does NOT cross array ends
 	if (absDist <= colours.length - absDist) {
-		return (target >= first && target <= last);
+		return target >= first && target <= last;
 	}
 	// range DOES cross array ends
-	return (target <= first || target >= last);
+	return target <= first || target >= last;
 }
 
 /** Checks if the shortest range between two target colours is a sub-range of the shortest range between two other colours. Both ranges are inclusive.
- * @param {number} one The index (in {@link FRdata.colours}) of the first colour in the range.
- * @param {number} two The index (in {@link FRdata.colours}) of the last colour in the range.
- * @param {number} target1 The index (in {@link FRdata.colours}) of the first colour in the target range.
- * @param {number} target2 The index (in {@link FRdata.colours}) of the last colour in the target range.
- * @returns {boolean|undefined} `true` if the colour range `target1`-`target2` is a subrange of the colour range `one`-`two`, `false` if not, `undefined` if any parameter is not an index in {@link FRdata.colours}. */
+ * @param {number} one The index (in {@link module:fr/data.colours fr/data.colours}) of the first colour in the range.
+ * @param {number} two The index (in {@link module:fr/data.colours fr/data.colours}) of the last colour in the range.
+ * @param {number} target1 The index (in {@link module:fr/data.colours fr/data.colours}) of the first colour in the target range.
+ * @param {number} target2 The index (in {@link module:fr/data.colours fr/data.colours}) of the last colour in the target range.
+ * @returns {boolean|undefined} `true` if the colour range `target1`-`target2` is a subrange of the colour range `one`-`two`, `false` if not, `undefined` if any parameter is not an index in {@link module:fr/data.colours fr/data.colours}. */
 export function isColourSubrangeInRange(one, two, target1, target2) {
 	if (!(one in colours && two in colours && target1 in colours && target2 in colours)) {
 		return;
@@ -144,28 +142,25 @@ export function isColourSubrangeInRange(one, two, target1, target2) {
 		targLast = Math.max(target1, target2);
 
 	// Whether or not the ranges wrap around the ends of the colour wheel array
-	const rangeWraps = (absDist > colours.length - absDist),
-		targWraps = (targAbsDist > colours.length - targAbsDist);
+	const rangeWraps = absDist > colours.length - absDist,
+		targWraps = targAbsDist > colours.length - targAbsDist;
 
 	if (rangeWraps && targWraps) {
-		return (first >= targFirst) && (targLast >= last);
-	}
-	else if (rangeWraps && !targWraps) {
-		return ((first <= targFirst) && (targLast < colours.length))
-			|| ((0 <= targFirst) && (targLast <= last));
-	}
-	else if (!rangeWraps && targWraps) {
+		return first >= targFirst && targLast >= last;
+	} else if (rangeWraps && !targWraps) {
+		return (first <= targFirst && targLast < colours.length)
+			|| (0 <= targFirst && targLast <= last);
+	} else if (!rangeWraps && targWraps) {
 		return false;
-	}
-	else if (!rangeWraps && !targWraps) {
+	} else if (!rangeWraps && !targWraps) {
 		return (first <= targFirst) && (targLast <= last);
 	}
 }
 
 /** Checks if the two given breeds are compatible for breeding; meaning either they're both modern breeds, or they're the same ancient breed.
- * @param {number} one The index (in {@link FRdata.breeds}) of the first breed.
- * @param {number} two The index (in {@link FRdata.breeds}) of the second breed.
- * @returns {boolean|undefined} `true` if the given breeds are compatible, `false` if they aren't, `undefined` if either parameter is not an index in {@link FRdata.breeds}. */
+ * @param {number} one The index (in {@link module:fr/data.breeds fr/data.breeds}) of the first breed.
+ * @param {number} two The index (in {@link module:fr/data.breeds fr/data.breeds}) of the second breed.
+ * @returns {boolean|undefined} `true` if the given breeds are compatible, `false` if they aren't, `undefined` if either parameter is not an index in {@link module:fr/data.breeds fr/data.breeds}. */
 export function areBreedsCompatible(one, two) {
 	if (!(one in breeds && two in breeds)) {
 		return;
@@ -177,17 +172,17 @@ export function areBreedsCompatible(one, two) {
 }
 
 /** Returns an array containing possible nest sizes and their probabilities if dragons of the two given breeds are nested.
- * @param {number} one The index (in {@link FRdata.breeds}) of the first breed.
- * @param {number} one The index (in {@link FRdata.breeds}) of the second breed.
- * @returns {Array.<{eggs:number,probability:number}>|undefined} An array of possible nest sizes and their probabilities, or `undefined` if either parameter is not an index in {@link FRdata.breeds}. */
+ * @param {number} one The index (in {@link module:fr/data.breeds fr/data.breeds}) of the first breed.
+ * @param {number} one The index (in {@link module:fr/data.breeds fr/data.breeds}) of the second breed.
+ * @returns {Array.<{eggs:number,probability:number}>|undefined} An array of possible nest sizes and their probabilities, or `undefined` if either parameter is not an index in {@link module:fr/data.breeds fr/data.breeds}. */
 export function nestSizesForBreeds(one, two) {
 	if (!(one in breeds && two in breeds && areBreedsCompatible(one, two))) {
 		return;
 	}
 	const type = breeds[one].type;
 	return (type === "M" && one === two)
-		? nest_sizes.same_breeds
-		: nest_sizes.diff_breeds;
+		? nestSizes.sameBreeds
+		: nestSizes.diffBreeds;
 }
 
 /** Yields all genes available to a breed in a specific slot. If no breed or a non-existent breed is provided, ignores restrictions and yields all genes for this slot. If the slot is invalid, yields nothing.
@@ -203,7 +198,7 @@ export function* genesForBreed(slot, breed) {
 	}
 	const isModern = breeds[breed]?.type === "M",
 		name = breeds[breed]?.name;
-	for (var i = 0; i < genes[slot].length; i++) {
+	for (let i = 0; i < genes[slot].length; i++) {
 		const gene = genes[slot][i];
 		if (anyBreed || (isModern && gene.modern) || gene.ancient.includes(name)) {
 			yield { index: i, ...gene };
@@ -211,32 +206,30 @@ export function* genesForBreed(slot, breed) {
 	}
 }
 
-/** Yields all colours in the shortest range between the two given colours. If either parameter is not an index in {@link FRdata.colours}, yields nothing.
- * @param {number} one The index (in {@link FRdata.colours}) of the first colour in the range.
- * @param {number} two The index (in {@link FRdata.colours}) of the last colour in the range.
+/** Yields all colours in the shortest range between the two given colours. If either parameter is not an index in {@link module:fr/data.colours fr/data.colours}, yields nothing.
+ * @param {number} one The index (in {@link module:fr/data.colours fr/data.colours}) of the first colour in the range.
+ * @param {number} two The index (in {@link module:fr/data.colours fr/data.colours}) of the last colour in the range.
  * @yields {{name:string,hex:string,index:number}} Colours in the given range. Object structure is:
  *		`{ name: string, hex: string, index: number }` */
 export function* colourRange(one, two) {
 	if (!(one in colours && two in colours)) {
 		return;
 	}
-	const absDist = Math.abs(one - two);
-	const first = Math.min(one, two);
-	const last = Math.max(one, two);
-	var out = [];
+	const absDist = Math.abs(one - two),
+		first = Math.min(one, two),
+		last = Math.max(one, two),
+		out = [];
 
 	// range does NOT cross array ends
 	if (absDist <= colours.length - absDist) {
-		for (var i = first; i <= last; i++) {
+		for (let i = first; i <= last; i++) {
 			yield { index: i, ...colours[i] };
 		}
-	}
-	// range DOES cross array ends
-	else {
-		for (var i = last; i < colours.length; i++) {
+	} else { // range DOES cross array ends
+		for (let i = last; i < colours.length; i++) {
 			yield { index: i, ...colours[i] };
 		}
-		for (var i = 0; i <= first; i++) {
+		for (let i = 0; i <= first; i++) {
 			yield { index: i, ...colours[i] };
 		}
 	}
@@ -315,7 +308,7 @@ export const breeds = [
 ];
 
 /** All available genes, organized into primary, secondary, and tertiary slots. Each gene has a name, rarity, boolean indicating if it's available on modern breeds, and list of ancient breeds it's available on (if any). Each slot is sorted by name (ascending). [Data Source]{@link https://www1.flightrising.com/forums/gde/3231610}
- * 
+ *
  * The structure of this object is:
  * ```{
  *     primary: { name: string, rarity: ("P"|"C"|"U"|"L"|"R"), modern: boolean, ancient: string[] }[],
