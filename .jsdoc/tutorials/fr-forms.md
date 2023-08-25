@@ -28,41 +28,27 @@ If you have python installed, open a command line terminal in the base folder of
 
 If you want to try another method of running an HTTP server, [MDN has a guide about it](https://developer.mozilla.org/en-US/docs/Learn/Common_questions/Tools_and_setup/set_up_a_local_testing_server).
 
-### 1. Import the module
+### 1. Load the module
 
-You can do this at either the top of your HTML's `<head>` tag:
+The best way to do this is at the top of your HTML's `<head>` tag:
 ```html
 <head>
     <script type="module" src="path/to/fr/forms.js"></script>
-
     <!-- ...etc... -->
 ```
 
-...Or in an inline script in your HTML `<head>` tag:
+The module has no exports; it just registers the custom elements.
+
+Alternatively, you can use the `import` statement or the `import()` function in a script to load it, but in most cases this is not recommended due to the potential performance penalty of loading the module later.
+
+For potential performance improvement in Firefox and chromium-based browsers, no matter how you're loading the module, consider preloading `fr/forms` and it's dependencies:
 ```html
 <head>
-    <script type="module">
-        import "path/to/fr/forms.js";
-        // ...etc...
-    </script>
+    <link rel="modulepreload" href="path/to/fr/data.js" />
+    <link rel="modulepreload" href="path/to/fr/forms.js" />
 
-    <!-- OR -->
-
-    <script type="text/javascript">
-        import("path/to/fr/forms.js");
-        // ...etc...
-    </script>
-
+    <script type="module" src="path/to/fr/forms.js"></script>
     <!-- ...etc... -->
-```
-
-...Or in the imports for your page's main script file:
-```js
-// ES6 module
-import "path/to/fr/forms.js";
-
-// Plain javascript file
-import("path/to/fr/forms.js");
 ```
 
 ### 2. Create your `<select>`s
@@ -87,24 +73,29 @@ const colourDropdown = document.createElement("select", { is: "fr-colours" });
 
 document.body.append(colourDropdown);
 ```
-<p class="note">
-When creating any of these <code>&lt;select&gt;</code> variants programmatically, they will only self-populate after they're added to the document. You can't access the self-populated options before adding the element.
-</p>
+<div class="note">
+<p>When working with any of these <code>&lt;select&gt;</code> custom dropdowns in javascript, be aware that they'll only self-populate after two things have happened:</p>
+<ol>
+    <li>The element is attached to the document.</li>
+    <li>The <code>fr/forms</code> module has run; this happens <em>after</em> the <code>document.readyState</code> becomes <code>interactive</code>, and <em>before</em> <code>DOMContentLoaded</code> has fired.</li>
+</ol>
+<p>If you need to access the self-populated options in your code, you should either wait until the <code>DOMContentLoaded</code> event has fired, or do so in an ES6 module which imports <code>fr/forms</code>.</p>
+</div>
 
 ## A Note on Styling (and `querySelector`)
 
 These custom `<select>`s will use whatever styles you set on regular `<select>` elements too, since they have the same HTML tag.
 
-If you want to do special styles for these custom elements, or search the DOM for them in javascript, there's one extra detail to consider: whether you're adding the element directly to your HTML, or creating it with Javascript.
+If you want to do special styles for these custom dropdowns, or search the DOM for them in javascript, there's one extra detail to consider: whether you're adding the dropdowns directly to your HTML, or creating them with Javascript.
 
-Any of these elements created direct in HTML will have an `is` attribute, which you can write CSS selectors to target in style sheets or with `document.querySelector()`. For example, the selector `select[is=fr-colours]` will target any/all colour dropdowns which were in the original HTML markup; `select[is|=fr]` will target any/all of these custom elements regardless of their specific type.
+Any of these dropdowns created direct in HTML will have an `is` attribute, which you can use in CSS selectors to target them with CSS rules or `document.querySelector()`. For example, the selector `select[is=fr-colours]` will target any/all colour dropdowns which were in the original HTML markup; `select[is|=fr]` will target any/all of these custom dropdowns.
 
-However, if you're creating them with scripts, *they do not have an `is` attribute.* You'll have to add a class name or otherwise differentiate them from normal selects if you want to target specifically one/all of the custom elements with a CSS selector.
+However, if you're creating them with scripts, *they do not have an `is` attribute.* You'll have to add a class name or otherwise differentiate them from normal `<select>`s if you want to target specifically one/all of the custom dropdowns with a CSS selector.
 
 ## More Information
 
-For details on how each of the custom `<select>`s work, check out the Sub-Tutorials.
+For details on how each of the custom dropdowns work, check out the Sub-Tutorials.
 
 This module uses Customized Built-in Elements to do its job. If you want to know more about how that works, check out [MDN's guide](https://developer.mozilla.org/en-US/docs/Web/API/Web_Components/Using_custom_elements).
 
-CBIE's are not natively supported in Safari, but this module should work in Safari anyway, as it loads a polyfill if CBIE support is not detected.
+CBIE's are not natively supported in Safari, but the custom dropdowns should work in Safari anyway because the module loads a polyfill if CBIE support is not detected.

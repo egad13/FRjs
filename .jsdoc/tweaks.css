@@ -1,7 +1,7 @@
 /*
  * Personal tweaks for clean-jsdoc-theme. Makes text and the sidebar more compact,
  * changes navbar colours.
- * 
+ *
  * author: egad13
 */
 
@@ -108,27 +108,27 @@ body.light nav.navbar div.navbar-item:active {
 
 /* || Custom Note & Warning Boxes */
 
-p.note::before, p.warning::before {
+.note::before, .warning::before {
 	font-family: "heading";
 	display: block;
 	margin-bottom: .5em;
 }
-p.note, p.warning {
+.note, .warning {
 	border-radius: 1rem;
 	padding: 1rem 1.5rem;
 }
 
-p.note:before {
+.note:before {
 	content: "\1F6C8  Note:";
 }
-p.note {
+.note {
 	background: rgb(47,129,247,.25);
 }
 
-p.warning:before {
+.warning:before {
 	content: "\26A0  Warning:";
 }
-p.warning {
+.warning {
 	background: rgba(210,153,34,.25);
 }
 
