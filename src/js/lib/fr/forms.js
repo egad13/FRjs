@@ -20,7 +20,7 @@ try {
 	});
 } catch (e) { console.error(e); }
 if (!supportsCBI) {
-	await import("https://unpkg.com/@ungap/custom-elements");
+	await import("https://unpkg.com/@ungap/custom-elements/es.js");
 }
 
 import * as FR from "./data.js";
