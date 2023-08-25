@@ -41,7 +41,7 @@ In addition to all standard attributes available for `<select>` elements, `Colou
 
 | Attribute            | Type    | Value If Unset | Description     |
 |----------------------|---------|----------------|-----------------|
-| **`option-styling`** | boolean | true           | If true, options will be styled with background colours matching their colour name. If false, options will be unstyled. |
+| **`no-opt-colours`** | boolean | n/a            | If this attribute is present, options will be unstyled. If this attribute is omitted, options will be styled with background colours matching their colour name. |
 
 ## Examples
 

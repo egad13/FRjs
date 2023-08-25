@@ -77,7 +77,7 @@ class PubSub {
 				callback(message);
 			}
 
-			return ()=>{
+			return () => {
 				const idx = subList.indexOf(callback);
 				if (idx != null && idx > -1) {
 					subList.splice(idx, 1);
@@ -96,16 +96,15 @@ class EyeSelect extends HTMLSelectElement {
 	#isPopulated = false;
 
 	connectedCallback() {
-		if (this.#isPopulated) {
-			return;
-		}
+		if (this.#isPopulated) { return; }
+		this.#isPopulated = true;
+
 		for (const [i, elt] of FR.eyes.entries()) {
 			const op = document.createElement("option");
 			op.value = i;
 			op.text = elt.name;
 			this.add(op);
 		}
-		this.#isPopulated = true;
 	}
 }
 
@@ -113,23 +112,18 @@ class EyeSelect extends HTMLSelectElement {
  * @tutorial colourselect */
 class ColourSelect extends HTMLSelectElement {
 	#isPopulated = false;
+	static #styleCache = new Map();
 
-	static get observedAttributes() { return ["option-styling"]; }
+	static get observedAttributes() { return ["no-opt-colours"]; }
 
-	attributeChangedCallback(name, oldValue, newValue) {
-		if (name === "option-styling" && this.#isPopulated) {
-			if (newValue === "false") {
-				for (const op of this) {
-					op.dataset.bg = op.style.background;
-					op.dataset.fg = op.style.color;
-					op.removeAttribute("style");
-				}
-			} else if (this[0].hasAttribute("data-fg")) {
-				for (const op of this.options) {
-					op.style = `background:${op.dataset.bg};color:${op.dataset.fg}`;
-					op.removeAttribute("data-bg");
-					op.removeAttribute("data-fg");
-				}
+	attributeChangedCallback(name) {
+		if (this.hasAttribute(name)) {
+			for (const op of this) {
+				op.removeAttribute("style");
+			}
+		} else if (!this.hasAttribute(name)) {
+			for (const op of this) {
+				op.style = ColourSelect.#styleCache.get(op.value);
 			}
 		}
 	}
@@ -138,19 +132,17 @@ class ColourSelect extends HTMLSelectElement {
 		if (this.#isPopulated) { return; }
 		this.#isPopulated = true;
 
-		const attr = this.getAttribute("option-styling"),
-			noStyle = attr == "false";
+		const doStyle = !this.hasAttribute("no-opt-colours");
 
 		for (const [i, elt] of FR.colours.entries()) {
-			const fg = ColourSelect.#textColourForBg(elt.hex),
-				op = document.createElement("option");
+			const op = document.createElement("option");
 			op.value = i;
 			op.text = elt.name;
-			if (noStyle) {
-				op.dataset.bg = elt.hex;
-				op.dataset.fg = fg;
-			} else {
-				op.style = `background:#${elt.hex};color:#${fg}`;
+			if (!ColourSelect.#styleCache.has(op.value)) {
+				ColourSelect.#styleCache.set(op.value, `background:#${elt.hex};color:#${ColourSelect.#textColourForBg(elt.hex)}`);
+			}
+			if (doStyle) {
+				op.style = ColourSelect.#styleCache.get(op.value);
 			}
 			this.add(op);
 		}
