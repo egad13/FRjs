@@ -1,11 +1,11 @@
 
-The {@link module:fr/forms fr/forms} module creates extensions of native HTML `<select>` elements that automatically populate themselves with Flight Rising data. Just add a few special attributes to your HTML markup, or a special option to your javascript, and you can quickly and easily create dropdowns of Flight Rising's breeds, eye types, colours, and genes!
+The {@link module:fr/forms fr/forms} module creates custom dropdown elements that automatically populate themselves with Flight Rising data. Just add an attribute to a `<select>` element your HTML markup, or create a `<select>` and pass it a special option in javascript, and you can quickly and easily create dropdowns for Flight Rising's breeds, eye types, colours, and genes!
 
-Since these are *extenstions* of the native `<select>`, they look and function just like one. Any CSS styling that affects selects will also affect these custom elements. You also don't need to do anything extra to make the elements accessible; they inherit all the same accessibility features/properties a regular dropdown would.
+Since these are *extenstions* of the native `<select>` tag, they look and function just like one. Any CSS styling that affects selects will also affect these custom dropdowns. You also don't need to do anything extra to make them accessible; they inherit all the same accessibility features/properties a regular dropdown would.
 
 ## Available Dropdowns
 
-There are four available dropdown extensions in this module. See their individual tutorials for more information on each one.
+There are four custom dropdowns available in this module:
 
 1. **Eye Types** (`"fr-eyes"`): Auto-populates options for all of Flight Rising's eye types, ordered by increasing rarity.  See {@tutorial eyeselect} for details.
 1. **Colours** (`"fr-colours"`): Auto-populates options for all of Flight Rising's colours, in on-site colour wheel order. Options may optionally be styled with the same background colours they have on site. See {@tutorial colourselect} for details.
@@ -37,11 +37,7 @@ The best way to do this is at the top of your HTML's `<head>` tag:
     <!-- ...etc... -->
 ```
 
-The module has no exports; it just registers the custom elements.
-
-Alternatively, you can use the `import` statement or the `import()` function in a script to load it, but in most cases this is not recommended due to the potential performance penalty of loading the module later.
-
-For potential performance improvement in Firefox and chromium-based browsers, no matter how you're loading the module, consider preloading `fr/forms` and it's dependencies:
+For potential performance improvement in Firefox and chromium-based browsers, consider preloading `fr/forms` and it's dependencies:
 ```html
 <head>
     <link rel="modulepreload" href="path/to/fr/data.js" />
@@ -51,38 +47,83 @@ For potential performance improvement in Firefox and chromium-based browsers, no
     <!-- ...etc... -->
 ```
 
-### 2. Create your `<select>`s
+Alternatively, you can use the `import` statement or the `import()` function in a script to load it, but in most cases this is not recommended.
+
+### 2. Create your Dropdowns
 
 #### In HTML
 
-You can use any of these extended `<select>`s directly in your HTML markup by adding the appropriate `is` attribute to any regular `<select>` tag.
+You can create any of these custom dropdowns directly in your HTML markup by adding the appropriate `is` attribute to any regular `<select>` tag.
 
-For example, this markup will cause the `<select>` element to populate itself with options for all of Flight Rising's eye types:
+For example, to create a dropdown with options for all of Flight Rising's eye types:
 ```html
 <select is="fr-eyes"></select>
 ```
 
 #### In Javascript
 
-You can also create any of these extended `<select>`s programmatically in javascript.
+You can also create any of these dropdowns with javascript by passing `document.createElement` the `is` option.
 
-For example, this code will create a dropdown of Flight Rising's colours and append it to the bottom of the document body:
+For example, this code will create a dropdown with options for all of Flight Rising's colours:
 ```js
 const colourDropdown = document.createElement("select", { is: "fr-colours" });
-// ...set attributes, add your own options, etc...
-
 document.body.append(colourDropdown);
 ```
 <div class="note">
-<p>When working with any of these <code>&lt;select&gt;</code> custom dropdowns in javascript, be aware that they'll only self-populate after two things have happened:</p>
+<p>When working with any of these custom dropdowns in javascript, be aware that they'll only self-populate after two things have happened:</p>
 <ol>
     <li>The element is attached to the document.</li>
-    <li>The <code>fr/forms</code> module has run; this happens <em>after</em> the <code>document.readyState</code> becomes <code>interactive</code>, and <em>before</em> <code>DOMContentLoaded</code> has fired.</li>
+    <li>The <code>fr/forms</code> module has run.</li>
 </ol>
-<p>If you need to access the self-populated options in your code, you should either wait until the <code>DOMContentLoaded</code> event has fired, or do so in an ES6 module which imports <code>fr/forms</code>.</p>
+<p>If you need to access the self-populated options in your code, you must either wait until the <code>DOMContentLoaded</code> event has fired, or do so in a script which imports <code>fr/forms</code>.</p>
 </div>
 
-## A Note on Styling (and `querySelector`)
+## Passing Data to `fr/data`
+
+These custom dropdowns are made to work directly with the `fr/data` module. Any `fr/data` function parameter that asks for the index of a breed, gene, eye type, or colour can be passed the value of a custom dropdown from `fr/forms`, and it'll just work.
+
+For an example, if you wanted to get the range of colours between two colours that a user selects and output them as a list:
+```html
+<html>
+<head>
+    <script type="module" src="path/to/fr/forms.js"></script>
+    <script type="module" src="example.js"></script>
+</head>
+<body>
+    <label>
+        Colour 1:
+        <select is="fr-colours" id="colour-1"></select>
+    </label>
+    <label>
+        Colour 2:
+        <select is="fr-colours" id="colour-2"></select>
+    </label>
+    <button id="find-range">Find Range Length</button>
+    <div id="output"></div>
+</body>
+</html>
+```
+```js
+// example.js
+import * as FRdata from "path/to/fr/data.js";
+
+const colour1 = document.querySelector("#colour-1"),
+    colour2 = document.querySelector("#colour-2"),
+    button = document.querySelector("#find-range"),
+    output = document.querySelector("#output");
+
+button.addEventListener("click", () => {
+    let results = `<p>The colours in the range are:</p><ul>`;
+
+    for (const colour of FRdata.colourRange(colour1.value, colour2.value)) {
+        results += `<li>${colour.name}</li>`;
+    }
+
+    output.innerHTML = results;
+});
+```
+
+## A Note on `querySelector` (and Styling)
 
 These custom `<select>`s will use whatever styles you set on regular `<select>` elements too, since they have the same HTML tag.
 
@@ -90,7 +131,7 @@ If you want to do special styles for these custom dropdowns, or search the DOM f
 
 Any of these dropdowns created direct in HTML will have an `is` attribute, which you can use in CSS selectors to target them with CSS rules or `document.querySelector()`. For example, the selector `select[is=fr-colours]` will target any/all colour dropdowns which were in the original HTML markup; `select[is|=fr]` will target any/all of these custom dropdowns.
 
-However, if you're creating them with scripts, *they do not have an `is` attribute.* You'll have to add a class name or otherwise differentiate them from normal `<select>`s if you want to target specifically one/all of the custom dropdowns with a CSS selector.
+However, if you're creating them with scripts, *they do not have an `is` attribute.* You'll have to add ids, class names, or otherwise differentiate them from normal `<select>`s if you want to target specifically one/all of the custom dropdowns with a CSS selector.
 
 ## More Information
 
