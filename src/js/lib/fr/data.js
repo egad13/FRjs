@@ -12,24 +12,41 @@
 // (As in not relevant to anyone using the module.)
 ///////////////////////////////////////////////////////////////////////////////
 
-/** Lookup table for rarity comparisons. Letters mean Plentiful, Common, Uncommon,
- * Limited, Rare. [Data Source]{@link https://www1.flightrising.com/forums/gde/2866445#post_43461539}
+// Internal rarity "enum" whose usage minifies smaller than the exported one
+const PLENTIFUL = "P",
+	COMMON = "C",
+	UNCOMMON = "U",
+	LIMITED = "L",
+	RARE = "R";
+
+/** Lookup table for rarity comparisons.
+ * [Data Source]{@link https://www1.flightrising.com/forums/gde/2866445#post_43461539}
  * @private */
 const rarityTable = {
-	P: {
-		P: [0.5, 0.5], C: [0.7, 0.3], U: [0.85, 0.15], L: [0.97, 0.03], R: [0.99, 0.01]
+	[PLENTIFUL]: {
+		[PLENTIFUL]: [0.5, 0.5],
+		[COMMON]: [0.7, 0.3],
+		[UNCOMMON]: [0.85, 0.15],
+		[LIMITED]: [0.97, 0.03],
+		[RARE]: [0.99, 0.01]
 	},
-	C: {
-		C: [0.5, 0.5], U: [0.75, 0.25], L: [0.9, 0.1], R: [0.99, 0.01]
+	[COMMON]: {
+		[COMMON]: [0.5, 0.5],
+		[UNCOMMON]: [0.75, 0.25],
+		[LIMITED]: [0.9, 0.1],
+		[RARE]: [0.99, 0.01]
 	},
-	U: {
-		U: [0.5, 0.5], L: [0.85, 0.15], R: [0.98, 0.02]
+	[UNCOMMON]: {
+		[UNCOMMON]: [0.5, 0.5],
+		[LIMITED]: [0.85, 0.15],
+		[RARE]: [0.98, 0.02]
 	},
-	L: {
-		L: [0.5, 0.5], R: [0.97, 0.03]
+	[LIMITED]: {
+		[LIMITED]: [0.5, 0.5],
+		[RARE]: [0.97, 0.03]
 	},
-	R: {
-		R: [0.5, 0.5]
+	[RARE]: {
+		[RARE]: [0.5, 0.5]
 	}
 };
 
@@ -61,10 +78,8 @@ const nestSizes = {
  * @param {"P"|"C"|"U"|"L"|"R"} rarity2 The second rarity in the comparison.
  * @returns {number[]|undefined} The probability that each outcome will occur. */
 export function rarityTableLookup(rarity1, rarity2) {
-	const r1 = rarity1[0].toUpperCase(),
-		r2 = rarity2[0].toUpperCase();
-	return rarityTable[r1][r2]
-		?? [...rarityTable[r2][r1]].reverse();
+	return rarityTable[rarity1][rarity2]
+		?? [...rarityTable[rarity2][rarity1]].reverse();
 	// spread operator so it doesn't modify original
 	// not toReversed() bc recent safari versions lack support
 }
@@ -240,16 +255,15 @@ export function* colourRange(one, two) {
 // PUBLIC DATA
 ///////////////////////////////////////////////////////////////////////////////
 
-/** Plentiful rarity. */
-export const PLENTIFUL = "P",
-	/** Common rarity. */
-	COMMON = "C",
-	/** Uncommon rarity. */
-	UNCOMMON = "U",
-	/** Limited rarity. */
-	LIMITED = "L",
-	/** Rare rarity. */
-	RARE = "R";
+/** Enum containing rarities. Every breed and gene has a rarity.
+ * @enum {string}
+ * @property {string} PLENTIFUL
+ * @property {string} COMMON
+ * @property {string} UNCOMMON
+ * @property {string} LIMITED
+ * @property {string} RARE
+ */
+export const Rarity = Object.freeze({ PLENTIFUL, COMMON, UNCOMMON, LIMITED, RARE });
 
 
 // Definitions ////////////////////////////////////////////////////////////////
