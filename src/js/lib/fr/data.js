@@ -12,6 +12,18 @@
 // (As in not relevant to anyone using the module.)
 ///////////////////////////////////////////////////////////////////////////////
 
+function deepFreeze(object) {
+	const propNames = Reflect.ownKeys(object);
+	for (const name of propNames) {
+		const value = object[name];
+		if ((value && typeof value === "object") || typeof value === "function") {
+			deepFreeze(value);
+		}
+	}
+	return Object.freeze(object);
+}
+
+
 // Internal breed type "enum" whose usage minifies smaller than the exported one
 const ANCIENT = "A", MODERN = "M";
 
@@ -25,7 +37,7 @@ const PLENTIFUL = "P",
 /** Lookup table for rarity comparisons.
  * [Data Source]{@link https://www1.flightrising.com/forums/gde/2866445#post_43461539}
  * @private */
-const RARITY_TABLE = {
+const RARITY_TABLE = deepFreeze({
 	[PLENTIFUL]: {
 		[PLENTIFUL]: [0.5, 0.5],
 		[COMMON]: [0.7, 0.3],
@@ -51,26 +63,26 @@ const RARITY_TABLE = {
 	[RARE]: {
 		[RARE]: [0.5, 0.5]
 	}
-};
+});
 
 /** Possible nest sizes and their probabilities of happening when dragons are nested.
  * [Data Source]{@link https://flightrising.fandom.com/wiki/Nesting_Grounds#Number_of_Eggs}
  * @private */
-const NEST_SIZES = {
+const NEST_SIZES = deepFreeze({
 	sameBreeds: [
-		{ eggs: 1, probability: 0.1 },
-		{ eggs: 2, probability: 0.38 },
-		{ eggs: 3, probability: 0.4 },
-		{ eggs: 4, probability: 0.12 }
+		nest(1, 0.1),
+		nest(2, 0.38),
+		nest(3, 0.4),
+		nest(4, 0.12)
 	],
 	diffBreeds: [ // ...or ancients
-		{ eggs: 1, probability: 0.1 },
-		{ eggs: 2, probability: 0.3 },
-		{ eggs: 3, probability: 0.45 },
-		{ eggs: 4, probability: 0.1 },
-		{ eggs: 5, probability: 0.05 }
+		nest(1, 0.1),
+		nest(2, 0.3),
+		nest(3, 0.45),
+		nest(4, 0.1),
+		nest(5, 0.05)
 	]
-};
+});
 
 ///////////////////////////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
@@ -283,16 +295,19 @@ export const BreedType = Object.freeze({ ANCIENT, MODERN });
 // data is supposed to be completely immutable.
 
 function eye(name, probability) {
-	return Object.freeze({ name, probability });
+	return { name, probability };
 }
 function breed(name, type, rarity) {
-	return Object.freeze({ name, type, rarity });
+	return { name, type, rarity };
 }
 function gene(name, rarity, modern, ancient) {
-	return Object.freeze({ name, rarity, modern, ancient: Object.freeze(ancient) });
+	return { name, rarity, modern, ancient };
 }
 function colour(name, hex) {
-	return Object.freeze({ name, hex });
+	return { name, hex };
+}
+function nest(eggs, probability) {
+	return { eggs, probability };
 }
 
 // Data ///////////////////////////////////////////////////////////////////////
@@ -300,7 +315,7 @@ function colour(name, hex) {
 /** All possible eye types and their probabilities of occurring. Sorted by probability (descending). [Data Source]{@link https://flightrising.fandom.com/wiki/Eye_Types#Odds}
  * @readonly
  * @type {Array.<{name:string,probability:number}>} */
-export const EYES = [
+export const EYES = deepFreeze([
 	eye("Common", 0.458),
 	eye("Uncommon", 0.242),
 	eye("Unusual", 0.139),
@@ -311,12 +326,12 @@ export const EYES = [
 	eye("Faceted", 0.007),
 	eye("Primal", 0.005),
 	eye("Multi-Gaze", 0.004)
-];
+]);
 
 /** All available breeds, their rarities, and a type specifying if they're ancient or modern. M = modern, A = ancient. Sorted by name (ascending). [Data Source]{@link https://www1.flightrising.com/wiki/wiki}
  * @readonly
  * @type {Array.<{name:string,type:("A"|"M"),rarity:("P"|"C"|"U"|"L"|"R")}>} */
-export const BREEDS = [
+export const BREEDS = deepFreeze([
 	breed("Aberration", ANCIENT, COMMON),
 	breed("Aether", ANCIENT, COMMON),
 	breed("Banescale", ANCIENT, COMMON),
@@ -339,7 +354,7 @@ export const BREEDS = [
 	breed("Undertide", ANCIENT, COMMON),
 	breed("Veilspun", ANCIENT, COMMON),
 	breed("Wildclaw", MODERN, RARE)
-];
+]);
 
 // Destructuring ancient breed names offers readability and typo prevention when I have
 // to edit genes, and a much smaller file size when aggresively minified.
@@ -363,7 +378,7 @@ const [
  * }```
  * @readonly
  * @type {{primary:Array.<{name:string,rarity:("P"|"C"|"U"|"L"|"R"),modern:boolean,ancient:string[]}>,secondary:Array.<{name:string,rarity:("P"|"C"|"U"|"L"|"R"),modern:boolean,ancient:string[]}>,tertiary:Array.<{name:string,rarity:("P"|"C"|"U"|"L"|"R"),modern:boolean,ancient:string[]}>}} */
-export const GENES = {
+export const GENES = deepFreeze({
 	primary: [
 		gene("Arapaima", COMMON, false, [SANDSURGE]),
 		gene("Arc", UNCOMMON, false, [VEILSPUN]),
@@ -586,12 +601,12 @@ export const GENES = {
 		gene("Wish", RARE, false, [AETHER]),
 		gene("Wraith", RARE, false, [BANESCALE])
 	]
-};
+});
 
 /** All available colours and their hex codes. Treat as a circular array. Hex codes are NOT prefixed. Ordered as they are in-game.
  * @readonly
  * @type {Array.<{name:string,hex:string}>} */
-export const COLOURS = [
+export const COLOURS = deepFreeze([
 	colour("Maize", "fffdea"),
 	colour("Cream", "ffefdc"),
 	colour("Antique", "d8d6cd"),
@@ -769,4 +784,4 @@ export const COLOURS = [
 	colour("Bubblegum", "eaa9ff"),
 	colour("Rose", "ffd6f6"),
 	colour("Pearl", "fbe9f8")
-];
+]);
