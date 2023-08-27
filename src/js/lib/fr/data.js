@@ -25,7 +25,7 @@ const PLENTIFUL = "P",
 /** Lookup table for rarity comparisons.
  * [Data Source]{@link https://www1.flightrising.com/forums/gde/2866445#post_43461539}
  * @private */
-const rarityTable = {
+const RARITY_TABLE = {
 	[PLENTIFUL]: {
 		[PLENTIFUL]: [0.5, 0.5],
 		[COMMON]: [0.7, 0.3],
@@ -56,7 +56,7 @@ const rarityTable = {
 /** Possible nest sizes and their probabilities of happening when dragons are nested.
  * [Data Source]{@link https://flightrising.fandom.com/wiki/Nesting_Grounds#Number_of_Eggs}
  * @private */
-const nestSizes = {
+const NEST_SIZES = {
 	sameBreeds: [
 		{ eggs: 1, probability: 0.1 },
 		{ eggs: 2, probability: 0.38 },
@@ -81,8 +81,8 @@ const nestSizes = {
  * @param {"P"|"C"|"U"|"L"|"R"} rarity2 The second rarity in the comparison.
  * @returns {number[]|undefined} The probability that each outcome will occur. */
 export function rarityTableLookup(rarity1, rarity2) {
-	return rarityTable[rarity1][rarity2]
-		?? [...rarityTable[rarity2][rarity1]].reverse();
+	return RARITY_TABLE[rarity1][rarity2]
+		?? [...RARITY_TABLE[rarity2][rarity1]].reverse();
 	// spread operator so it doesn't modify original
 	// not toReversed() bc recent safari versions lack support
 }
@@ -113,11 +113,11 @@ export function calcRarityProb(arr, one, two, target) {
  * @param {number} two The index (in {@link module:fr/data.colours fr/data.colours}) of the last colour in the range.
  * @returns {number|undefined} The length of the shortest range between the two colours, `undefined` if either parameter is not an index in {@link module:fr/data.colours fr/data.colours}. */
 export function colourRangeLength(one, two) {
-	if (!(one in colours && two in colours)) {
+	if (!(one in COLOURS && two in COLOURS)) {
 		return;
 	}
 	const absDist = Math.abs(one - two);
-	return 1 + Math.min(colours.length - absDist, absDist);
+	return 1 + Math.min(COLOURS.length - absDist, absDist);
 }
 
 /** Checks if the target colour is in the shortest range between two given colours.
@@ -126,7 +126,7 @@ export function colourRangeLength(one, two) {
  * @param {number} target The index of the target colour in the range.
  * @returns {boolean|undefined} `true` if `target` is in the colour range `one`-`two`, `false` if not, `undefined` if any parameter is not an index in {@link module:fr/data.colours fr/data.colours}. */
 export function isColourInRange(one, two, target) {
-	if (!(one in colours && two in colours && target in colours)) {
+	if (!(one in COLOURS && two in COLOURS && target in COLOURS)) {
 		return;
 	}
 	const absDist = Math.abs(one - two),
@@ -134,7 +134,7 @@ export function isColourInRange(one, two, target) {
 		last = Math.max(one, two);
 
 	// range does NOT cross array ends
-	if (absDist <= colours.length - absDist) {
+	if (absDist <= COLOURS.length - absDist) {
 		return target >= first && target <= last;
 	}
 	// range DOES cross array ends
@@ -148,7 +148,7 @@ export function isColourInRange(one, two, target) {
  * @param {number} target2 The index (in {@link module:fr/data.colours fr/data.colours}) of the last colour in the target range.
  * @returns {boolean|undefined} `true` if the colour range `target1`-`target2` is a subrange of the colour range `one`-`two`, `false` if not, `undefined` if any parameter is not an index in {@link module:fr/data.colours fr/data.colours}. */
 export function isColourSubrangeInRange(one, two, target1, target2) {
-	if (!(one in colours && two in colours && target1 in colours && target2 in colours)) {
+	if (!(one in COLOURS && two in COLOURS && target1 in COLOURS && target2 in COLOURS)) {
 		return;
 	}
 	const absDist = Math.abs(one - two),
@@ -159,13 +159,14 @@ export function isColourSubrangeInRange(one, two, target1, target2) {
 		targLast = Math.max(target1, target2);
 
 	// Whether or not the ranges wrap around the ends of the colour wheel array
-	const rangeWraps = absDist > colours.length - absDist,
-		targWraps = targAbsDist > colours.length - targAbsDist;
+	const rangeWraps = absDist > COLOURS.length - absDist,
+		targWraps = targAbsDist > COLOURS.length - targAbsDist;
 
 	if (rangeWraps && targWraps) {
 		return first >= targFirst && targLast >= last;
 	} else if (rangeWraps && !targWraps) {
-		return (first <= targFirst && targLast < colours.length)
+		return (first <= targFirst && targLast < COLOURS.length)
+			// eslint-disable-next-line yoda
 			|| (0 <= targFirst && targLast <= last);
 	} else if (!rangeWraps && targWraps) {
 		return false;
@@ -179,11 +180,11 @@ export function isColourSubrangeInRange(one, two, target1, target2) {
  * @param {number} two The index (in {@link module:fr/data.breeds fr/data.breeds}) of the second breed.
  * @returns {boolean|undefined} `true` if the given breeds are compatible, `false` if they aren't, `undefined` if either parameter is not an index in {@link module:fr/data.breeds fr/data.breeds}. */
 export function areBreedsCompatible(one, two) {
-	if (!(one in breeds && two in breeds)) {
+	if (!(one in BREEDS && two in BREEDS)) {
 		return;
 	}
-	const b1 = breeds[one],
-		b2 = breeds[two];
+	const b1 = BREEDS[one],
+		b2 = BREEDS[two];
 
 	return (b1.type === MODERN && b2.type === MODERN) || (b1 === b2);
 }
@@ -193,13 +194,13 @@ export function areBreedsCompatible(one, two) {
  * @param {number} one The index (in {@link module:fr/data.breeds fr/data.breeds}) of the second breed.
  * @returns {Array.<{eggs:number,probability:number}>|undefined} An array of possible nest sizes and their probabilities, or `undefined` if either parameter is not an index in {@link module:fr/data.breeds fr/data.breeds}. */
 export function nestSizesForBreeds(one, two) {
-	if (!(one in breeds && two in breeds && areBreedsCompatible(one, two))) {
+	if (!(one in BREEDS && two in BREEDS && areBreedsCompatible(one, two))) {
 		return;
 	}
-	const type = breeds[one].type;
+	const type = BREEDS[one].type;
 	return (type === MODERN && one === two)
-		? nestSizes.sameBreeds
-		: nestSizes.diffBreeds;
+		? NEST_SIZES.sameBreeds
+		: NEST_SIZES.diffBreeds;
 }
 
 /** Yields all genes available to a breed in a specific slot. If no breed or a non-existent breed is provided, ignores restrictions and yields all genes for this slot. If the slot is invalid, yields nothing.
@@ -209,14 +210,14 @@ export function nestSizesForBreeds(one, two) {
  *		Genes available to the given breed in the given slot. Object structure is:
  *		`{ name: string, rarity: string, modern: boolean, ancient: string[], index: number }` */
 export function* genesForBreed(slot, breed) {
-	const anyBreed = !(breed in breeds);
+	const anyBreed = !(breed in BREEDS);
 	if (!["primary", "secondary", "tertiary"].includes(slot)) {
 		return;
 	}
-	const isModern = breeds[breed]?.type === MODERN,
-		name = breeds[breed]?.name;
-	for (let i = 0; i < genes[slot].length; i++) {
-		const gene = genes[slot][i];
+	const isModern = BREEDS[breed]?.type === MODERN,
+		name = BREEDS[breed]?.name;
+	for (let i = 0; i < GENES[slot].length; i++) {
+		const gene = GENES[slot][i];
 		if (anyBreed || (isModern && gene.modern) || gene.ancient.includes(name)) {
 			yield { index: i, ...gene };
 		}
@@ -229,7 +230,7 @@ export function* genesForBreed(slot, breed) {
  * @yields {{name:string,hex:string,index:number}} Colours in the given range. Object structure is:
  *		`{ name: string, hex: string, index: number }` */
 export function* colourRange(one, two) {
-	if (!(one in colours && two in colours)) {
+	if (!(one in COLOURS && two in COLOURS)) {
 		return;
 	}
 	const absDist = Math.abs(one - two),
@@ -238,16 +239,16 @@ export function* colourRange(one, two) {
 		out = [];
 
 	// range does NOT cross array ends
-	if (absDist <= colours.length - absDist) {
+	if (absDist <= COLOURS.length - absDist) {
 		for (let i = first; i <= last; i++) {
-			yield { index: i, ...colours[i] };
+			yield { index: i, ...COLOURS[i] };
 		}
 	} else { // range DOES cross array ends
-		for (let i = last; i < colours.length; i++) {
-			yield { index: i, ...colours[i] };
+		for (let i = last; i < COLOURS.length; i++) {
+			yield { index: i, ...COLOURS[i] };
 		}
 		for (let i = 0; i <= first; i++) {
-			yield { index: i, ...colours[i] };
+			yield { index: i, ...COLOURS[i] };
 		}
 	}
 	return out;
@@ -299,7 +300,7 @@ function colour(name, hex) {
 /** All possible eye types and their probabilities of occurring. Sorted by probability (descending). [Data Source]{@link https://flightrising.fandom.com/wiki/Eye_Types#Odds}
  * @readonly
  * @type {Array.<{name:string,probability:number}>} */
-export const eyes = [
+export const EYES = [
 	eye("Common", 0.458),
 	eye("Uncommon", 0.242),
 	eye("Unusual", 0.139),
@@ -315,7 +316,7 @@ export const eyes = [
 /** All available breeds, their rarities, and a type specifying if they're ancient or modern. M = modern, A = ancient. Sorted by name (ascending). [Data Source]{@link https://www1.flightrising.com/wiki/wiki}
  * @readonly
  * @type {Array.<{name:string,type:("A"|"M"),rarity:("P"|"C"|"U"|"L"|"R")}>} */
-export const breeds = [
+export const BREEDS = [
 	breed("Aberration", ANCIENT, COMMON),
 	breed("Aether", ANCIENT, COMMON),
 	breed("Banescale", ANCIENT, COMMON),
@@ -350,7 +351,7 @@ const [
 	SANDSURGE,
 	UNDERTIDE,
 	VEILSPUN
-] = breeds.map((x, i) => i).filter(i => breeds[i].type === ANCIENT);
+] = BREEDS.map((x, i) => i).filter(i => BREEDS[i].type === ANCIENT);
 
 /** All available genes, organized into primary, secondary, and tertiary slots. Each gene has a name, rarity, boolean indicating if it's available on modern breeds, and list of ancient breeds it's available on (if any). Each slot is sorted by name (ascending). [Data Source]{@link https://www1.flightrising.com/forums/gde/3231610}
  *
@@ -362,7 +363,7 @@ const [
  * }```
  * @readonly
  * @type {{primary:Array.<{name:string,rarity:("P"|"C"|"U"|"L"|"R"),modern:boolean,ancient:string[]}>,secondary:Array.<{name:string,rarity:("P"|"C"|"U"|"L"|"R"),modern:boolean,ancient:string[]}>,tertiary:Array.<{name:string,rarity:("P"|"C"|"U"|"L"|"R"),modern:boolean,ancient:string[]}>}} */
-export const genes = {
+export const GENES = {
 	primary: [
 		gene("Arapaima", COMMON, false, [SANDSURGE]),
 		gene("Arc", UNCOMMON, false, [VEILSPUN]),
@@ -590,7 +591,7 @@ export const genes = {
 /** All available colours and their hex codes. Treat as a circular array. Hex codes are NOT prefixed. Ordered as they are in-game.
  * @readonly
  * @type {Array.<{name:string,hex:string}>} */
-export const colours = [
+export const COLOURS = [
 	colour("Maize", "fffdea"),
 	colour("Cream", "ffefdc"),
 	colour("Antique", "d8d6cd"),

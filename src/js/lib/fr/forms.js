@@ -99,10 +99,9 @@ class EyeSelect extends HTMLSelectElement {
 		if (this.#isPopulated) { return; }
 		this.#isPopulated = true;
 
-		for (const [i, elt] of FR.eyes.entries()) {
+		for (const [i, elt] of FR.EYES.entries()) {
 			const op = document.createElement("option");
-			op.value = i;
-			op.text = elt.name;
+			[op.value, op.text] = [i, elt.name];
 			this.add(op);
 		}
 	}
@@ -134,10 +133,9 @@ class ColourSelect extends HTMLSelectElement {
 
 		const doStyle = !this.hasAttribute("no-opt-colours");
 
-		for (const [i, elt] of FR.colours.entries()) {
+		for (const [i, elt] of FR.COLOURS.entries()) {
 			const op = document.createElement("option");
-			op.value = i;
-			op.text = elt.name;
+			[op.value, op.text] = [i, elt.name];
 			if (!ColourSelect.#styleCache.has(op.value)) {
 				ColourSelect.#styleCache.set(op.value, `background:#${elt.hex};color:#${ColourSelect.#textColourForBg(elt.hex)}`);
 			}
@@ -196,7 +194,7 @@ class BreedSelect extends HTMLSelectElement {
 			modern.label = "Modern";
 			ancient.label = "Ancient";
 
-			for (const [i, elt] of FR.breeds.entries()) {
+			for (const [i, elt] of FR.BREEDS.entries()) {
 				const opt = document.createElement("option");
 				opt.value = i;
 				opt.text = elt.name;
@@ -284,7 +282,7 @@ class GeneSelect extends HTMLSelectElement {
 
 		if (!breedVal) {
 			breedVal = bgPubSub.checkMessage(this.#breedSelectID)
-				?? (this.#breedName ? FR.breeds.findIndex(x => x.name.toLowerCase() === this.#breedName) : null);
+				?? (this.#breedName ? FR.BREEDS.findIndex(x => x.name.toLowerCase() === this.#breedName) : null);
 		}
 
 		for (let i = this.length - 1; i >= 0; i--) {
@@ -299,6 +297,7 @@ class GeneSelect extends HTMLSelectElement {
 		}
 
 		for (const { index, name } of FR.genesForBreed(this.#slot, breedVal)) {
+			// eslint-disable-next-line eqeqeq
 			if (!oldVal && index == oldSelectedVal) { // DON'T do === , select val is a string
 				oldVal = index;
 			}
@@ -306,8 +305,7 @@ class GeneSelect extends HTMLSelectElement {
 				defVal = index;
 			}
 			const op = document.createElement("option");
-			op.value = index;
-			op.text = name;
+			[op.value, op.text] = [index, name];
 			op.dataset.auto = true;
 			this.add(op);
 		}
