@@ -350,7 +350,7 @@ const [
 	SANDSURGE,
 	UNDERTIDE,
 	VEILSPUN
-] = breeds.filter(x => x.type === ANCIENT).map(x => x.name);
+] = breeds.map((x, i) => i).filter(i => breeds[i].type === ANCIENT);
 
 /** All available genes, organized into primary, secondary, and tertiary slots. Each gene has a name, rarity, boolean indicating if it's available on modern breeds, and list of ancient breeds it's available on (if any). Each slot is sorted by name (ascending). [Data Source]{@link https://www1.flightrising.com/forums/gde/3231610}
  *
