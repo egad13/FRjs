@@ -12,6 +12,9 @@
 // (As in not relevant to anyone using the module.)
 ///////////////////////////////////////////////////////////////////////////////
 
+// Internal breed type "enum" whose usage minifies smaller than the exported one
+const ANCIENT = "A", MODERN = "M";
+
 // Internal rarity "enum" whose usage minifies smaller than the exported one
 const PLENTIFUL = "P",
 	COMMON = "C",
@@ -182,7 +185,7 @@ export function areBreedsCompatible(one, two) {
 	const b1 = breeds[one],
 		b2 = breeds[two];
 
-	return (b1.type === "M" && b2.type === "M") || (b1 === b2);
+	return (b1.type === MODERN && b2.type === MODERN) || (b1 === b2);
 }
 
 /** Returns an array containing possible nest sizes and their probabilities if dragons of the two given breeds are nested.
@@ -194,7 +197,7 @@ export function nestSizesForBreeds(one, two) {
 		return;
 	}
 	const type = breeds[one].type;
-	return (type === "M" && one === two)
+	return (type === MODERN && one === two)
 		? nestSizes.sameBreeds
 		: nestSizes.diffBreeds;
 }
@@ -210,7 +213,7 @@ export function* genesForBreed(slot, breed) {
 	if (!["primary", "secondary", "tertiary"].includes(slot)) {
 		return;
 	}
-	const isModern = breeds[breed]?.type === "M",
+	const isModern = breeds[breed]?.type === MODERN,
 		name = breeds[breed]?.name;
 	for (let i = 0; i < genes[slot].length; i++) {
 		const gene = genes[slot][i];
@@ -265,6 +268,12 @@ export function* colourRange(one, two) {
  */
 export const Rarity = Object.freeze({ PLENTIFUL, COMMON, UNCOMMON, LIMITED, RARE });
 
+/** Enum containing breed types; ie Ancient and Modern.
+ * @enum {string}
+ * @property {string} ANCIENT
+ * @property {string} MODERN
+ */
+export const BreedType = Object.freeze({ ANCIENT, MODERN });
 
 // Definitions ////////////////////////////////////////////////////////////////
 
@@ -307,28 +316,28 @@ export const eyes = [
  * @readonly
  * @type {Array.<{name:string,type:("A"|"M"),rarity:("P"|"C"|"U"|"L"|"R")}>} */
 export const breeds = [
-	breed("Aberration", "A", COMMON),
-	breed("Aether", "A", COMMON),
-	breed("Banescale", "A", COMMON),
-	breed("Bogsneak", "M", UNCOMMON),
-	breed("Coatl", "M", RARE),
-	breed("Fae", "M", PLENTIFUL),
-	breed("Gaoler", "A", COMMON),
-	breed("Guardian", "M", PLENTIFUL),
-	breed("Imperial", "M", LIMITED),
-	breed("Mirror", "M", PLENTIFUL),
-	breed("Nocturne", "M", LIMITED),
-	breed("Obelisk", "M", UNCOMMON),
-	breed("Pearlcatcher", "M", COMMON),
-	breed("Ridgeback", "M", UNCOMMON),
-	breed("Sandsurge", "A", COMMON),
-	breed("Skydancer", "M", UNCOMMON),
-	breed("Snapper", "M", COMMON),
-	breed("Spiral", "M", COMMON),
-	breed("Tundra", "M", PLENTIFUL),
-	breed("Undertide", "A", COMMON),
-	breed("Veilspun", "A", COMMON),
-	breed("Wildclaw", "M", RARE)
+	breed("Aberration", ANCIENT, COMMON),
+	breed("Aether", ANCIENT, COMMON),
+	breed("Banescale", ANCIENT, COMMON),
+	breed("Bogsneak", MODERN, UNCOMMON),
+	breed("Coatl", MODERN, RARE),
+	breed("Fae", MODERN, PLENTIFUL),
+	breed("Gaoler", ANCIENT, COMMON),
+	breed("Guardian", MODERN, PLENTIFUL),
+	breed("Imperial", MODERN, LIMITED),
+	breed("Mirror", MODERN, PLENTIFUL),
+	breed("Nocturne", MODERN, LIMITED),
+	breed("Obelisk", MODERN, UNCOMMON),
+	breed("Pearlcatcher", MODERN, COMMON),
+	breed("Ridgeback", MODERN, UNCOMMON),
+	breed("Sandsurge", ANCIENT, COMMON),
+	breed("Skydancer", MODERN, UNCOMMON),
+	breed("Snapper", MODERN, COMMON),
+	breed("Spiral", MODERN, COMMON),
+	breed("Tundra", MODERN, PLENTIFUL),
+	breed("Undertide", ANCIENT, COMMON),
+	breed("Veilspun", ANCIENT, COMMON),
+	breed("Wildclaw", MODERN, RARE)
 ];
 
 // Destructuring ancient breed names offers readability and typo prevention when I have
@@ -341,7 +350,7 @@ const [
 	SANDSURGE,
 	UNDERTIDE,
 	VEILSPUN
-] = breeds.filter(x => x.type === "A").map(x => x.name);
+] = breeds.filter(x => x.type === ANCIENT).map(x => x.name);
 
 /** All available genes, organized into primary, secondary, and tertiary slots. Each gene has a name, rarity, boolean indicating if it's available on modern breeds, and list of ancient breeds it's available on (if any). Each slot is sorted by name (ascending). [Data Source]{@link https://www1.flightrising.com/forums/gde/3231610}
  *
