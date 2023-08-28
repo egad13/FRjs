@@ -1,23 +1,20 @@
 {
-	"fr-data": {
+	"01-fr-data": {
 		"title": "Getting Started: fr/data"
 	},
-	"fr-forms": {
-		"title": "Getting Started: fr/forms",
-
-		"children": {
-			"eyeselect": {
-				"title": "Using Eye Type Dropdowns"
-			},
-			"colourselect": {
-				"title": "Using Colour Dropdowns"
-			},
-			"breedselect": {
-				"title": "Using Breed Dropdowns"
-			},
-			"geneselect": {
-				"title": "Using Gene Dropdowns"
-			}
-		}
+	"02-fr-forms": {
+		"title": "Getting Started: fr/forms"
+	},
+	"03-eyeselect": {
+		"title": "fr/forms: Using Eye Type Dropdowns"
+	},
+	"04-colourselect": {
+		"title": "fr/forms: Using Colour Dropdowns"
+	},
+	"05-breedselect": {
+		"title": "fr/forms: Using Breed Dropdowns"
+	},
+	"06-geneselect": {
+		"title": "fr/forms: Using Gene Dropdowns"
 	}
 }

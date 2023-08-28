@@ -1,7 +1,7 @@
 
 The {@link module:fr/forms fr/forms} module creates several extensions to the `<select>` tag/`HTMLSelectElement` class which let you place self-populating dropdowns in your HTML markup, or easily create them in Javascript.
 
-For basic setup of the module, see {@tutorial fr-forms}.
+For basic setup of the module, see {@tutorial 02-fr-forms}.
 
 This tutorial covers how to use the Automatic Gene Dropdowns. (In the source code, this is the {@link module:fr/forms~GeneSelect GeneSelect} class.)
 
@@ -15,7 +15,6 @@ After importing the `fr/forms` module, there are two methods for creating a gene
 
 To create a `<select>` that uses this functionality in your HTML files, just add the attribute `is="fr-genes"` to the element:
 ```html
-This dropdown will populate with all existing primary genes when the page loads.
 <select is="fr-genes"></select>
 ```
 
@@ -29,15 +28,19 @@ To create a `<select>` that uses this functionality in a script:
 ```js
 const geneDropdown = document.createElement("select", { is: "fr-genes" });
 document.body.append(geneDropdown);
-// The document now has a <select> element with options for all primary genes.
 ```
-<p class="note">
-When creating this element in a script, it will only self-populate <strong>after</strong> it's attached to the document. You can't access the self-populated options before attaching it.
-</p>
+<div class="note">
+<p>When working with any of these custom dropdowns in javascript, be aware that they'll only self-populate after two things have happened:</p>
+<ol>
+    <li>The element is attached to the document.</li>
+    <li>The <code>fr/forms</code> module has run.</li>
+</ol>
+<p>If you need to access the self-populated options in your code, you must either wait until the <code>DOMContentLoaded</code> event has fired, or do so in a script which imports <code>fr/forms</code>.</p>
+</div>
 
 ## Custom Attributes
 
-In addition to all standard attributes available for `<select>` elements, `gene dropdown`s support the following custom attributes:
+In addition to all standard attributes available for `<select>` elements, gene dropdowns support the following custom attributes:
 
 | Attribute     | Type     | Value If Unset     | Description     |
 |---------------|----------|--------------------|-----------------|
@@ -82,7 +85,7 @@ If you're creating a gene dropdown with a script, for best performance you shoul
 If you're also creating its linked breed dropdown with a script, for best performance you should attach the breed dropdown to the document *before* any gene dropdowns linked to it; that way you trigger one repopulation event (gene dropdown attached) instead of two (gene dropdown attached, then breed dropdown attached).
 
 <p class="note">
-This element marks its automatically generated options with the attribute `data-auto="true"`. When it repopulates, it ONLY removes options that have that attribute. Options you added yourself will be preserved, but will moved to the top of the option list if they weren't there already.
+This element marks its automatically generated options with the attribute <code>data-auto="true"</code>. When it repopulates, it ONLY removes options that have that attribute. Options you added yourself will be preserved, but will moved to the top of the option list if they weren't there already.
 </p>
 
 ## Examples

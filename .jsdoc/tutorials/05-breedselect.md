@@ -1,13 +1,13 @@
 
 The {@link module:fr/forms fr/forms} module creates several extensions to the `<select>` tag/`HTMLSelectElement` class which let you place self-populating dropdowns in your HTML markup, or easily create them in Javascript.
 
-For basic setup of the module, see {@tutorial fr-forms}.
+For basic setup of the module, see {@tutorial 02-fr-forms}.
 
 This tutorial covers how to use the Automatic Breed Dropdowns. (In the source code, this is the {@link module:fr/forms~BreedSelect BreedSelect} class.)
 
 A dropdown of this type automatically populates itself with options representing Flight Rising's breeds. The options will be separated into Modern and Ancient `<optgroup>`s, and ordered alphabetically.
 
-Any {@link module:fr/forms~GeneSelect GeneSelect} can be set to watch a breed dropdown for changes, and update itself based on the currently selected breed. For more information on how to do that, see {@tutorial geneselect}.
+Any {@link module:fr/forms~GeneSelect GeneSelect} can be set to watch a breed dropdown for changes, and update itself based on the currently selected breed. For more information on how to do that, see {@tutorial 06-geneselect}.
 
 ## Basic Usage
 
@@ -47,7 +47,7 @@ Because of how the connection to gene dropdowns works, it's recommended you crea
 
 If you choose to create a breed dropdown with a script instead, for best performance you should attach it to the document *before* any of its linked gene dropdowns are attached.
 
-For more information, on how linking works, see {@tutorial geneselect}.
+For more information on how linking works, see {@tutorial 06-geneselect}.
 
 ## Examples
 

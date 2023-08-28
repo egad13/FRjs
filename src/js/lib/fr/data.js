@@ -2,7 +2,7 @@
  * Data about Flight Rising's dragon attributes and breeding mechanics, and utility functions to streamline working with that data.
  * @module fr/data
  * @version 0.0.2
- * @tutorial fr-data
+ * @tutorial 01-fr-data
  */
 
 

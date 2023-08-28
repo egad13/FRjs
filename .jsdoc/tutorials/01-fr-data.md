@@ -102,4 +102,4 @@ button.addEventListener("click", () => {
 });
 ```
 
-For more information on what custom dropdowns are available and how to use them, see {@tutorial fr-forms}.
+For more information on how to use the custom dropdowns, see {@tutorial 02-fr-forms}.

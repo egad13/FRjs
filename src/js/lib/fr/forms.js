@@ -4,7 +4,7 @@
  * Customized Built-in Elements are not natively supported in Safari, but the custom dropdowns should work in Safari anyway because the module loads a polyfill if CBIE support is not detected.
  * @module fr/forms
  * @version 0.0.2
- * @tutorial fr-forms
+ * @tutorial 02-fr-forms
  * @requires module:fr/data
  */
 
@@ -90,7 +90,7 @@ class PubSub {
 const bgPubSub = new PubSub();
 
 /** A customized `<select>` element which self-populates with options representing all of Flight Rising's eye types, in order of increasing rarity. Registered as `fr-eyes`.
- * @tutorial eyeselect */
+ * @tutorial 03-eyeselect */
 class EyeSelect extends HTMLSelectElement {
 	#isPopulated = false;
 
@@ -107,7 +107,7 @@ class EyeSelect extends HTMLSelectElement {
 }
 
 /** A customized `<select>` element which self-populates with options representing all of Flight Rising's colours, in order of the on-site colour wheel. Registered as `fr-colours`.
- * @tutorial colourselect */
+ * @tutorial 04-colourselect */
 class ColourSelect extends HTMLSelectElement {
 	#isPopulated = false;
 	/** Stores text colours for each possible colour option.
@@ -177,7 +177,7 @@ class ColourSelect extends HTMLSelectElement {
  *
  * These elements are the publishers of a Pub/Sub relationship with {@link module:fr/forms~GeneSelect GeneSelect}s.
  *
- * @tutorial breedselect */
+ * @tutorial 05-breedselect */
 class BreedSelect extends HTMLSelectElement {
 	#prevValue;
 	#isPopulated = false;
@@ -229,7 +229,7 @@ class BreedSelect extends HTMLSelectElement {
  *
  * These elements can optionally be the subscribers in a Pub/Sub relationship with {@link module:fr/forms~BreedSelect BreedSelect}s.
  *
- * @tutorial breedselect */
+ * @tutorial 06-geneselect */
 class GeneSelect extends HTMLSelectElement {
 	#isPopulated = false;
 	#defaultName = "basic";
