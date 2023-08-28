@@ -1,5 +1,5 @@
 
-The {@link module:fr/forms fr/forms} module provides you with several extensions to the `<select>` tag/`HTMLSelectElement` class which let you place self-populating dropdowns in your HTML markup, or easily create them in Javascript.
+The {@link module:fr/forms fr/forms} module creates several extensions to the `<select>` tag/`HTMLSelectElement` class which let you place self-populating dropdowns in your HTML markup, or easily create them in Javascript.
 
 For basic setup of the module, see {@tutorial fr-forms}.
 
@@ -9,7 +9,7 @@ A dropdown of this type automatically populates itself with options representing
 
 ## Basic Usage
 
-After importing the `fr/forms` module, there are two methods for creating a GeneSelect.
+After importing the `fr/forms` module, there are two methods for creating a gene dropdown.
 
 ### In HTML
 
@@ -37,49 +37,49 @@ When creating this element in a script, it will only self-populate <strong>after
 
 ## Custom Attributes
 
-In addition to all standard attributes available for `<select>` elements, `GeneSelect`s support the following custom attributes:
+In addition to all standard attributes available for `<select>` elements, `gene dropdown`s support the following custom attributes:
 
 | Attribute     | Type     | Value If Unset     | Description     |
 |---------------|----------|--------------------|-----------------|
 | **`default`** | string   | "basic"            | Case insensitive. Specifies, by text content, which option should be the default selected option when creating the dropdown and when repopulating it. You can use the text content of any option here, including ones you add yourself. |
 | **`slot`**    | "primary" or "secondary" or "tertiary" | "primary" | Puts a slot constraint on this element; ie, will only contain options for either of primary, secondary, or tertiary genes. |
 | **`breed-name`** | string | null              | Case insensitive. Puts a breed constraint on this element; ie, it will only contain genes available on the given breed. |
-| **`breed`**   | string   | null               | <p>Specifies, by ID, a `BreedSelect` whose value will be used as a breed constraint; ie, it will only contain genes available on that BreedSelect's currently selected breed.</p><p><strong>This attribute takes precedence over `breed-name`.</strong></p> |
+| **`breed`**   | string   | null               | <p>Specifies, by ID, a breed dropdown whose value will be used as a breed constraint; ie, it will only contain genes available on that breed dropdown's currently selected breed.</p><p><strong>This attribute takes precedence over `breed-name`.</strong></p> |
 
 ## Linking to a Breed Dropdown
 
-Like the Custom Attributes section mentioned, this element has the built-in ability to **automatically repopulate itself** based on what the currently selected option of a {@link module:fr/forms~BreedSelect BreedSelect} is.
+Like the Custom Attributes section mentioned, this element has the built-in ability to **automatically repopulate itself** based on what the currently selected option of a breed dropdown on the page is.
 
-For example: If the linked BreedSelect has "Aether" as it's current selection, this element will only contain genes (in the chosen slot) available on Aethers. If the user then selects "Nocturne" in the linked BreedSelect, this element will repopulate itself to only contain genes available on modern breeds.
+For example: If the linked breed dropdown has "Aether" as it's current selection, this element will only contain genes available on Aethers. If the user then selects "Nocturne" in the linked breed dropdown, this element will repopulate itself to only contain genes available on modern breeds.
 
-To use this functionality, make sure the BreedSelect you wish to link to has a a unique `id` attribute, then set this GeneSelect's `breed` attribute to that `id`.
+To use this functionality, make sure the breed dropdown you wish to link to has a a unique `id` attribute, then set this gene dropdown's `breed` attribute to that `id`.
 
 This works similarly to setting the `for` attribute on a `<label>` to the id of the form element it's labeling.
 
-If you intend to create a GeneSelect that's linked to a BreedSelect, the easiest way is with HTML markup.
+If you intend to create a gene dropdown that's linked to a breed dropdown, the easiest way is with HTML markup.
 
-You can do it with a script instead, but you have to be more careful about the order of operations if you do. For best performance you should set the GeneSelect's attributes before attaching *either* element to the document, and attach the BreedSelect to the document *before* the linked GeneSelect.
+You can do it with a script instead, but you have to be more careful about the order of operations if you do. For best performance you should set the gene dropdown's attributes before attaching *either* element to the document, and attach the breed dropdown to the document *before* the linked gene dropdown.
 
 ## Repopulation Behaviour
 
-The GeneSelect has the unique functionality to automatically repopulate itself when the constraints placed on it change.
+Gene dropdowns have the ability to automatically repopulate themselves when the constraints placed on them via their custom attributes change.
 
-The following events will cause a GeneSelect to populate or repopulate itself:
+The following events will cause a gene dropdown to repopulate itself:
 
 - It gets attached to the document. *(when being created in HTML, or appended with a script)*
-- Its attached to the document and the `slot` attribute changes.
-- Its attached to the document and the `breed` attribute changes to indicate a BreedSelect which is attached to the document.
-- Its attached to the document and the `breed-name` attribute changes, provided there's no *linked* BreedSelect which is attached to the document.
-- Its attached to the document and its linked BreedSelect, which is attached to the document, fires a `change` event.
-- Its attached to the document and its linked BreedSelect, which was not yet attached to the document, *gets* attached to the document.
+- The `slot` attribute changes while it's attached to the document.
+- The `breed` attribute changes to indicate a breed dropdown which is attached to the document, while the gene dropdown is already attached to the document.
+- The `breed-name` attribute changes while it's attached to the document, provided the `breed` attribute is NOT set.
+- Its linked breed dropdown, which is currently attached to the document, fires a `change` event while the gene dropdown is already attached to the document.
+- Its linked breed dropdown, which was not yet attached to the document, *gets* attached to the document while the gene dropdown is already attached to the document.
 
 In short, if something about it changes while it's on the page, it will generate new options.
 
-For this reason, the simplest and most performant way to place constraints on a GeneSelect, including linking it to a BreedSelect, is to set its attributes in the HTML markup upfront.
+For this reason, the simplest and most performant way to place constraints on a gene dropdown, including linking it to a breed dropdown, is to set its attributes in the HTML markup upfront.
 
-If you're creating a GeneSelect with a script, for best performance you should set all the custom attributes you need *before* attaching it to the document, to avoid triggering multiple repopulate events.
+If you're creating a gene dropdown with a script, for best performance you should set all the custom attributes you need *before* attaching it to the document, to avoid triggering multiple repopulate events.
 
-If you're also creating its linked BreedSelect with a script, for best performance you should attach the BreedSelect to the document *before* any GeneSelects linked to it; that way you trigger one repopulation event (GeneSelect attached) instead of two (GeneSelect attached, then BreedSelect attached).
+If you're also creating its linked breed dropdown with a script, for best performance you should attach the breed dropdown to the document *before* any gene dropdowns linked to it; that way you trigger one repopulation event (gene dropdown attached) instead of two (gene dropdown attached, then breed dropdown attached).
 
 <p class="note">
 This element marks its automatically generated options with the attribute `data-auto="true"`. When it repopulates, it ONLY removes options that have that attribute. Options you added yourself will be preserved, but will moved to the top of the option list if they weren't there already.

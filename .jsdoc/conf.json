@@ -27,6 +27,7 @@
 			"include_css": [ "./.jsdoc/tweaks.css" ],
 			"include_js": [ "./.jsdoc/tweaks.js" ],
 			"sections": [
+				"Tutorials",
 				"Modules",
 				"Namespaces",
 				"Interfaces",
@@ -34,8 +35,7 @@
 				"Events",
 				"Mixins",
 				"Global",
-				"Externals",
-				"Tutorials"
+				"Externals"
 			],
 			"menu": [
 				{

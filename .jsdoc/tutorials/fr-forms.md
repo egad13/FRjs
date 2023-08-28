@@ -1,7 +1,7 @@
 
-The {@link module:fr/forms fr/forms} module creates custom dropdown elements that automatically populate themselves with Flight Rising data. Just add an attribute to a `<select>` element your HTML markup, or create a `<select>` and pass it a special option in javascript, and you can quickly and easily create dropdowns for Flight Rising's breeds, eye types, colours, and genes!
+The {@link module:fr/forms fr/forms} module creates custom dropdown elements that automatically populate themselves with Flight Rising data. Just add an attribute to a `<select>` element your HTML markup or pass a special option in javascript and you can quickly and easily create dropdowns for Flight Rising's breeds, eye types, colours, and genes!
 
-Since these are *extenstions* of the native `<select>` tag, they look and function just like one. Any CSS styling that affects selects will also affect these custom dropdowns. You also don't need to do anything extra to make them accessible; they inherit all the same accessibility features/properties a regular dropdown would.
+Since these are *extensions* of the native `<select>` tag, they look and function just like a regular dropdown. Any CSS styling that affects `<select>`s will also affect these custom dropdowns. You also don't need to do anything extra to make them accessible; they inherit all the same accessibility features/properties a regular dropdown would.
 
 ## Available Dropdowns
 
@@ -16,7 +16,7 @@ There are four custom dropdowns available in this module:
 
 ### 0. Set up your environment
 
-This module requires the {@link module:fr/data fr/data} module. Make sure that module, `data.js`, is in the same directory as this module, `forms.js`.
+This module requires the {@link module:fr/data fr/data} module. Make sure that module, ie `data.js`, is in the same directory as this module, `forms.js`.
 
 `fr/forms` is an ES6 module. This means that it will work when the file is being delivered by a server, but NOT if you just open an html file in your browser with the `file:///` protocol.
 
@@ -80,9 +80,9 @@ document.body.append(colourDropdown);
 
 ## Passing Data to `fr/data`
 
-These custom dropdowns are made to work directly with the `fr/data` module. Any `fr/data` function parameter that asks for the index of a breed, gene, eye type, or colour can be passed the value of a custom dropdown from `fr/forms`, and it'll just work.
+These custom dropdowns are made to work directly with the `fr/data` module. You can use the value of any of these custom dropdowns as an index in an appropriate `fr/data` array, or pass them to any `fr/data` function parameter that asks for the index of a breed, gene, eye type, or colour, and it'll just work.
 
-For an example, if you wanted to get the range of colours between two colours that a user selects and output them as a list:
+For an example, here's a small web page that outputs the range of colours between two colours that a user selects:
 ```html
 <html>
 <head>

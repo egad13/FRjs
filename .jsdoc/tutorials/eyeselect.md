@@ -1,5 +1,5 @@
 
-The {@link module:fr/forms fr/forms} module provides you with several extensions to the `<select>` tag/`HTMLSelectElement` class which let you place self-populating dropdowns in your HTML markup, or easily create them in Javascript.
+The {@link module:fr/forms fr/forms} module creates several extensions to the `<select>` tag/`HTMLSelectElement` class which let you place self-populating dropdowns in your HTML markup, or easily create them in Javascript.
 
 For basic setup of the module, see {@tutorial fr-forms}.
 
@@ -9,13 +9,12 @@ A dropdown of this type automatically populates itself with options representing
 
 ## Basic Usage
 
-After importing the `fr/forms` module, there are two methods for creating a EyeSelect.
+After importing the `fr/forms` module, there are two methods for creating a eye type dropdown.
 
 ### In HTML
 
 To create a `<select>` that uses this functionality in your HTML files, just add the attribute `is="fr-eyes"` to the element:
 ```html
-This dropdown will populate with all eye types when the page loads.
 <select is="fr-eyes"></select>
 ```
 
@@ -29,8 +28,12 @@ To create a `<select>` that uses this functionality in a script:
 ```js
 const eyeDropdown = document.createElement("select", { is: "fr-eyes" });
 document.body.append(eyeDropdown);
-// The document now has a <select> element with options for all eye types.
 ```
-<p class="note">
-When creating this element in a script, it will only self-populate <strong>after</strong> it's attached to the document. You can't access the self-populated options before attaching it.
-</p>
+<div class="note">
+<p>When working with any of these custom dropdowns in javascript, be aware that they'll only self-populate after two things have happened:</p>
+<ol>
+    <li>The element is attached to the document.</li>
+    <li>The <code>fr/forms</code> module has run.</li>
+</ol>
+<p>If you need to access the self-populated options in your code, you must either wait until the <code>DOMContentLoaded</code> event has fired, or do so in a script which imports <code>fr/forms</code>.</p>
+</div>

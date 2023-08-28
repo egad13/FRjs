@@ -50,8 +50,8 @@ For example, if you wanted to find the length of the range between the colours P
 ```js
 import * as FRdata from "path/to/fr/data.js";
 
-const peridotIdx = FRdata.colours.findIndex(x => x.name === "Peridot");
-const seafoamIdx = FRdata.colours.findIndex(x => x.name === "Seafoam");
+const peridotIdx = FRdata.COLOURS.findIndex(x => x.name === "Peridot");
+const seafoamIdx = FRdata.COLOURS.findIndex(x => x.name === "Seafoam");
 
 const rangeLength = FRdata.colourRangeLength(peridotIdx, seafoamIdx);
 // rangeLength is 23
@@ -92,7 +92,7 @@ const colour1 = document.querySelector("#colour-1"),
     output = document.querySelector("#output");
 
 button.addEventListener("click", () => {
-    let results = `<p>The colours in the range are:</p><ul>`;
+    let results = "<p>The colours in the range are:</p><ul>";
 
     for (const colour of FRdata.colourRange(colour1.value, colour2.value)) {
         results += `<li>${colour.name}</li>`;

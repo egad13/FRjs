@@ -1,5 +1,5 @@
 
-The {@link module:fr/forms fr/forms} module provides you with several extensions to the `<select>` tag/`HTMLSelectElement` class which let you place self-populating dropdowns in your HTML markup, or easily create them in Javascript.
+The {@link module:fr/forms fr/forms} module creates several extensions to the `<select>` tag/`HTMLSelectElement` class which let you place self-populating dropdowns in your HTML markup, or easily create them in Javascript.
 
 For basic setup of the module, see {@tutorial fr-forms}.
 
@@ -9,13 +9,12 @@ A dropdown of this type automatically populates itself with options representing
 
 ## Basic Usage
 
-After importing the `fr/forms` module, there are two methods for creating a ColourSelect.
+After importing the `fr/forms` module, there are two methods for creating a colour dropdown.
 
 ### In HTML
 
 To create a `<select>` that uses this functionality in your HTML files, just add the attribute `is="fr-colours"` to the element:
 ```html
-This dropdown will populate with all colours when the page loads.
 <select is="fr-colours"></select>
 ```
 
@@ -29,7 +28,6 @@ To create a `<select>` that uses this functionality in a script:
 ```js
 const colourDropdown = document.createElement("select", { is: "fr-colours" });
 document.body.append(colourDropdown);
-// The document now has a <select> element with options for all colours.
 ```
 <p class="note">
 When creating this element in a script, it will only self-populate <strong>after</strong> it's attached to the document. You can't access the self-populated options before attaching it.
@@ -37,7 +35,7 @@ When creating this element in a script, it will only self-populate <strong>after
 
 ## Custom Attributes
 
-In addition to all standard attributes available for `<select>` elements, `ColourSelect`s support the following custom attributes:
+In addition to all standard attributes available for `<select>` elements, colour dropdowns support the following custom attributes:
 
 | Attribute            | Type    | Value If Unset | Description     |
 |----------------------|---------|----------------|-----------------|
@@ -47,16 +45,17 @@ In addition to all standard attributes available for `<select>` elements, `Colou
 
 ### HTML
 
-Create three colour dropdowns, all of which have their options styled:
+Create a colour dropdown with coloured options, and a default value of "Pick a colour":
 ```html
-<select is="fr-colours"></select>
-<select is="fr-colours" option-styling></select>
-<select is="fr-colours" option-styling="true"></select>
+<select is="fr-colours">
+	<option>Pick a colour</option>
+</select>
 ```
 
-Create a colour dropdown with NO option styling:
+Create two colour dropdowns with NO option styling:
 ```html
-<select is="fr-colours" option-styling="false"></select>
+<select is="fr-colours" no-opt-colours></select>
+<select is="fr-colours" no-opt-colours="no-opt-colours"></select>
 ```
 
 ### Javascript
@@ -64,6 +63,6 @@ Create a colour dropdown with NO option styling:
 Create a colour dropdown with NO option styling:
 ```js
 const colourDropdown = document.createElement("select", { is: "fr-colours" });
-colourDropdown.setAttribute("option-styling", false);
+colourDropdown.setAttribute("no-opt-colours");
 document.body.append(colourDropdown);
 ```

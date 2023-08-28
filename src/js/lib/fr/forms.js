@@ -1,14 +1,11 @@
 /**
- * This module defines variants of the native HTML `<select>` element which self-populate with different kinds of Flight Rising data. Available variants are `fr-eyes`, `fr-colours`, `fr-breeds`, and `fr-genes`. See the tutorials for usage.
+ * Defines extensions of the native HTML `<select>` element which self-populate with different kinds of Flight Rising data. Available elements are registered as `fr-eyes`, `fr-colours`, `fr-breeds`, and `fr-genes`. See the tutorials for usage.
  *
- * Customized Built-in Elements are not natively supported in Safari, but this module should work in Safari anyway, as it loads a polyfill if CBIE support is not detected.
- *
- * @tutorial fr-forms
- *
+ * Customized Built-in Elements are not natively supported in Safari, but the custom dropdowns should work in Safari anyway because the module loads a polyfill if CBIE support is not detected.
  * @module fr/forms
- * @requires module:fr/data
- * @author egad13
  * @version 0.0.2
+ * @tutorial fr-forms
+ * @requires module:fr/data
  */
 
 // Polyfill customized built-in elements for safari
@@ -25,10 +22,11 @@ if (!supportsCBI) {
 
 import * as FR from "./data.js";
 
-/** The message bus in a publisher-subscriber system. */
+/** The message bus in a publisher-subscriber system.
+ * @private */
 class PubSub {
 	/** A map containing channel keys, and lists of callback functions subscribed to those channels.
-	 * @type {Map<string,function[]>} */
+	 * @type {Map<string,Array<function(any)>>} */
 	#subscribers = new Map();
 	/** A map containing channel keys, and the last message sent to that channel.
 	 * @type {Map<string,any>} */
@@ -87,10 +85,11 @@ class PubSub {
 	}
 }
 
-/** The Pub/Sub message bus for the BreedSelect/GeneSelect link. */
+/** The Pub/Sub message bus for the BreedSelect/GeneSelect link.
+ * @private */
 const bgPubSub = new PubSub();
 
-/** A customized variant of the `<select>` element which self-populates with options representing all of Flight Rising's eye types, in order of increasing rarity. Registered as `fr-eyes`.
+/** A customized `<select>` element which self-populates with options representing all of Flight Rising's eye types, in order of increasing rarity. Registered as `fr-eyes`.
  * @tutorial eyeselect */
 class EyeSelect extends HTMLSelectElement {
 	#isPopulated = false;
@@ -107,10 +106,13 @@ class EyeSelect extends HTMLSelectElement {
 	}
 }
 
-/** A customized variant of the `<select>` element which self-populates with options representing all of Flight Rising's colours, in order of the on-site colour wheel. Registered as `fr-colours`.
+/** A customized `<select>` element which self-populates with options representing all of Flight Rising's colours, in order of the on-site colour wheel. Registered as `fr-colours`.
  * @tutorial colourselect */
 class ColourSelect extends HTMLSelectElement {
 	#isPopulated = false;
+	/** Stores text colours for each possible colour option.
+	 * @private
+	 * @type {Map.<string, string>} */
 	static #styleCache = new Map();
 
 	static get observedAttributes() { return ["no-opt-colours"]; }
@@ -146,11 +148,10 @@ class ColourSelect extends HTMLSelectElement {
 		}
 	}
 
-	/** Determines whether text placed on the given background colour should be black or
-	 * white for the best readability.
-	 * @param {string} bgHex Background colour. A non-prefixed 6-digit hex colour code.
-	 * @returns {string} Whichever of the hex colour codes "000" or "fff" is the easier to
-	 * read text colour when placed on the given background colour. */
+	/** Determines whether text placed on the given background colour should be black or white for the best readability.
+	 * @private
+	 * @param {string} bgHex A non-prefixed 6-digit hex colour code.
+	 * @returns {string} Whichever of "000" or "fff" is easier to read when placed on the given background colour. */
 	static #textColourForBg(bgHex) {
 		// Convert to RGB
 		bgHex = +(`0x${bgHex}`);
@@ -172,9 +173,9 @@ class ColourSelect extends HTMLSelectElement {
 	}
 }
 
-/** A customized variant of the `<select>` element which self-populates with options representing all of Flight Rising's breeds, separated into Modern and Ancient `<optgroup>`s, which are ordered alphabetically. Registered as `fr-breeds`.
+/** A customized `<select>` element which self-populates with options representing all of Flight Rising's breeds, separated into Modern and Ancient `<optgroup>`s which are each ordered alphabetically. Registered as `fr-breeds`.
  *
- * These elements are the publishers of the Pub/Sub relationship between themselves and {@link module:fr/forms~GeneSelect GeneSelect}s.
+ * These elements are the publishers of a Pub/Sub relationship with {@link module:fr/forms~GeneSelect GeneSelect}s.
  *
  * @tutorial breedselect */
 class BreedSelect extends HTMLSelectElement {
@@ -224,9 +225,9 @@ class BreedSelect extends HTMLSelectElement {
 	}
 }
 
-/** A customized variant of the `<select>` element which self-populates with options representing Flight Rising's genes, ordered alphabetically. Registered as `fr-genes`.
+/** A customized `<select>` element which self-populates with options representing Flight Rising's genes, ordered alphabetically. Registered as `fr-genes`.
  *
- * These elements can optionally be the subscribers in the Pub/Sub relationship between themselves and {@link module:fr/forms~BreedSelect BreedSelect}s.
+ * These elements can optionally be the subscribers in a Pub/Sub relationship with {@link module:fr/forms~BreedSelect BreedSelect}s.
  *
  * @tutorial breedselect */
 class GeneSelect extends HTMLSelectElement {
@@ -237,11 +238,11 @@ class GeneSelect extends HTMLSelectElement {
 	#breedName;
 	/** @type {string?} */
 	#breedSelectID;
-	#unsubFromChannel = () => { };
+	#unsubscribe = () => { };
 
 	#resubscribe(newChannel) {
-		this.#unsubFromChannel?.();
-		this.#unsubFromChannel = bgPubSub.subscribe(newChannel, this.#repopulate.bind(this));
+		this.#unsubscribe?.();
+		this.#unsubscribe = bgPubSub.subscribe(newChannel, this.#repopulate.bind(this));
 	}
 
 	static get observedAttributes() { return ["slot", "breed", "breed-name", "default"]; }
@@ -267,8 +268,8 @@ class GeneSelect extends HTMLSelectElement {
 	}
 
 	disconnectedCallback() {
-		if (this.#unsubFromChannel) {
-			this.#unsubFromChannel();
+		if (this.#unsubscribe) {
+			this.#unsubscribe();
 		}
 	}
 
@@ -282,7 +283,11 @@ class GeneSelect extends HTMLSelectElement {
 
 		if (!breedVal) {
 			breedVal = bgPubSub.checkMessage(this.#breedSelectID)
-				?? (this.#breedName ? FR.BREEDS.findIndex(x => x.name.toLowerCase() === this.#breedName) : null);
+				?? (
+					this.#breedName
+						? FR.BREEDS.findIndex(x => x.name.toLowerCase() === this.#breedName)
+						: null
+				);
 		}
 
 		for (let i = this.length - 1; i >= 0; i--) {
@@ -297,8 +302,7 @@ class GeneSelect extends HTMLSelectElement {
 		}
 
 		for (const { index, name } of FR.genesForBreed(this.#slot, breedVal)) {
-			// eslint-disable-next-line eqeqeq
-			if (!oldVal && index == oldSelectedVal) { // DON'T do === , select val is a string
+			if (!oldVal && index.toString() === oldSelectedVal) {
 				oldVal = index;
 			}
 			if (!defVal && name.toLowerCase() === this.#defaultName) {
