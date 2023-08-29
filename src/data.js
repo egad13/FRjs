@@ -1,8 +1,7 @@
 /**
  * Data about Flight Rising's dragon attributes and breeding mechanics, and utility functions to streamline working with that data.
- * @module fr/data
+ * @module FRjs/data
  * @version 0.0.2
- * @tutorial 01-fr-data
  */
 
 
@@ -12,15 +11,15 @@
 // (As in not relevant to anyone using the module.)
 ///////////////////////////////////////////////////////////////////////////////
 
-function deepFreeze(object) {
-	const propNames = Reflect.ownKeys(object);
+function deepFreeze(obj) {
+	const propNames = Reflect.ownKeys(obj);
 	for (const name of propNames) {
-		const value = object[name];
+		const value = obj[name];
 		if ((value && typeof value === "object") || typeof value === "function") {
 			deepFreeze(value);
 		}
 	}
-	return Object.freeze(object);
+	return Object.freeze(obj);
 }
 
 
@@ -89,8 +88,8 @@ const NEST_SIZES = deepFreeze({
 ///////////////////////////////////////////////////////////////////////////////
 
 /** Given two rarities to compare, returns an array containing, in order, the probability that `rarity1` occurs and the probability that `rarity2` occurs. If invalid rarities are given, returns `undefined`.
- * @param {module:fr/data.Rarity} rarity1
- * @param {module:fr/data.Rarity} rarity2
+ * @param {module:FRjs/data.Rarity} rarity1
+ * @param {module:FRjs/data.Rarity} rarity2
  * @returns {number[]|undefined} */
 export function rarityTableLookup(rarity1, rarity2) {
 	return RARITY_TABLE[rarity1][rarity2]
@@ -100,7 +99,7 @@ export function rarityTableLookup(rarity1, rarity2) {
 }
 
 /** Compares two objects with rarities from the given array, and returns the probability of the given `target` outcome occurring. If the indexes aren't in the array, or the array members don't have rarities, returns`undefined`.
- * @param {Array<{rarity: module:fr/data.Rarity}>} arr An array of objects with a `rarity` property.
+ * @param {Array<{rarity: module:FRjs/data.Rarity}>} arr An array of objects with a `rarity` property.
  * @param {number} one The index in `arr` of the first possible outcome.
  * @param {number} two The index in `arr` of the second possible outcome.
  * @param {number} target The index in `arr` of the target outcome. Should be identical to either `one` or `two`.
@@ -118,7 +117,7 @@ export function calcRarityProb(arr, one, two, target) {
 	return lookup[(target === one) ? 0 : 1];
 }
 
-/** Calculates the length of the shortest range between two colours. If either parameter is not an index in {@link module:fr/data.COLOURS fr/data.COLOURS}, returns `undefined`.
+/** Calculates the length of the shortest range between two colours. If either parameter is not an index in {@link module:FRjs/data.COLOURS FRjs/data.COLOURS}, returns `undefined`.
  * @param {number} one The index of the first colour in the range.
  * @param {number} two The index of the last colour in the range.
  * @returns {number|undefined} */
@@ -130,7 +129,7 @@ export function colourRangeLength(one, two) {
 	return 1 + Math.min(COLOURS.length - absDist, absDist);
 }
 
-/** Returns `true` if the target colour is in the shortest range between two given colours, and `false` if it isn't. If any parameter is not an index in {@link module:fr/data.COLOURS fr/data.COLOURS}, returns `undefined`. Range includes both end colours.
+/** Returns `true` if the target colour is in the shortest range between two given colours, and `false` if it isn't. If any parameter is not an index in {@link module:FRjs/data.COLOURS FRjs/data.COLOURS}, returns `undefined`. Range includes both end colours.
  * @param {number} one The index of the first colour in the range.
  * @param {number} two The index of the last colour in the range.
  * @param {number} target The index of the target colour.
@@ -151,7 +150,7 @@ export function isColourInRange(one, two, target) {
 	return target <= first || target >= last;
 }
 
-/** Returns `true` if the colour range from `target1` to `target2` is a sub-range of the colour range from `one` to `two`, and `false` if not. If any parameter is not an index in {@link module:fr/data.COLOURS fr/data.COLOURS}, returns `undefined`. Both ranges include both their end colours.
+/** Returns `true` if the colour range from `target1` to `target2` is a sub-range of the colour range from `one` to `two`, and `false` if not. If any parameter is not an index in {@link module:FRjs/data.COLOURS FRjs/data.COLOURS}, returns `undefined`. Both ranges include both their end colours.
  * @param {number} one The index of the first colour in the parent range.
  * @param {number} two The index of the last colour in the parent range.
  * @param {number} target1 The index of the first colour in the target range.
@@ -185,7 +184,7 @@ export function isColourSubrangeInRange(one, two, target1, target2) {
 	}
 }
 
-/** Returns `true` if the two given breeds are compatible for breeding -- meaning either they're both modern breeds, or they're the same ancient breed -- and `false` if they aren't. If either parameter is not an index in {@link module:fr/data.BREEDS fr/data.BREEDS}, returns `undefined`.
+/** Returns `true` if the two given breeds are compatible for breeding -- meaning either they're both modern breeds, or they're the same ancient breed -- and `false` if they aren't. If either parameter is not an index in {@link module:FRjs/data.BREEDS FRjs/data.BREEDS}, returns `undefined`.
  * @param {number} one The index of the first breed.
  * @param {number} two The index of the second breed.
  * @returns {boolean|undefined} */
@@ -200,7 +199,7 @@ export function areBreedsCompatible(one, two) {
 		|| (b1 === b2);
 }
 
-/** Returns an array containing possible nest sizes and their probabilities if dragons of the two given breeds are nested. If the given breeds are incompatible, or if either parameter is not an index in {@link module:fr/data.BREEDS fr/data.BREEDS}, returns `undefined`.
+/** Returns an array containing possible nest sizes and their probabilities if dragons of the two given breeds are nested. If the given breeds are incompatible, or if either parameter is not an index in {@link module:FRjs/data.BREEDS FRjs/data.BREEDS}, returns `undefined`.
  * @param {number} one The index of the first breed.
  * @param {number} two The index of the second breed.
  * @returns {Array<{size: number, probability: number}>|undefined} */
@@ -221,9 +220,9 @@ export function nestSizesForBreeds(one, two) {
  * Genes available to the given breed in the given slot. Object structure is:
  * | Property | Type | Description |
  * |---|-|-|
- * | `index` | number | The index of the gene in {@link module:fr/data.GENES fr/data.GENES} |
+ * | `index` | number | The index of the gene in {@link module:FRjs/data.GENES FRjs/data.GENES} |
  * | `name` | string | Name of the gene |
- * | `rarity` | {@link module:fr/data.Rarity} | Rarity of the gene |
+ * | `rarity` | {@link module:FRjs/data.Rarity} | Rarity of the gene |
  * | `modern` | boolean | Whether or not the gene is available on modern breeds |
  * | `ancient` | number[] | List of ancient breeds (by index) gene is available on | */
 export function* genesForBreed(slot, breed) {
@@ -241,14 +240,14 @@ export function* genesForBreed(slot, breed) {
 	}
 }
 
-/** Yields all colours in the shortest range between the two given colours. If either parameter is not an index in {@link module:fr/data.COLOURS fr/data.COLOURS}, yields nothing.
+/** Yields all colours in the shortest range between the two given colours. If either parameter is not an index in {@link module:FRjs/data.COLOURS FRjs/data.COLOURS}, yields nothing.
  * @param {number} one The index of the first colour in the range.
  * @param {number} two The index of the last colour in the range.
  * @yields {{index: number, name: string, hex: string}}
  * Colours in the given range. Object structure is:
  * | Property | Type | Description |
  * |---|-|-|
- * | `index` | number | The index of the colour in {@link module:fr/data.COLOURS fr/data.COLOURS} |
+ * | `index` | number | The index of the colour in {@link module:FRjs/data.COLOURS FRjs/data.COLOURS} |
  * | `name` | string | Name of the colour |
  * | `hex` | string | The hex code for this colour. NOT hash-prefixed. | */
 export function* colourRange(one, two) {
@@ -339,7 +338,7 @@ export const EYES = deepFreeze([
 
 /** All available breeds, their rarities, and a type specifying if they're ancient or modern. Sorted by name (ascending). [Data Source]{@link https://www1.flightrising.com/wiki/wiki}
  * @readonly
- * @type {Array<{name: string, type: module:fr/data.BreedType, rarity: module:fr/data.Rarity}>} */
+ * @type {Array<{name: string, type: module:FRjs/data.BreedType, rarity: module:FRjs/data.Rarity}>} */
 export const BREEDS = deepFreeze([
 	breed("Aberration", ANCIENT, COMMON),
 	breed("Aether", ANCIENT, COMMON),
@@ -384,11 +383,11 @@ const [
  * | Property | Type | Description |
  * |---|-|-|
  * | `name` | string | Name of the gene |
- * | `rarity` | {@link module:fr/data.Rarity} | Rarity of the gene |
+ * | `rarity` | {@link module:FRjs/data.Rarity} | Rarity of the gene |
  * | `modern` | boolean | Whether or not the gene is available on modern breeds |
  * | `ancient` | number[] | List of ancient breeds (by index) gene is available on |
  * @readonly
- * @type {{primary:Array<{name:string,rarity:module:fr/data.Rarity,modern:boolean,ancient:number[]}>,secondary:Array<{name:string,rarity:module:fr/data.Rarity,modern:boolean,ancient:number[]}>,tertiary:Array<{name:string,rarity:module:fr/data.Rarity,modern:boolean,ancient:number[]}>}} */
+ * @type {{primary:Array<{name:string,rarity:module:FRjs/data.Rarity,modern:boolean,ancient:number[]}>,secondary:Array<{name:string,rarity:module:FRjs/data.Rarity,modern:boolean,ancient:number[]}>,tertiary:Array<{name:string,rarity:module:FRjs/data.Rarity,modern:boolean,ancient:number[]}>}} */
 export const GENES = deepFreeze({
 	primary: [
 		gene("Arapaima", COMMON, false, [SANDSURGE]),

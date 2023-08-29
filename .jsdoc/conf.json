@@ -18,12 +18,12 @@
 		"encoding": "utf8",
 		"tutorials": "./.jsdoc/tutorials",
 		"theme_opts": {
-			"homepageTitle": "Kay's FR Tools Docs",
+			"homepageTitle": "FRjs Docs",
 			"displayModuleHeader": true,
 			"prefixModuleToSidebarItems_experimental": true,
 			"includeFilesListInHomepage": true,
 			"default_theme": "dark",
-			"title": "Kay's FR Tools Docs",
+			"title": "FRjs Docs",
 			"include_css": [ "./.jsdoc/tweaks.css" ],
 			"include_js": [ "./.jsdoc/tweaks.js" ],
 			"sections": [
@@ -40,23 +40,18 @@
 			"menu": [
 				{
 					"title": "Github",
-					"link": "https://github.com/egad13/FR-Hatchling-Probability",
-					"target": "_blank"
-				},
-				{
-					"title": "Live Website",
-					"link": "../",
+					"link": "https://github.com/egad13/FRjs",
 					"target": "_blank"
 				}
 			],
 			"meta": [
 				{
 					"name": "author",
-					"content": "egad13"
+					"content": "egad13 (https://github.com/egad13)"
 				},
 				{
 					"name": "description",
-					"content": "Documentation for the javascript under the hood of Kay's Flight Rising Tools"
+					"content": "Documentation for the FRjs javascript library."
 				}
 			]
 		}

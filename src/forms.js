@@ -2,10 +2,10 @@
  * Defines extensions of the native HTML `<select>` element which self-populate with different kinds of Flight Rising data. Available elements are registered as `fr-eyes`, `fr-colours`, `fr-breeds`, and `fr-genes`. See the tutorials for usage.
  *
  * Customized Built-in Elements are not natively supported in Safari, but the custom dropdowns should work in Safari anyway because the module loads a polyfill if CBIE support is not detected.
- * @module fr/forms
+ * @module FRjs/forms
  * @version 0.0.2
  * @tutorial 02-fr-forms
- * @requires module:fr/data
+ * @requires module:FRjs/data
  */
 
 // Polyfill customized built-in elements for safari
@@ -175,7 +175,7 @@ class ColourSelect extends HTMLSelectElement {
 
 /** A customized `<select>` element which self-populates with options representing all of Flight Rising's breeds, separated into Modern and Ancient `<optgroup>`s which are each ordered alphabetically. Registered as `fr-breeds`.
  *
- * These elements are the publishers of a Pub/Sub relationship with {@link module:fr/forms~GeneSelect GeneSelect}s.
+ * These elements are the publishers of a Pub/Sub relationship with {@link module:FRjs/forms~GeneSelect GeneSelect}s.
  *
  * @tutorial 05-breedselect */
 class BreedSelect extends HTMLSelectElement {
@@ -227,7 +227,7 @@ class BreedSelect extends HTMLSelectElement {
 
 /** A customized `<select>` element which self-populates with options representing Flight Rising's genes, ordered alphabetically. Registered as `fr-genes`.
  *
- * These elements can optionally be the subscribers in a Pub/Sub relationship with {@link module:fr/forms~BreedSelect BreedSelect}s.
+ * These elements can optionally be the subscribers in a Pub/Sub relationship with {@link module:FRjs/forms~BreedSelect BreedSelect}s.
  *
  * @tutorial 06-geneselect */
 class GeneSelect extends HTMLSelectElement {

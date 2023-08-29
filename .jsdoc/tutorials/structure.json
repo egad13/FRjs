@@ -1,20 +1,17 @@
 {
-	"01-fr-data": {
-		"title": "Getting Started: fr/data"
-	},
 	"02-fr-forms": {
-		"title": "Getting Started: fr/forms"
+		"title": "FRjs/forms: Getting Started"
 	},
 	"03-eyeselect": {
-		"title": "fr/forms: Using Eye Type Dropdowns"
+		"title": "FRjs/forms: Eye Type Dropdowns"
 	},
 	"04-colourselect": {
-		"title": "fr/forms: Using Colour Dropdowns"
+		"title": "FRjs/forms: Colour Dropdowns"
 	},
 	"05-breedselect": {
-		"title": "fr/forms: Using Breed Dropdowns"
+		"title": "FRjs/forms: Breed Dropdowns"
 	},
 	"06-geneselect": {
-		"title": "fr/forms: Using Gene Dropdowns"
+		"title": "FRjs/forms: Gene Dropdowns"
 	}
 }
