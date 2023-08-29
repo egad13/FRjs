@@ -55,7 +55,9 @@ jobs:
         run: |
           git config --local user.name github-actions[bot]
           git config --local user.email github-actions[bot]@github.com
-          git commit -a -m "chore: Minify source, generate docs"
+          git add -f dist/*
+          git add -f docs/*
+          git commit -m "chore: Minify source, generate docs"
           git push
 
       - name: Setup Pages
