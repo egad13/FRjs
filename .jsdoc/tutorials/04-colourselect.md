@@ -1,15 +1,13 @@
 
-The {@link module:fr/forms fr/forms} module creates several extensions to the `<select>` tag/`HTMLSelectElement` class which let you place self-populating dropdowns in your HTML markup, or easily create them in Javascript.
+The {@link module:FRjs/forms FRjs/forms} module creates several extensions to the `<select>` tag/`HTMLSelectElement` class which let you place self-populating dropdowns in your HTML markup, or easily create them in Javascript.
 
 For basic setup of the module, see {@tutorial 02-fr-forms}.
 
-This tutorial covers how to use the Automatic Colour Dropdowns. (In the source code, this is the {@link module:fr/forms~ColourSelect ColourSelect} class.)
-
-A dropdown of this type automatically populates itself with options representing Flight Rising's colours, in on-site colour wheel order. The options will be styled similarly to how they are on-site, with coloured backgrounds.
+This tutorial covers how to use the Automatic Colour Dropdowns. A dropdown of this type automatically populates itself with options representing Flight Rising's colours, in on-site colour wheel order. The options will be styled similarly to how they are on-site, with coloured backgrounds.
 
 ## Basic Usage
 
-After importing the `fr/forms` module, there are two methods for creating a colour dropdown.
+After loading the FRjs/forms module, there are two methods for creating a colour dropdown.
 
 ### In HTML
 
@@ -33,9 +31,9 @@ document.body.append(colourDropdown);
 <p>When working with any of these custom dropdowns in javascript, be aware that they'll only self-populate after two things have happened:</p>
 <ol>
     <li>The element is attached to the document.</li>
-    <li>The <code>fr/forms</code> module has run.</li>
+    <li>The <code>FRjs/forms</code> module has run.</li>
 </ol>
-<p>If you need to access the self-populated options in your code, you must either wait until the <code>DOMContentLoaded</code> event has fired, or do so in a script which imports <code>fr/forms</code>.</p>
+<p>If you need to access the self-populated options in your code, you must either wait until the <code>DOMContentLoaded</code> event has fired, or do so in a script which **statically** imports FRjs/forms.</p>
 </div>
 
 ## Custom Attributes

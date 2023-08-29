@@ -1,17 +1,15 @@
 
-The {@link module:fr/forms fr/forms} module creates several extensions to the `<select>` tag/`HTMLSelectElement` class which let you place self-populating dropdowns in your HTML markup, or easily create them in Javascript.
+The {@link module:FRjs/forms FRjs/forms} module creates several extensions to the `<select>` tag/`HTMLSelectElement` class which let you place self-populating dropdowns in your HTML markup, or easily create them in Javascript.
 
 For basic setup of the module, see {@tutorial 02-fr-forms}.
 
-This tutorial covers how to use the Automatic Breed Dropdowns. (In the source code, this is the {@link module:fr/forms~BreedSelect BreedSelect} class.)
+This tutorial covers how to use the Automatic Breed Dropdowns. A dropdown of this type automatically populates itself with options representing Flight Rising's breeds. The options will be separated into Modern and Ancient `<optgroup>`s, and ordered alphabetically.
 
-A dropdown of this type automatically populates itself with options representing Flight Rising's breeds. The options will be separated into Modern and Ancient `<optgroup>`s, and ordered alphabetically.
-
-Any {@link module:fr/forms~GeneSelect GeneSelect} can be set to watch a breed dropdown for changes, and update itself based on the currently selected breed. For more information on how to do that, see {@tutorial 06-geneselect}.
+Any gene dropdown can be set to watch a breed dropdown for changes, and update itself based on the currently selected breed. For more information on how to do that, see {@tutorial 06-geneselect}.
 
 ## Basic Usage
 
-After importing the `fr/forms` module, there are two methods for creating a breed dropdown.
+After loading the FRjs/forms module, there are two methods for creating a breed dropdown.
 
 ### In HTML
 
@@ -35,10 +33,10 @@ document.body.append(geneDropdown);
 
 A breed dropdown will only self-populate after two things have happened:
 1. The element is attached to the document.
-1. The `fr/forms` module has run.
+1. The `FRjs/forms` module has run.
 
 <p class="note">
-If you need to access the self-populated options in javascript, you must either wait until the <code>DOMContentLoaded</code> event has fired, or do so in a script which imports <code>fr/forms</code>.
+If you need to access the self-populated options in javascript, you must either wait until the <code>DOMContentLoaded</code> event has fired, or do so in a script which statically imports FRjs/forms.
 </p>
 
 When being attached to the document, when its selected value is changed, and when its `change` event is fired via javascript, a breed dropdown sends a message which will notify any gene dropdowns linked to it of its new value and tell them to repopulate themselves.

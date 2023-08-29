@@ -1,5 +1,5 @@
 
-The {@link module:fr/forms fr/forms} module creates custom dropdown elements that automatically populate themselves with Flight Rising data. Just add an attribute to a `<select>` element your HTML markup or pass a special option in javascript and you can quickly and easily create dropdowns for Flight Rising's breeds, eye types, colours, and genes!
+The {@link module:FRjs/forms FRjs/forms} module creates custom dropdown elements that automatically populate themselves with Flight Rising data. Just add an attribute to a `<select>` element your HTML markup or pass a special option in javascript and you can quickly and easily create dropdowns for Flight Rising's breeds, eye types, colours, and genes!
 
 Since these are *extensions* of the native `<select>` tag, they look and function just like a regular dropdown. Any CSS styling that affects `<select>`s will also affect these custom dropdowns. You also don't need to do anything extra to make them accessible; they inherit all the same accessibility features/properties a regular dropdown would.
 
@@ -12,42 +12,41 @@ There are four custom dropdowns available in this module:
 1. **Breeds** (`"fr-breeds"`): Auto-populates options for all of Flight Rising's breeds, separated into Modern and Ancient `<optgroup>`s and ordered alphabetically. See {@tutorial 05-breedselect} for details.
 1. **Genes** (`"fr-genes"`): Auto-populates options for all Flight Rising genes in a specific slot (primary/secondary/tertiary). Can be optionally restricted to show only genes available to a specific breed, or linked to a breed dropdown! See {@tutorial 06-geneselect} for details.
 
-## Usage
-
-### 0. Set up your environment
-
-This module requires the {@link module:fr/data fr/data} module. Make sure that module, ie `data.js`, is in the same directory as this module, `forms.js`.
-
-`fr/forms` is an ES6 module. This means that it will work when the file is being delivered by a server, but NOT if you just open an html file in your browser with the `file:///` protocol.
-
-So, if you're testing your project locally (which you probably should), you'll need to run an HTTP server. This is a lot easier than it sounds!
-
-If you have python installed, open a command line terminal in the base folder of your project. You can either run the command `python -m http.server` to serve a basic HTTP server, or you can run [this python script I wrote that serves a non-caching HTTP server](https://gist.github.com/egad13/456511ef2cd80e2fa60baee6da41f8ce).
-
-**Keep the terminal window open**. You can now go to the URL `http://localhost:8000/` in your browser, and you should see the contents of the `index.html` in the folder you started up the script.
-
-If you want to try another method of running an HTTP server, [MDN has a guide about it](https://developer.mozilla.org/en-US/docs/Learn/Common_questions/Tools_and_setup/set_up_a_local_testing_server).
+## Basic Usage
 
 ### 1. Load the module
 
-The best way to do this is at the top of your HTML's `<head>` tag:
+FRjs/forms has no exports; the module registers its custom elements just from being loaded on the page at all, and doesn't have to run at any particular time to upgrade the `<select>`s you mark.
+
+The recommended way to load the module is to add it as either its own script tag at the top of your page's `<head>`, or as a dynamic import at the top of your main script file.
+
 ```html
 <head>
-    <script type="module" src="path/to/fr/forms.js"></script>
+    <script type="module" src="path/to/FRjs/forms.js"></script>
+
+    <!-- OR -->
+
+    <script type="module">
+        //main page script
+        import("FRjs/forms.js");
+    </script>
     <!-- ...etc... -->
 ```
 
-For potential performance improvement in Firefox and chromium-based browsers, consider preloading `fr/forms` and it's dependencies:
+For a potential performance improvement in Firefox and chromium-based browsers, consider preloading FRjs/data and FRjs/forms:
 ```html
 <head>
-    <link rel="modulepreload" href="path/to/fr/data.js" />
-    <link rel="modulepreload" href="path/to/fr/forms.js" />
+    <link rel="modulepreload" href="path/to/FRjs/data.js" />
+    <link rel="modulepreload" href="path/to/FRjs/forms.js" />
 
-    <script type="module" src="path/to/fr/forms.js"></script>
     <!-- ...etc... -->
 ```
 
-Alternatively, you can use the `import` statement or the `import()` function in a script to load it, but in most cases this is not recommended.
+You should also consider using jsDelivr to bundle FRjs/data and FRjs/forms together to save on time and HTTP requests.
+```bash
+# Packages 'data' and 'forms' module into one file. Consider adding it to your import map.
+https://cdn.jsdelivr.net/combine/gh/egad13/FRjs@1/js/data.min.js,gh/egad13/FRjs@1/js/forms.min.js
+```
 
 ### 2. Create your Dropdowns
 
@@ -73,20 +72,20 @@ document.body.append(colourDropdown);
 <p>When working with any of these custom dropdowns in javascript, be aware that they'll only self-populate after two things have happened:</p>
 <ol>
     <li>The element is attached to the document.</li>
-    <li>The <code>fr/forms</code> module has run.</li>
+    <li>The FRjs/forms module has run.</li>
 </ol>
-<p>If you need to access the self-populated options in your code, you must either wait until the <code>DOMContentLoaded</code> event has fired, or do so in a script which imports <code>fr/forms</code>.</p>
+<p>If you need to access the self-populated options in your code, you must either wait until after the <code>DOMContentLoaded</code> event has fired, or do so in a script which statically imports FRjs/forms.</p>
 </div>
 
-## Passing Data to `fr/data`
+## Passing Data to `FRjs/data`
 
-These custom dropdowns are made to work directly with the `fr/data` module. You can use the value of any of these custom dropdowns as an index in an appropriate `fr/data` array, or pass them to any `fr/data` function parameter that asks for the index of a breed, gene, eye type, or colour, and it'll just work.
+These custom dropdowns are made to work directly with the `FRjs/data` module. You can use the value of any of these custom dropdowns as an index in an appropriate `FRjs/data` array, or pass them to any `FRjs/data` function parameter that asks for the index of a breed, gene, eye type, or colour, and it'll just work.
 
 For an example, here's a small web page that outputs the range of colours between two colours that a user selects:
 ```html
 <html>
 <head>
-    <script type="module" src="path/to/fr/forms.js"></script>
+    <script type="module" src="path/to/FRjs/forms.js"></script>
     <script type="module" src="example.js"></script>
 </head>
 <body>
@@ -105,7 +104,7 @@ For an example, here's a small web page that outputs the range of colours betwee
 ```
 ```js
 // example.js
-import * as FRdata from "path/to/fr/data.js";
+import * as FRdata from "path/to/FRjs/data.js";
 
 const colour1 = document.querySelector("#colour-1"),
     colour2 = document.querySelector("#colour-2"),
@@ -135,7 +134,7 @@ However, if you're creating them with scripts, *they do not have an `is` attribu
 
 ## More Information
 
-For details on how each of the custom dropdowns work, check out the Sub-Tutorials.
+For details on how each of the custom dropdowns work, check out the individual tutorials for each of them linked in the first section of this tutorial.
 
 This module uses Customized Built-in Elements to do its job. If you want to know more about how that works, check out [MDN's guide](https://developer.mozilla.org/en-US/docs/Web/API/Web_Components/Using_custom_elements).
 

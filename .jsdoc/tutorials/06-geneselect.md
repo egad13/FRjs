@@ -1,15 +1,15 @@
 
-The {@link module:fr/forms fr/forms} module creates several extensions to the `<select>` tag/`HTMLSelectElement` class which let you place self-populating dropdowns in your HTML markup, or easily create them in Javascript.
+The {@link module:FRjs/forms FRjs/forms} module creates several extensions to the `<select>` tag/`HTMLSelectElement` class which let you place self-populating dropdowns in your HTML markup, or easily create them in Javascript.
 
 For basic setup of the module, see {@tutorial 02-fr-forms}.
 
-This tutorial covers how to use the Automatic Gene Dropdowns. (In the source code, this is the {@link module:fr/forms~GeneSelect GeneSelect} class.)
+This tutorial covers how to use the Automatic Gene Dropdowns. (In the source code, this is the {@link module:FRjs/forms~GeneSelect GeneSelect} class.)
 
-A dropdown of this type automatically populates itself with options representing Flight Rising's genes. By setting a few attributes, you can add constraints on which slot (primary/secondary/tertiary) and breed to display genes for. You can also link it to a {@link module:fr/forms~BreedSelect BreedSelect} to cause it to dynamically repopulate to reflect the currently chosen breed.
+A dropdown of this type automatically populates itself with options representing Flight Rising's genes. By setting a few attributes, you can add constraints on which slot (primary/secondary/tertiary) and breed to display genes for. You can also link it to a {@link module:FRjs/forms~BreedSelect BreedSelect} to cause it to dynamically repopulate to reflect the currently chosen breed.
 
 ## Basic Usage
 
-After importing the `fr/forms` module, there are two methods for creating a gene dropdown.
+After loading the FRjs/forms module, there are two methods for creating a gene dropdown.
 
 ### In HTML
 
@@ -33,9 +33,9 @@ document.body.append(geneDropdown);
 <p>When working with any of these custom dropdowns in javascript, be aware that they'll only self-populate after two things have happened:</p>
 <ol>
     <li>The element is attached to the document.</li>
-    <li>The <code>fr/forms</code> module has run.</li>
+    <li>The <code>FRjs/forms</code> module has run.</li>
 </ol>
-<p>If you need to access the self-populated options in your code, you must either wait until the <code>DOMContentLoaded</code> event has fired, or do so in a script which imports <code>fr/forms</code>.</p>
+<p>If you need to access the self-populated options in your code, you must either wait until the <code>DOMContentLoaded</code> event has fired, or do so in a script which imports <code>FRjs/forms</code>.</p>
 </div>
 
 ## Custom Attributes
@@ -69,14 +69,14 @@ Gene dropdowns have the ability to automatically repopulate themselves when the 
 
 The following events will cause a gene dropdown to repopulate itself:
 
-- It gets attached to the document. *(when being created in HTML, or appended with a script)*
+- It gets attached to the document. *(i.e. when being created in HTML, or appended with a script)*
 - The `slot` attribute changes while it's attached to the document.
 - The `breed` attribute changes to indicate a breed dropdown which is attached to the document, while the gene dropdown is already attached to the document.
-- The `breed-name` attribute changes while it's attached to the document, provided the `breed` attribute is NOT set.
-- Its linked breed dropdown, which is currently attached to the document, fires a `change` event while the gene dropdown is already attached to the document.
-- Its linked breed dropdown, which was not yet attached to the document, *gets* attached to the document while the gene dropdown is already attached to the document.
+- The `breed-name` attribute changes while it's attached to the document (provided the `breed` attribute is NOT set).
+- Its linked breed dropdown, which is currently attached to the document, fires a `change` event (provided the gene dropdown is already attached to the document).
+- Its linked breed dropdown, which was not yet attached to the document, *gets* attached to the document (provided the gene dropdown is already attached to the document).
 
-In short, if something about it changes while it's on the page, it will generate new options.
+In short, if something about it or relevant to it changes while it's on the page, it will generate new options.
 
 For this reason, the simplest and most performant way to place constraints on a gene dropdown, including linking it to a breed dropdown, is to set its attributes in the HTML markup upfront.
 
