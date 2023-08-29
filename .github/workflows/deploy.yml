@@ -1,0 +1,113 @@
+
+name: Build, Deploy Docs, Release
+
+on:
+  push:
+    branches: ["main"]
+    paths: ["src/**", ".jsdoc/**", "README.md"]
+
+  workflow_dispatch: # Allow run from Actions tab
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "deployment"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Minify Source
+        uses: docker://devatherock/minify-js:2.0.0
+        with:
+          directory: "./src"
+          output: "./dist"
+          add_suffix: true
+
+      - name: Generate Docs
+        uses: andstor/jsdoc-action@v1
+        with:
+          source_dir: ./src
+          recurse: true
+          output_dir: ./docs
+          front_page: ./README.md
+          template: clean-jsdoc-theme
+          config_file: ./.jsdoc/conf.json
+
+      - name: Push Changes
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add .
+          git commit -m "chore: Minify source, generate docs"
+          git push
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+      - name: Build with Jekyll
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./docs
+          destination: ./_site
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v2
+      - name: Upload Dist artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist-artifact
+          path: dist
+          retention-days: 5
+          if-no-files-found: error
+
+
+  deploy-docs:
+    name: Deploy Docs to GitHub Pages
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v2
+
+
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Create Release
+        id: release
+        uses: dev-build-deploy/release-me@v0
+        with:
+          token: ${{ github.token }}
+          versioning: semver
+          config: .github/release.yml
+          artifacts: dist-artifact
+
+      - if: steps.release.outputs.created
+        id: split-ver
+        env:
+          VER: ${{ fromJSON(steps.release.outputs.release).tag }}
+        run: |
+          echo "::set-output name=major::${VER%%.*}"
+          echo "::set-output name=minor::${VER%.*}"
+
+      - name: Purge jsDelivr Cache
+        if: steps.release.outputs.created
+        uses: gacts/purge-jsdelivr-cache@v1
+        with:
+          url: |
+            https://cdn.jsdelivr.net/gh/${{ github.repository }}@${{ steps.split-ver.outputs.major }}/dist/
+            https://cdn.jsdelivr.net/gh/${{ github.repository }}@${{ steps.split-ver.outputs.minor }}/dist/

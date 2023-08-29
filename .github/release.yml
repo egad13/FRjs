@@ -1,0 +1,10 @@
+changelog:
+  categories:
+    - title: "💥 Breaking Changes"
+      increment: ["MAJOR"]
+    - title: "✨ New Features"
+      increment: ["MINOR"]
+    - title: "🐛 Patches"
+      increment: ["PATCH"]
+    - title: "📚 Documentation"
+      types: ["docs"]
