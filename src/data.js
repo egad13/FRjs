@@ -549,6 +549,7 @@ export const GENES = deepFreeze({
 		gene("Firebreather", LIMITED, true, [ABERRATION]),
 		gene("Firefly", LIMITED, true, [ABERRATION, VEILSPUN]),
 		gene("Fishbone", UNCOMMON, false, [SANDSURGE]),
+		gene("Flameforger", LIMITED, false, [ABERRATION, BANESCALE]),
 		gene("Flecks", UNCOMMON, true, [ABERRATION, UNDERTIDE, VEILSPUN]),
 		gene("Flutter", LIMITED, false, [AETHER]),
 		gene("Frills", RARE, false, [ABERRATION]),
