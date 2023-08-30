@@ -120,10 +120,17 @@ jobs:
           echo "major=${VER%%.*}" >> $GITHUB_OUTPUT
           echo "minor=${VER%.*}" >> $GITHUB_OUTPUT
 
+      # Need to find a way to loop this over the dist directory for *.js files...
       - name: Purge jsDelivr Cache
         if: steps.release.outputs.created
         uses: gacts/purge-jsdelivr-cache@v1
         with:
           url: |
-            https://cdn.jsdelivr.net/gh/${{ github.repository }}@${{ steps.split-ver.outputs.major }}/dist/
-            https://cdn.jsdelivr.net/gh/${{ github.repository }}@${{ steps.split-ver.outputs.minor }}/dist/
+            https://cdn.jsdelivr.net/gh/${{ github.repository }}@${{ steps.split-ver.outputs.major }}/dist/data.js
+            https://cdn.jsdelivr.net/gh/${{ github.repository }}@${{ steps.split-ver.outputs.major }}/dist/data.min.js
+            https://cdn.jsdelivr.net/gh/${{ github.repository }}@${{ steps.split-ver.outputs.major }}/dist/forms.js
+            https://cdn.jsdelivr.net/gh/${{ github.repository }}@${{ steps.split-ver.outputs.major }}/dist/forms.min.js
+            https://cdn.jsdelivr.net/gh/${{ github.repository }}@${{ steps.split-ver.outputs.minor }}/dist/data.js
+            https://cdn.jsdelivr.net/gh/${{ github.repository }}@${{ steps.split-ver.outputs.minor }}/dist/forms.js
+            https://cdn.jsdelivr.net/gh/${{ github.repository }}@${{ steps.split-ver.outputs.minor }}/dist/data.min.js
+            https://cdn.jsdelivr.net/gh/${{ github.repository }}@${{ steps.split-ver.outputs.minor }}/dist/forms.min.js
