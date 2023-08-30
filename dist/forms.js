@@ -255,7 +255,7 @@ class GeneSelect extends HTMLSelectElement {
 			this.#resubscribe(newValue);
 		} else if (name === "breed-name") {
 			this.#breedName = newValue?.toLowerCase();
-			if (!this.#breedSelectID) { this.#repopulate(); }
+			if (!this.#breedSelectID) { this.#repopulate(this.#breedName); }
 		} else if (name === "slot") {
 			this.#slot = newValue ?? "primary";
 			this.#repopulate();
