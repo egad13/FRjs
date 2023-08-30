@@ -230,11 +230,10 @@ export function* genesForBreed(slot, breed) {
 	if (!["primary", "secondary", "tertiary"].includes(slot)) {
 		return;
 	}
-	const isModern = BREEDS[breed]?.type === MODERN,
-		name = BREEDS[breed]?.name;
+	const isModern = BREEDS[breed]?.type === MODERN;
 	for (let i = 0; i < GENES[slot].length; i++) {
 		const gene = GENES[slot][i];
-		if (anyBreed || (isModern && gene.modern) || gene.ancient.includes(name)) {
+		if (anyBreed || (isModern && gene.modern) || gene.ancient.includes(parseInt(breed))) {
 			yield { index: i, ...gene };
 		}
 	}
