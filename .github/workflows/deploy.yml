@@ -51,7 +51,7 @@ jobs:
           rm -rf "${output_path}"
           fi
           echo "uglifying ${f} > ${output_path}"
-          npx uglifyjs -c -m --mangle-props regex="/^#/" --module --source-map "url='${output_path}.map'" -o "${output_path}" -- "${output}${filename}.${extension}"
+          npx uglifyjs -c -m --mangle-props regex="/^#/" --module --source-map "url='${f}.map'" -o "${output_path}" -- "${f}"
           done
 
       - name: Generate Docs
