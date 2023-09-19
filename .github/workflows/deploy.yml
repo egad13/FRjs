@@ -39,19 +39,19 @@ jobs:
           mkdir -p dist
           cp -r src/* dist/
           npm i uglify-js@3.17.4 --save-dev
-          for f in `find dist -name "*.js"`
-          do
-          directory=$f
-          basename=$(basename $directory)
-          extension="${basename##*.}"
-          filename="${basename%.*}"
-          output="${directory%/*}/"
-          output_path="${output}${filename}.min.${extension}"
-          if [ "${output_path}" != "${directory}" ]; then
-          rm -rf "${output_path}"
-          fi
-          echo "uglifying ${f} > ${output_path}"
-          npx uglifyjs -c -m --mangle-props regex="/^#/" --module --source-map "url='${f}.map'" -o "${output_path}" -- "${f}"
+          for f in `find dist -name "*.js"`; do
+            directory=$f
+            basename=$(basename $directory)
+            extension="${basename##*.}"
+            filename="${basename%.*}"
+            output="${directory%/*}/"
+            output_path="${output}${filename}.min.${extension}"
+            if [ "${output_path}" != "${directory}" ]; then
+              rm -rf "${output_path}"
+            fi
+            echo "uglifying ${f} > ${output_path}"
+            sed -i -En "s/(from "[.]{1,2}\/[A-z0-9-_\/]+)(\.js)/\1\.min\2/g" $f
+            npx uglifyjs -c -m --mangle-props regex="/^#/" --module --source-map "url='${f}.map'" -o "${output_path}" -- "${f}"
           done
 
       - name: Generate Docs
