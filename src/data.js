@@ -364,7 +364,7 @@ export const BREEDS = deepFreeze([
 ]);
 
 // Destructuring ancient breed names offers readability and typo prevention when I have
-// to edit genes, and a much smaller file size when aggresively minified.
+// to edit genes, and a much smaller file size when aggressively minified.
 const [
 	ABERRATION,
 	AETHER,
@@ -429,7 +429,7 @@ export const GENES = deepFreeze({
 		gene("Piebald", COMMON, true, [AETHER, GAOLER, SANDSURGE]),
 		gene("Pinstripe", LIMITED, true, [ABERRATION, BANESCALE, GAOLER, SANDSURGE, UNDERTIDE]),
 		gene("Poison", LIMITED, true, [ABERRATION, BANESCALE, GAOLER, UNDERTIDE, VEILSPUN]),
-		gene("Python", UNCOMMON, true, [AETHER]),
+		gene("Python", LIMITED, true, [AETHER]),
 		gene("Ragged", UNCOMMON, false, [BANESCALE]),
 		gene("Rattlesnake", UNCOMMON, false, [SANDSURGE]),
 		gene("Ribbon", UNCOMMON, true, [ABERRATION, BANESCALE, GAOLER, UNDERTIDE]),
@@ -488,7 +488,7 @@ export const GENES = deepFreeze({
 		gene("Loop", UNCOMMON, false, [VEILSPUN]),
 		gene("Marbled", COMMON, true, [ABERRATION, GAOLER, SANDSURGE, UNDERTIDE]),
 		gene("Marlin", LIMITED, false, [SANDSURGE]),
-		gene("Morph", UNCOMMON, true, [AETHER]),
+		gene("Morph", LIMITED, true, [AETHER]),
 		gene("Mottle", COMMON, false, [BANESCALE]),
 		gene("Myrid", LIMITED, true, [ABERRATION, AETHER, SANDSURGE, UNDERTIDE]),
 		gene("Noxtide", UNCOMMON, true, [ABERRATION, AETHER, SANDSURGE, UNDERTIDE]),
@@ -549,7 +549,7 @@ export const GENES = deepFreeze({
 		gene("Firefly", LIMITED, true, [ABERRATION, VEILSPUN]),
 		gene("Fishbone", UNCOMMON, false, [SANDSURGE]),
 		gene("Flameforger", LIMITED, false, [ABERRATION, BANESCALE]),
-		gene("Flecks", UNCOMMON, true, [ABERRATION, UNDERTIDE, VEILSPUN]),
+		gene("Flecks", LIMITED, true, [ABERRATION, UNDERTIDE, VEILSPUN]),
 		gene("Flutter", LIMITED, false, [AETHER]),
 		gene("Frills", RARE, false, [ABERRATION]),
 		gene("Gembond", UNCOMMON, true, [AETHER, UNDERTIDE]),
