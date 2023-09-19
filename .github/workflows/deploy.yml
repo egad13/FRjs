@@ -50,7 +50,7 @@ jobs:
               rm -rf "${output_path}"
             fi
             echo "uglifying ${f} > ${output_path}"
-            sed -i -En "s/(from "[.]{1,2}\/[A-z0-9-_\/]+)(\.js)/\1\.min\2/g" $f
+            sed -i -E 's/^(import.*from "\.{1,2}\/.*)\.js/\1\.min\.js/g' $f
             npx uglifyjs -c -m --mangle-props regex="/^#/" --module --source-map "url='${f}.map'" -o "${output_path}" -- "${f}"
           done
 
