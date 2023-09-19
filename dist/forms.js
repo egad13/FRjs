@@ -20,7 +20,7 @@ if (!supportsCBI) {
 	await import("https://unpkg.com/@ungap/custom-elements/es.js");
 }
 
-import * as FR from "./data.js";
+import * as FR from "./data.min.js";
 
 /** The message bus in a publisher-subscriber system.
  * @private */
