@@ -5,7 +5,6 @@ on:
   push:
     branches: ["main"]
     paths:
-      - ".github/workflows/**"
       - "src/**"
       - ".jsdoc/**"
       - "README.md"
@@ -23,7 +22,7 @@ concurrency:
 
 jobs:
   build:
-    name: Build
+    name: Build, Release
     runs-on: ubuntu-latest
     steps:
       - name: Checkout main
@@ -34,24 +33,22 @@ jobs:
       # Quick n dirty custom minify "action", because the actions available on the marketplace aren't quite what I need. Maybe I ought to roll my own minify action?
       - name: Minify Source
         run: |
-          rm -rf docs
           rm -rf dist
           mkdir -p dist
           cp -r src/* dist/
           npm i uglify-js@3.17.4 --save-dev
-          for f in `find dist -name "*.js"`; do
-            directory=$f
-            basename=$(basename $directory)
+          for f in `find dist -name "*.js" -type f`; do
+            basename=$(basename $f)
             extension="${basename##*.}"
             filename="${basename%.*}"
-            output="${directory%/*}/"
+            output="${f%/*}/"
             output_path="${output}${filename}.min.${extension}"
-            if [ "${output_path}" != "${directory}" ]; then
+            if [ "${output_path}" != "${f}" ]; then
               rm -rf "${output_path}"
             fi
             echo "uglifying ${f} > ${output_path}"
             sed -i -E 's/^(import.*from "\.{1,2}\/.*)\.js/\1\.min\.js/g' $f
-            npx uglifyjs -c -m --mangle-props regex="/^#/" --module --source-map "url='${f}.map'" -o "${output_path}" -- "${f}"
+            npx uglifyjs -c -m --mangle-props regex="/^#/" --module --source-map "url='${basename}.map'" -o "${output_path}" -- "${f}"
           done
 
       - name: Generate Docs
@@ -83,27 +80,6 @@ jobs:
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v2
 
-
-  deploy-docs:
-    name: Deploy Docs to GitHub Pages
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v2
-
-
-  release:
-    name: Create GitHub Release
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Checkout main
-        uses: actions/checkout@v3
-
       - name: Create Release
         id: release
         uses: dev-build-deploy/release-me@v0
@@ -112,25 +88,38 @@ jobs:
           versioning: semver
           config: .github/release.yml
 
-      - if: steps.release.outputs.created
-        id: split-ver
+      - name: Determine URLs to Purge
+        id: purge_urls
+        if: steps.release.outputs.created
         env:
           VER: ${{ fromJSON(steps.release.outputs.release).tag_name }}
         run: |
-          echo "major=${VER%%.*}" >> $GITHUB_OUTPUT
-          echo "minor=${VER%.*}" >> $GITHUB_OUTPUT
+          baseUrl="https://cdn.jsdelivr.net/gh/${{ github.repository }}@"
+          major="${VER%%.*}"
+          minor="${VER%.*}"
+          urls=""
+          for f in `git diff ${{ github.sha }} --name-only dist/**.js`; do
+            urls+="${baseUrl}${major}/${f},"
+            urls+="${baseUrl}${minor}/${f},"
+            urls+="${baseUrl}latest/${f},"
+          done
+          echo "${urls}"
+          echo "urls=${urls%,*}" >> $GITHUB_OUTPUT
 
-      # Need to find a way to loop this over the dist directory for *.js files...
       - name: Purge jsDelivr Cache
-        if: steps.release.outputs.created
-        uses: gacts/purge-jsdelivr-cache@v1
+        if: success() && steps.release.outputs.created
+        uses: egad13/purge-jsdelivr-cache@v1
         with:
-          url: |
-            https://cdn.jsdelivr.net/gh/${{ github.repository }}@${{ steps.split-ver.outputs.major }}/dist/data.js
-            https://cdn.jsdelivr.net/gh/${{ github.repository }}@${{ steps.split-ver.outputs.major }}/dist/data.min.js
-            https://cdn.jsdelivr.net/gh/${{ github.repository }}@${{ steps.split-ver.outputs.major }}/dist/forms.js
-            https://cdn.jsdelivr.net/gh/${{ github.repository }}@${{ steps.split-ver.outputs.major }}/dist/forms.min.js
-            https://cdn.jsdelivr.net/gh/${{ github.repository }}@${{ steps.split-ver.outputs.minor }}/dist/data.js
-            https://cdn.jsdelivr.net/gh/${{ github.repository }}@${{ steps.split-ver.outputs.minor }}/dist/forms.js
-            https://cdn.jsdelivr.net/gh/${{ github.repository }}@${{ steps.split-ver.outputs.minor }}/dist/data.min.js
-            https://cdn.jsdelivr.net/gh/${{ github.repository }}@${{ steps.split-ver.outputs.minor }}/dist/forms.min.js
+          url: ${{ steps.purge_urls.outputs.urls }}
+          attempts: 1
+
+  deploy-docs:
+    name: Deploy Docs to GitHub Pages
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v2
