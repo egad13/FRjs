@@ -610,7 +610,7 @@ export const GENES = deepFreeze({
 		gene("Weathered", LIMITED, false, [GAOLER]),
 		gene("Whiskers", UNCOMMON, false, [AETHER]),
 		gene("Wintercoat", UNCOMMON, false, [GAOLER]),
-		gene("Wish", RARE, false, [AETHER]),
+		gene("Wish", RARE, true, [AETHER]),
 		gene("Wraith", RARE, false, [BANESCALE])
 	]
 });
