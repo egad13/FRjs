@@ -581,6 +581,7 @@ export const GENES = deepFreeze({
 		gene("Pufferfish", UNCOMMON, false, [UNDERTIDE]),
 		gene("Remora", RARE, false, [UNDERTIDE]),
 		gene("Ringlets", UNCOMMON, true, [BANESCALE, GAOLER, UNDERTIDE]),
+		gene("Riot", LIMITED, false, [ABERRATION, GAOLER]),
 		gene("Runes", UNCOMMON, true, [GAOLER, UNDERTIDE, VEILSPUN]),
 		gene("Sailfin", RARE, false, [UNDERTIDE]),
 		gene("Scales", LIMITED, true, [ABERRATION, AETHER]),
@@ -609,7 +610,7 @@ export const GENES = deepFreeze({
 		gene("Weathered", LIMITED, false, [GAOLER]),
 		gene("Whiskers", UNCOMMON, false, [AETHER]),
 		gene("Wintercoat", UNCOMMON, false, [GAOLER]),
-		gene("Wish", RARE, false, [AETHER]),
+		gene("Wish", RARE, true, [AETHER]),
 		gene("Wraith", RARE, false, [BANESCALE])
 	]
 });
