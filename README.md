@@ -1,5 +1,9 @@
 # FRjs
 
+![Release version][badge_release_version]
+[![License][badge_license]][link_license]
+[![jsDelivr stats][badge_jsdelivr]][link_jsdelivr]
+
  A javascript library that makes developing external tools for [Flight Rising](https://www1.flightrising.com/) a breeze. Dragon attribute data, utility functions, and automatic form components.
 
 Available modules include:
@@ -9,7 +13,7 @@ Available modules include:
 
 ## Where do I get it?
 
-The most convenient way to get the library is to load it from the jsDeliver CDN. I recommend sticking to the latest major version, so that you get updates like gene expansions ASAP and avoid getting surprised by any breaking changes in major version releases.
+The most convenient way to get the library is to load it from the jsDelivr CDN. I recommend sticking to the latest major version, so that you get updates like gene expansions ASAP and avoid getting surprised by any breaking changes in major version releases.
 ```bash
 # Specific major version - recommended
 https://cdn.jsdelivr.net/gh/egad13/FRjs@1/dist/data.min.js
@@ -36,7 +40,7 @@ For easiest usage, and minimal headaches from long import statements and version
 	</script>
 ```
 
-If you want to self-host the library instead, you can [get the latest release from Github](https://github.com/egad13/FRjs/releases/latest). This is a convenient way to use the library in local development environments because it lets your IDE do code completion, among other things. However, this is not recommended for production environments, because you won't automatically receive the semi-frequent patches the data module gets to keep up with changes on Flight Rising.
+If you want to self-host the library instead, you can [get the latest release from Github](https://github.com/egad13/FRjs/releases/latest). This is a convenient way to use the library in local development environments. However, this is not recommended for production environments, because you won't automatically receive the semi-frequent patches the data module gets to keep up with changes on Flight Rising.
 
 ## How do I use it?
 
@@ -78,3 +82,28 @@ FRjs is made of ES6 modules. This means that it will work when the files are bei
 You can do this easily with python by running `python -m http.server` in the root folder of your project. (Or alternatively: [python script for a non-caching server](https://gist.github.com/egad13/456511ef2cd80e2fa60baee6da41f8ce).) Your project should be reachable in-browser from `http://localhost:8000/`; provided your local copies of FRjs are in that folder somewhere, they'll also be available for import under that domain.
 
 If you want to try another method of running an HTTP server, [MDN has a guide about it](https://developer.mozilla.org/en-US/docs/Learn/Common_questions/Tools_and_setup/set_up_a_local_testing_server).
+
+## Support
+
+[![Issues][badge_issues]][link_issues]
+[![Issues][badge_pulls]][link_pulls]
+
+If you find any errors in the data or the functioning of the code, or if you have any suggestions for new features, please [open an issue][link_create_issue] and let me know.
+
+## License
+
+This is open-source code licensed under the [MIT License][link_license].
+
+
+
+[badge_release_version]:https://img.shields.io/github/release/egad13/FRjs.svg?maxAge=30
+[badge_jsdelivr]:https://data.jsdelivr.com/v1/package/gh/egad13/FRjs/badge?style=rounded
+[badge_license]:https://img.shields.io/github/license/egad13/FRjs.svg?longCache=true
+[badge_issues]:https://img.shields.io/github/issues/egad13/FRjs.svg?maxAge=45
+[badge_pulls]:https://img.shields.io/github/issues-pr/egad13/FRjs.svg?maxAge=45
+
+[link_jsdelivr]:https://www.jsdelivr.com/package/gh/egad13/FRjs
+[link_license]:https://github.com/egad13/FRjs/blob/master/LICENSE
+[link_issues]:https://github.com/egad13/FRjs/issues
+[link_pulls]:https://github.com/egad13/FRjs/pulls
+[link_create_issue]:https://github.com/egad13/FRjs/issues/new
