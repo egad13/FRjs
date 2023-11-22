@@ -1,8 +1,6 @@
 # FRjs
 
-![Release version][badge_release_version]
-[![License][badge_license]][link_license]
-[![jsDelivr stats][badge_jsdelivr]][link_jsdelivr]
+![Release version][badge_release_version] [![License][badge_license]][link_license] [![jsDelivr stats][badge_jsdelivr]][link_jsdelivr]
 
  A javascript library that makes developing external tools for [Flight Rising](https://www1.flightrising.com/) a breeze. Dragon attribute data, utility functions, and automatic form components.
 
@@ -85,8 +83,7 @@ If you want to try another method of running an HTTP server, [MDN has a guide ab
 
 ## Support
 
-[![Issues][badge_issues]][link_issues]
-[![Issues][badge_pulls]][link_pulls]
+[![Issues][badge_issues]][link_issues] [![Issues][badge_pulls]][link_pulls]
 
 If you find any errors in the data or the functioning of the code, or if you have any suggestions for new features, please [open an issue][link_create_issue] and let me know.
 
