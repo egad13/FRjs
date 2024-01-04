@@ -620,7 +620,7 @@ export const GENES = deepFreeze({
 		gene("Tentacles", RARE, false, [UNDERTIDE]),
 		gene("Terracotta", COMMON, false, [AURABOA]),
 		gene("Thorns", UNCOMMON, false, [ABERRATION, AURABOA, VEILSPUN]),
-		gene("Thundercrack", LIMITED, false, [GAOLER]),
+		gene("Thundercrack", LIMITED, false, [GAOLER, SANDSURGE]),
 		gene("Thylacine", COMMON, true, [ABERRATION, GAOLER, SANDSURGE]),
 		gene("Topcoat", COMMON, false, [AURABOA]),
 		gene("Trimmings", COMMON, false, [BANESCALE]),
