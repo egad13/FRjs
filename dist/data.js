@@ -552,6 +552,7 @@ export const GENES = deepFreeze({
 		gene("Contour", COMMON, true, [ABERRATION, AETHER, AURABOA, BANESCALE, GAOLER]),
 		gene("Crackle", UNCOMMON, true, [AURABOA, BANESCALE, UNDERTIDE, VEILSPUN]),
 		gene("Crest", UNCOMMON, false, [AURABOA, SANDSURGE]),
+		gene("Crystalline", LIMITED, false, [AURABOA, GAOLER]),
 		gene("Darts", COMMON, false, [SANDSURGE]),
 		gene("Diaphanous", RARE, false, [VEILSPUN]),
 		gene("Fangs", UNCOMMON, false, [ABERRATION]),
