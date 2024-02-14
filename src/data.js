@@ -422,6 +422,7 @@ export const GENES = deepFreeze({
 		gene("Laced", COMMON, true, [AETHER, AURABOA, BANESCALE, GAOLER, VEILSPUN]),
 		gene("Leopard", COMMON, true, [ABERRATION, BANESCALE, GAOLER, VEILSPUN]),
 		gene("Lionfish", UNCOMMON, true, [ABERRATION, AETHER, SANDSURGE, UNDERTIDE]),
+		gene("Love", LIMITED, false, [AURABOA]),
 		gene("Marble", COMMON, false, [BANESCALE]),
 		gene("Metallic", RARE, true, [AETHER, AURABOA, BANESCALE]),
 		gene("Mochlus", UNCOMMON, false, [AURABOA]),
@@ -463,6 +464,7 @@ export const GENES = deepFreeze({
 		gene("Wrought", COMMON, false, [SANDSURGE])
 	],
 	secondary: [
+		gene("Affection", LIMITED, false, [AURABOA]),
 		gene("Alloy", RARE, true, [AETHER, AURABOA, BANESCALE]),
 		gene("Arowana", COMMON, false, [SANDSURGE]),
 		gene("Arrow", UNCOMMON, false, [BANESCALE]),
