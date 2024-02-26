@@ -301,8 +301,8 @@ export const Rarity = Object.freeze({ PLENTIFUL, COMMON, UNCOMMON, LIMITED, RARE
 // Creating objects repeatedly by returning literals from a function performs
 // well and saves a *lot* of file space.
 
-function eye(name, probability) {
-	return { name, probability };
+function eye(name, sid, probability) {
+	return { name, sid, probability };
 }
 function breed(name, type, rarity) {
 	return { name, type, rarity };
@@ -319,20 +319,24 @@ function nest(size, probability) {
 
 // Data ///////////////////////////////////////////////////////////////////////
 
-/** All possible eye types and their probabilities of occurring. Sorted by probability (descending). [Data Source]{@link https://flightrising.fandom.com/wiki/Eye_Types#Odds}
+/** All possible eye types, their ID on Flight Rising, and their probabilities of occurring through breeding. Sorted by probability (descending). [Data Source]{@link https://flightrising.fandom.com/wiki/Eye_Types#Odds}
  * @readonly
- * @type {Array<{name:string,probability:number}>} */
+ * @type {Array<{name:string,sid:number,probability:number}>} */
 export const EYES = deepFreeze([
-	eye("Common", 0.458),
-	eye("Uncommon", 0.242),
-	eye("Unusual", 0.139),
-	eye("Rare", 0.091),
-	eye("Bright", 0.022),
-	eye("Pastel", 0.021),
-	eye("Goat", 0.011),
-	eye("Faceted", 0.007),
-	eye("Primal", 0.005),
-	eye("Multi-Gaze", 0.004)
+	eye("Common", 0, 0.458),
+	eye("Uncommon", 1, 0.242),
+	eye("Unusual", 2, 0.139),
+	eye("Rare", 3, 0.091),
+	eye("Bright", 13, 0.022),
+	eye("Pastel", 12, 0.021),
+	eye("Goat", 9, 0.011),
+	eye("Faceted", 4, 0.007),
+	eye("Primal", 6, 0.005),
+	eye("Multi-Gaze", 5, 0.004),
+	eye("Glowing", 7, 0),
+	eye("Dark Sclera", 8, 0),
+	eye("Swirl", 10, 0),
+	eye("Innocent", 11, 0)
 ]);
 
 /** All available breeds, their rarities, and a type specifying if they're ancient or modern. Sorted by name (ascending). [Data Source]{@link https://www1.flightrising.com/wiki/wiki}
