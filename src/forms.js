@@ -94,6 +94,25 @@ const bgPubSub = new PubSub();
 class EyeSelect extends HTMLSelectElement {
 	#isPopulated = false;
 
+	static get observedAttributes() { return ["only-natural"] }
+
+	attributeChangedCallback(name) {
+		if (this.hasAttribute(name)) {
+			for (const op of this) {
+				if (op.dataset.notNat === "true") {
+					op.disabled = true;
+					op.style = "display: none;";
+				}
+			}
+		}
+		else {
+			for (const op of this) {
+				op.removeAttribute("disabled");
+				op.removeAttribute("style");
+			}
+		}
+	}
+
 	connectedCallback() {
 		if (this.#isPopulated) { return; }
 		this.#isPopulated = true;
@@ -101,6 +120,14 @@ class EyeSelect extends HTMLSelectElement {
 		for (const [i, elt] of FR.EYES.entries()) {
 			const op = document.createElement("option");
 			[op.value, op.text] = [i, elt.name];
+			if (elt.probability === 0) {
+				op.dataset.notNat = true;
+				if (this.hasAttribute("only-natural")) {
+					op.disabled = true;
+					op.style = "display: none;";
+				}
+			}
+
 			this.add(op);
 		}
 	}
