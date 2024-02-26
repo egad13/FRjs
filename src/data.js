@@ -304,8 +304,8 @@ export const Rarity = Object.freeze({ PLENTIFUL, COMMON, UNCOMMON, LIMITED, RARE
 function eye(name, sid, probability) {
 	return { name, sid, probability };
 }
-function breed(name, type, rarity) {
-	return { name, type, rarity };
+function breed(name, sid, type, rarity) {
+	return { name, sid, type, rarity };
 }
 function gene(name, rarity, modern, ancient) {
 	return { name, rarity, modern, ancient };
@@ -339,33 +339,33 @@ export const EYES = deepFreeze([
 	eye("Innocent", 11, 0)
 ]);
 
-/** All available breeds, their rarities, and a type specifying if they're ancient or modern. Sorted by name (ascending). [Data Source]{@link https://www1.flightrising.com/wiki/wiki}
+/** All available breeds, their ID on Flight Rising, their rarities, and a type specifying if they're ancient or modern. Sorted by name (ascending). [Data Source]{@link https://www1.flightrising.com/wiki/wiki}
  * @readonly
- * @type {Array<{name: string, type: module:FRjs/data.BreedType, rarity: module:FRjs/data.Rarity}>} */
+ * @type {Array<{name: string, sid: number, type: module:FRjs/data.BreedType, rarity: module:FRjs/data.Rarity}>} */
 export const BREEDS = deepFreeze([
-	breed("Aberration", ANCIENT, COMMON),
-	breed("Aether", ANCIENT, COMMON),
-	breed("Auraboa", ANCIENT, COMMON),
-	breed("Banescale", ANCIENT, COMMON),
-	breed("Bogsneak", MODERN, UNCOMMON),
-	breed("Coatl", MODERN, RARE),
-	breed("Fae", MODERN, PLENTIFUL),
-	breed("Gaoler", ANCIENT, COMMON),
-	breed("Guardian", MODERN, PLENTIFUL),
-	breed("Imperial", MODERN, LIMITED),
-	breed("Mirror", MODERN, PLENTIFUL),
-	breed("Nocturne", MODERN, LIMITED),
-	breed("Obelisk", MODERN, UNCOMMON),
-	breed("Pearlcatcher", MODERN, COMMON),
-	breed("Ridgeback", MODERN, UNCOMMON),
-	breed("Sandsurge", ANCIENT, COMMON),
-	breed("Skydancer", MODERN, UNCOMMON),
-	breed("Snapper", MODERN, COMMON),
-	breed("Spiral", MODERN, COMMON),
-	breed("Tundra", MODERN, PLENTIFUL),
-	breed("Undertide", ANCIENT, COMMON),
-	breed("Veilspun", ANCIENT, COMMON),
-	breed("Wildclaw", MODERN, RARE)
+	breed("Aberration", 20, ANCIENT, COMMON),
+	breed("Aether", 22, ANCIENT, COMMON),
+	breed("Auraboa", 24, ANCIENT, COMMON),
+	breed("Banescale", 18, ANCIENT, COMMON),
+	breed("Bogsneak", 14, MODERN, UNCOMMON),
+	breed("Coatl", 12, MODERN, RARE),
+	breed("Fae", 1, MODERN, PLENTIFUL),
+	breed("Gaoler", 17, ANCIENT, COMMON),
+	breed("Guardian", 2, MODERN, PLENTIFUL),
+	breed("Imperial", 8, MODERN, LIMITED),
+	breed("Mirror", 3, MODERN, PLENTIFUL),
+	breed("Nocturne", 11, MODERN, LIMITED),
+	breed("Obelisk", 15, MODERN, UNCOMMON),
+	breed("Pearlcatcher", 4, MODERN, COMMON),
+	breed("Ridgeback", 5, MODERN, UNCOMMON),
+	breed("Sandsurge", 23, ANCIENT, COMMON),
+	breed("Skydancer", 13, MODERN, UNCOMMON),
+	breed("Snapper", 9, MODERN, COMMON),
+	breed("Spiral", 7, MODERN, COMMON),
+	breed("Tundra", 6, MODERN, PLENTIFUL),
+	breed("Undertide", 21, ANCIENT, COMMON),
+	breed("Veilspun", 19, ANCIENT, COMMON),
+	breed("Wildclaw", 10, MODERN, RARE)
 ]);
 
 // Destructuring ancient breed names offers readability and typo prevention when I have
