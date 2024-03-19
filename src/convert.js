@@ -55,6 +55,28 @@ export class DragonTraits {
 	 * @returns {DragonTraits} Object containing all the traits defined in the given profile.
 	 */
 	static fromProfile(profile) {
+		// UNUSED MATCHES:
+		// 7 = age
+		// 9 = element
+		// cannot grab gender from this, because it's not present in a profile page copy-paste
+
+		const profileRegex = /Primary Gene\n(\w+)\n(\w+)\nSecondary Gene\n(\w+)\n(\w+)\nTertiary Gene\n(\w+)\n(\w+).*(?:Breed\n){2}(\w+)\n(\w+)\n(?:Eye Type\n){2}(\w+)\n(\w+)/s;
+		const matches = profileRegex.exec(profile.replace(/\r/g, ""));
+
+		return new DragonTraits({
+			breed: FR.BREEDS.findIndex(x => matches[8] === x.name),
+			eye: FR.EYES.findIndex(x => matches[10] === x.name),
+			colour: {
+				primary: FR.COLOURS.findIndex(x => matches[1] === x.name),
+				secondary: FR.COLOURS.findIndex(x => matches[3] === x.name),
+				tertiary: FR.COLOURS.findIndex(x => matches[5] === x.name)
+			},
+			gene: {
+				primary: FR.GENES.primary.findIndex(x => matches[2] === x.name),
+				secondary: FR.GENES.secondary.findIndex(x => matches[4] === x.name),
+				tertiary: FR.GENES.tertiary.findIndex(x => matches[6] === x.name)
+			}
+		});
 	}
 
 	/** Constructs a formal DragonTraits object from a generic object containing indices in FRjs/data arrays for any/all of a single dragon's traits. Calling the constructor directly is useful for ensuring all traits are possible to have on one dragon, converting traits into scrying workshop links, or for quickly getting the actual data objects for all traits.
