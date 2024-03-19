@@ -98,7 +98,7 @@ export function rarityTableLookup(rarity1, rarity2) {
 	// not toReversed() bc recent safari versions lack support
 }
 
-/** Compares two objects with rarities from the given array, and returns the probability of the given `target` outcome occurring. If the indexes aren't in the array, or the array members don't have rarities, returns`undefined`.
+/** Compares two objects with rarities from the given array, and returns the probability of the given `target` outcome occurring. If the indexes aren't in the array, or the array members don't have rarities, returns `undefined`.
  * @param {Array<{rarity: module:FRjs/data.Rarity}>} arr An array of objects with a `rarity` property.
  * @param {number} one The index in `arr` of the first possible outcome.
  * @param {number} two The index in `arr` of the second possible outcome.
@@ -227,7 +227,7 @@ export function nestSizesForBreeds(one, two) {
  * | `ancient` | number[] | List of ancient breeds (by index) gene is available on | */
 export function* genesForBreed(slot, breed) {
 	const anyBreed = !(breed in BREEDS);
-	if (!["primary", "secondary", "tertiary"].includes(slot)) {
+	if (!(slot in GENES)) {
 		return;
 	}
 	let i = 0;
@@ -298,7 +298,7 @@ export const Rarity = Object.freeze({ PLENTIFUL, COMMON, UNCOMMON, LIMITED, RARE
 
 // Definitions ////////////////////////////////////////////////////////////////
 
-// Creating objects repeatedly by returning literals from a function performs
+// Creating trait objects by returning generic objects from functions performs
 // well and saves a *lot* of file space.
 
 function eye(name, sid, probability) {
@@ -321,11 +321,8 @@ function gene(name, rarity, sids) {
 
 	return {
 		name, rarity, sids,
-		/** Whether or not this gene is available on modern breeds */
 		isModern: () => Object.keys(sids).includes(MODERN),
-		/** The indexes of the ancient breeds this gene is available on, if any */
-		ancients: () => Object.keys(sids).filter(value => value !== MODERN),
-		/** The proper site ID for this gene on the given breed, if its available on that breed */
+		ancients: () => Object.keys(sids).filter(k => k !== MODERN).map(k => parseInt(k)),
 		sidForBreed: (breed) => BREEDS[breed]?.type === MODERN ? sids[MODERN] : sids[breed]
 	};
 }
@@ -402,18 +399,27 @@ const [
 
 /** All available genes, organized into primary, secondary, and tertiary slots. Each gene has a name, rarity, a dictionary of all IDs it may have on Flight Rising, and functions which can tell you if the gene is available on modern breeds, what ancient breeds it's available on, and what the correct on-site ID is for a specific breed. Each slot is sorted by name (ascending). [Data Source]{@link https://www1.flightrising.com/forums/gde/3109561}
  *
- * This object has three properties: `primary`, `secondary`, and `tertiary`. All three of these properties are arrays containing **gene objects** which have the following structure:
+ * This object has the following structure:
+ * ```js
+ * {
+ * 	primary: Object[],
+ * 	secondary: Object[],
+ * 	tertiary: Object[]
+ * }
+ * ```
+ *
+ * The **individual gene objects** populating each of the `primary`, `secondary`, and `tertiary` arrays have the following structure:
  *
  * | Property | Type | Description |
  * |---|-|-|
  * | `name` | string | Name of the gene |
  * | `rarity` | {@link module:FRjs/data.Rarity Rarity} | Rarity of the gene |
- * | `sids` | Object | All on-site IDs that this gene may have. The "M" key, if present, corresponds to the site ID for the gene on modern breeds. All other keys, if present, are an index in {@link module:FRjs/data.BREEDS BREEDS} and correspond to the site ID for the gene on that ancient breed. |
- * | `isModern()` | boolean | A function which returns whether or not the gene is available on modern breeds. |
- * | `ancients()` | number[] | A function which returns an array of ancient breeds (by index) that this gene is available on. |
- * | `sidForBreed(breed)` | number \| undefined | A function which returns the site ID of this gene when on the given breed, provided it's available on that breed. The parameter should be an index in {@link module:FRjs/data.BREEDS BREEDS}. |
+ * | `sids` | Object | All on-site IDs that this gene may have. The {@link module:FRjs/data.BreedType BreedType.MODERN} (`M`) key, if present, corresponds to the site ID for the gene on modern breeds. All other keys, if present, are an index in {@link module:FRjs/data.BREEDS BREEDS} and correspond to the site ID for the gene on that ancient breed. |
+ * | `isModern()` | boolean | Returns whether or not the gene is available on modern breeds. |
+ * | `ancients()` | number[] | Returns an array of ancient breeds (by index) that this gene is available on. |
+ * | `sidForBreed(breed)` | number \| undefined | Returns the site ID of this gene when on the given breed, provided it's available on that breed. The parameter should be an index in {@link module:FRjs/data.BREEDS BREEDS}. |
  * @readonly
- * @type {{primary:Array<{name:string,rarity:module:FRjs/data.Rarity,sids:Object,isModern:Function,ancients:Function,sidForBreed:Function}>,secondary:Array<{name:string,rarity:module:FRjs/data.Rarity,sids:Object,isModern:Function,ancients:Function,sidForBreed:Function}>,tertiary:Array<{name:string,rarity:module:FRjs/data.Rarity,sids:Object,isModern:Function,ancients:Function,sidForBreed:Function}>}} */
+ * @type {{primary:Array<{name:string,rarity:Rarity,sids:Object,isModern:Function,ancients:Function,sidForBreed:Function}>,secondary:Array<{name:string,rarity:Rarity,sids:Object,isModern:Function,ancients:Function,sidForBreed:Function}>,tertiary:Array<{name:string,rarity:Rarity,sids:Object,isModern:Function,ancients:Function,sidForBreed:Function}>}} */
 export const GENES = deepFreeze({
 	primary: [
 		gene("Arapaima", COMMON, { [SANDSURGE]: 194 }),
