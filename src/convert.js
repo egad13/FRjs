@@ -24,6 +24,30 @@ export class DragonTraits {
 	 * @returns {DragonTraits|undefined} Object containing all the traits defined in the given scrying link; OR, if the given link could not be parsed, returns undefined.
 	 */
 	static fromScrylink(link) {
+		// UNUSED TRAITS:
+		// gender, age, element
+
+		const url = Object.fromEntries((new URL(link)).searchParams);
+		for (const k in url) {
+			url[k] = parseInt?.(url[k]);
+		}
+
+		const breed = FR.BREEDS.findIndex(x => url.breed === x.sid);
+
+		return new DragonTraits({
+			breed: breed,
+			eye: FR.EYES.findIndex(x => url.eyetype === x.sid),
+			colour: {
+				primary: FR.COLOURS.findIndex(x => url.body === x.sid),
+				secondary: FR.COLOURS.findIndex(x => url.wings === x.sid),
+				tertiary: FR.COLOURS.findIndex(x => url.tert === x.sid)
+			},
+			gene: {
+				primary: FR.GENES.primary.findIndex(x => url.bodygene === x.sidForBreed(breed)),
+				secondary: FR.GENES.secondary.findIndex(x => url.winggene === x.sidForBreed(breed)),
+				tertiary: FR.GENES.tertiary.findIndex(x => url.tertgene === x.sidForBreed(breed))
+			}
+		});
 	}
 
 	/**
@@ -131,5 +155,21 @@ export class DragonTraits {
 
 	/** @returns {string} A link to the scrying workshop for a dragon with all defined traits. */
 	scrylink() {
+		const bi = this.indices().breed;
+		const {breed, eye, colour, gene} = this.values();
+		const params = new URLSearchParams({
+			breed: breed.sid,
+			gender: 0,
+			age: 0,
+			bodygene: gene.primary.sidForBreed(bi),
+			body: colour.primary.sid,
+			winggene: gene.secondary.sidForBreed(bi),
+			wings: colour.secondary.sid,
+			tertgene: gene.tertiary.sidForBreed(bi),
+			tert: colour.tertiary.sid,
+			element: 0,
+			eyetype: eye.sid
+		});
+		return `https://www1.flightrising.com/scrying/predict?${params}`;
 	}
 }
