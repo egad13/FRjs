@@ -33,17 +33,100 @@ export class DragonTraits {
 	static fromProfile(profile) {
 	}
 
+	/** Constructs a formal DragonTraits object from a generic object containing indices in FRjs/data arrays for any/all of a single dragon's traits. Calling the constructor directly is useful for ensuring all traits are possible to have on one dragon, converting traits into scrying workshop links, or for quickly getting the actual data objects for all traits.
+	 *
+	 * Any traits that are left undefined, or which are invalid, will be set to a default value; index 0 for most traits, and for genes the index of Basic.
+	 * @param {Object} indices An object defining any/all of a single dragon's traits. The structure is the same as the objects returned by {@link module:FRjs/convert.DragonTraits#indices .indices() method}
+	 */
 	constructor(indices) {
+		if (indices.breed in FR.BREEDS) {
+			this.#breed = indices.breed;
+		}
+		if (indices.eye in FR.EYES) {
+			this.#eye = indices.eye;
+		}
+
+		// set colours and genes, ignoring any keys in the input that we can't actually use
+		for (const slot in FR.GENES) {
+			if (indices?.colour?.[slot] in FR.COLOURS) {
+				this.#colour[slot] = indices.colour[slot];
+			}
+		}
+		for (const slot in FR.GENES) {
+			if (FR.GENES[slot][indices?.gene?.[slot]]?.sidForBreed(this.#breed) !== undefined) {
+				this.#gene[slot] = indices.gene[slot];
+			}
+			else { // default gene is Basic
+				this.#gene[slot] = FR.GENES[slot].findIndex(x => x.sids.M === 0);
+			}
+		}
 	}
 
 	/** @returns {Object} An object containing all dragon traits as **indices** in the applicable array from {@link module:FRjs/data FRjs/data}.
+	 *
+	 * The structure of the returned object is:
+	 * ```js
+	 * {
+	 * 	breed: number
+	 * 	eye: number
+	 * 	colour: {
+	 * 		primary: number
+	 * 		secondary: number
+	 * 		tertiary: number
+	 * 	}
+	 * 	gene: {
+	 * 		primary: number
+	 * 		secondary: number
+	 * 		tertiary: number
+	 * 	}
+	 * }
+	 * ```
 	 */
 	indices() {
+		return {
+			breed: this.#breed,
+			eye: this.#eye,
+			colour: {...this.#colour},
+			gene: {...this.#gene}
+		};
 	}
 
 	/** @returns {Object} An object containing all dragon traits as **data objects** from {@link module:FRjs/data FRjs/data}. For the exact structure of each data object, see the documentation of the arrays in {@link module:FRjs/data FRjs/data}.
+	 *
+	 * The structure of the returned object is:
+	 * ```js
+	 * {
+	 * 	breed: Object
+	 * 	eye: Object
+	 * 	colour: {
+	 * 		primary: Object
+	 * 		secondary: Object
+	 * 		tertiary: Object
+	 * 	}
+	 * 	gene: {
+	 * 		primary: Object
+	 * 		secondary: Object
+	 * 		tertiary: Object
+	 * 	}
+	 * }
+	 * ```
 	 */
 	values() {
+		const idxs = this.indices();
+		return {
+			breed: FR.BREEDS[idxs.breed],
+			eye: FR.EYES[idxs.eye],
+			colour: {
+				primary: FR.COLOURS[idxs.colour.primary],
+				secondary: FR.COLOURS[idxs.colour.secondary],
+				tertiary: FR.COLOURS[idxs.colour.tertiary]
+			},
+			gene: {
+				primary: FR.GENES.primary[idxs.gene.primary],
+				secondary: FR.GENES.secondary[idxs.gene.secondary],
+				tertiary: FR.GENES.tertiary[idxs.gene.tertiary]
+			}
+		};
 	}
 
 	/** @returns {string} A link to the scrying workshop for a dragon with all defined traits. */
