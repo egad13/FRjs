@@ -13,5 +13,8 @@
 	},
 	"06-geneselect": {
 		"title": "FRjs/forms: Gene Dropdowns"
+	},
+	"07-fr-convert": {
+		"title": "FRjs/convert: Usage Guide"
 	}
 }

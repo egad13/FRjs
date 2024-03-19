@@ -2,6 +2,7 @@
  * Contains a class for converting the relevant data in scrying workshop links and dragon profile pages into indices in the arrays of module:FRjs/data, and for converting those indices into a functioning scrying workshop link. See the `DragonTraits` class' documentation for more details. See the tutorial for usage examples.
  *
  * @module FRjs/convert
+ * @tutorial 07-fr-convert
  * @requires module:FRjs/data
  */
 
