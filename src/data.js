@@ -1,8 +1,75 @@
 /**
- * Data about Flight Rising's dragon attributes and breeding mechanics, and utility functions to streamline working with that data.
+ * Data about Flight Rising's dragon traits and breeding mechanics, and utility functions to streamline working with that data.
  * @module FRjs/data
- * @version 0.0.2
  */
+
+///////////////////////////////////////////////////////////////////////////////
+// TYPE DEFINITIONS
+///////////////////////////////////////////////////////////////////////////////
+
+// Creating trait objects by returning generic objects from functions performs
+// well and saves a *lot* of file space.
+
+/** @typedef {Object} Gene
+ * @property {string} name
+ * @property {module:FRjs/data.Rarity} rarity
+ * @property {Object} sids Map of all on-site IDs that this gene may have. The {@link module:FRjs/data.BreedType BreedType.MODERN} (`M`) key, if present, corresponds to the site ID for the gene on modern breeds. All other keys, if present, are an index in {@link module:FRjs/data.BREEDS} and correspond to the site ID for the gene on that ancient breed. */
+function gene(name, rarity, sids) {
+	if (name === "Basic") { // all basic genes are plentiful and available on all breeds
+		rarity = PLENTIFUL;
+		sids = {[MODERN]: 0};
+		BREEDS.forEach( (b, i) => {
+			if (b.type === ANCIENT) {
+				sids[i] = 0;
+			}
+		});
+	}
+	return {
+		name, rarity, sids,
+		isModern: () => Object.keys(sids).includes(MODERN),
+		ancients: () => Object.keys(sids).filter(k => k !== MODERN).map(k => parseInt(k)),
+		sidForBreed: breed => BREEDS[breed]?.type === MODERN ? sids[MODERN] : sids[breed]
+	};
+}
+
+/** @typedef {Object} Breed
+ * @property {string} name
+ * @property {number} sid The breed's on-site ID.
+ * @property {module:FRjs/data.BreedType} type
+ * @property {module:FRjs/data.Rarity} rarity */
+function breed(name, sid, type, rarity) {
+	return { name, sid, type, rarity };
+}
+
+/** @typedef {Object} EyeType
+ * @property {string} name
+ * @property {number} sid The eye type's on-site ID.
+ * @property {number} probability The eye type's probability of showing up on a hatchling when breeding dragons. */
+function eye(name, sid, probability) {
+	return { name, sid, probability };
+}
+
+/** @typedef {Object} Colour
+ * @property {string} name
+ * @property {number} sid The colour's on-site ID.
+ * @property {string} hex The colour's main hex code. NOT prefixed. */
+function colour(name, sid, hex) {
+	return { name, sid, hex };
+}
+
+/** @typedef {Object} BasicTrait
+ * @property {string} name
+ * @property {number} sid The trait's on-site ID. */
+function basicTrait(name, sid) {
+	return { name, sid };
+}
+
+/** @typedef {Object} Nest
+ * @property {string} name
+ * @property {number} probability The nest's probability of occurring when breeding dragons. */
+function nest(size, probability) {
+	return { size, probability };
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -11,6 +78,7 @@
 // (As in not relevant to anyone using the module.)
 ///////////////////////////////////////////////////////////////////////////////
 
+// Used to make all data objects immutable
 function deepFreeze(obj) {
 	const propNames = Reflect.ownKeys(obj);
 	for (const name of propNames) {
@@ -21,7 +89,6 @@ function deepFreeze(obj) {
 	}
 	return Object.freeze(obj);
 }
-
 
 // Internal breed type "enum" whose usage minifies smaller than the exported one
 const ANCIENT = "A", MODERN = "M";
@@ -99,10 +166,10 @@ export function rarityTableLookup(rarity1, rarity2) {
 }
 
 /** Compares two objects with rarities from the given array, and returns the probability of the given `target` outcome occurring. If the indexes aren't in the array, or the array members don't have rarities, returns `undefined`.
- * @param {Array<{rarity: module:FRjs/data.Rarity}>} arr An array of objects with a `rarity` property.
- * @param {number} one The index in `arr` of the first possible outcome.
- * @param {number} two The index in `arr` of the second possible outcome.
- * @param {number} target The index in `arr` of the target outcome. Should be identical to either `one` or `two`.
+ * @param {Array<{rarity: module:FRjs/data.Rarity}>} arr Array of objects with a `rarity` property.
+ * @param {number} one Index in `arr` of the first possible outcome.
+ * @param {number} two Index in `arr` of the second possible outcome.
+ * @param {number} target Index in `arr` of the target outcome. Should be identical to either `one` or `two`.
  * @returns {number|undefined} */
 export function calcRarityProb(arr, one, two, target) {
 	if (!(arr instanceof Array && one in arr && two in arr
@@ -117,9 +184,9 @@ export function calcRarityProb(arr, one, two, target) {
 	return lookup[(target === one) ? 0 : 1];
 }
 
-/** Calculates the length of the shortest range between two colours. If either parameter is not an index in {@link module:FRjs/data.COLOURS FRjs/data.COLOURS}, returns `undefined`.
- * @param {number} one The index of the first colour in the range.
- * @param {number} two The index of the last colour in the range.
+/** Calculates the length of the shortest range between two colours. If either parameter is not an index in {@link module:FRjs/data.COLOURS}, returns `undefined`.
+ * @param {number} one Index of the first colour in the range.
+ * @param {number} two Index of the last colour in the range.
  * @returns {number|undefined} */
 export function colourRangeLength(one, two) {
 	if (!(one in COLOURS && two in COLOURS)) {
@@ -129,10 +196,10 @@ export function colourRangeLength(one, two) {
 	return 1 + Math.min(COLOURS.length - absDist, absDist);
 }
 
-/** Returns `true` if the target colour is in the shortest range between two given colours, and `false` if it isn't. If any parameter is not an index in {@link module:FRjs/data.COLOURS FRjs/data.COLOURS}, returns `undefined`. Range includes both end colours.
- * @param {number} one The index of the first colour in the range.
- * @param {number} two The index of the last colour in the range.
- * @param {number} target The index of the target colour.
+/** Returns `true` if the target colour is in the shortest range between two given colours, and `false` if it isn't. If any parameter is not an index in {@link module:FRjs/data.COLOURS}, returns `undefined`. Range includes both end colours.
+ * @param {number} one Index of the first colour in the range.
+ * @param {number} two Index of the last colour in the range.
+ * @param {number} target Index of the target colour.
  * @returns {boolean|undefined} */
 export function isColourInRange(one, two, target) {
 	if (!(one in COLOURS && two in COLOURS && target in COLOURS)) {
@@ -150,19 +217,19 @@ export function isColourInRange(one, two, target) {
 	return target <= first || target >= last;
 }
 
-/** Returns `true` if the colour range from `target1` to `target2` is a sub-range of the colour range from `one` to `two`, and `false` if not. If any parameter is not an index in {@link module:FRjs/data.COLOURS FRjs/data.COLOURS}, returns `undefined`. Both ranges include both their end colours.
- * @param {number} one The index of the first colour in the parent range.
- * @param {number} two The index of the last colour in the parent range.
- * @param {number} target1 The index of the first colour in the target range.
- * @param {number} target2 The index of the last colour in the target range.
+/** Returns `true` if the colour range from `target1` to `target2` is a sub-range of the colour range from `range1` to `range2`, and `false` if not. If any parameter is not an index in {@link module:FRjs/data.COLOURS}, returns `undefined`. Both ranges include both their end colours.
+ * @param {number} range1 Index of the first colour in the parent range.
+ * @param {number} range2 Index of the last colour in the parent range.
+ * @param {number} target1 Index of the first colour in the target range.
+ * @param {number} target2 Index of the last colour in the target range.
  * @returns {boolean|undefined} */
-export function isColourSubrangeInRange(one, two, target1, target2) {
-	if (!(one in COLOURS && two in COLOURS && target1 in COLOURS && target2 in COLOURS)) {
+export function isColourSubrangeInRange(range1, range2, target1, target2) {
+	if (!(range1 in COLOURS && range2 in COLOURS && target1 in COLOURS && target2 in COLOURS)) {
 		return;
 	}
-	const absDist = Math.abs(one - two),
-		first = Math.min(one, two),
-		last = Math.max(one, two),
+	const absDist = Math.abs(range1 - range2),
+		first = Math.min(range1, range2),
+		last = Math.max(range1, range2),
 		targAbsDist = Math.abs(target1 - target2),
 		targFirst = Math.min(target1, target2),
 		targLast = Math.max(target1, target2);
@@ -184,9 +251,9 @@ export function isColourSubrangeInRange(one, two, target1, target2) {
 	}
 }
 
-/** Returns `true` if the two given breeds are compatible for breeding -- meaning either they're both modern breeds, or they're the same ancient breed -- and `false` if they aren't. If either parameter is not an index in {@link module:FRjs/data.BREEDS FRjs/data.BREEDS}, returns `undefined`.
- * @param {number} one The index of the first breed.
- * @param {number} two The index of the second breed.
+/** Returns `true` if the two given breeds are compatible for breeding -- meaning either they're both modern breeds, or they're the same ancient breed -- and `false` if they aren't. If either parameter is not an index in {@link module:FRjs/data.BREEDS}, returns `undefined`.
+ * @param {number} one Index of the first breed.
+ * @param {number} two Index of the second breed.
  * @returns {boolean|undefined} */
 export function areBreedsCompatible(one, two) {
 	if (!(one in BREEDS && two in BREEDS)) {
@@ -199,10 +266,10 @@ export function areBreedsCompatible(one, two) {
 		|| (b1 === b2);
 }
 
-/** Returns an array containing possible nest sizes and their probabilities if dragons of the two given breeds are nested. If the given breeds are incompatible, or if either parameter is not an index in {@link module:FRjs/data.BREEDS FRjs/data.BREEDS}, returns `undefined`.
- * @param {number} one The index of the first breed.
- * @param {number} two The index of the second breed.
- * @returns {Array<{size: number, probability: number}>|undefined} */
+/** Returns an array containing possible nest sizes and their probabilities if dragons of the two given breeds are nested. See {@link module:FRjs/data~Nest} for structure. If the given breeds are incompatible, or if either parameter is not an index in {@link module:FRjs/data.BREEDS}, returns `undefined`.
+ * @param {number} one Index of the first breed.
+ * @param {number} two Index of the second breed.
+ * @returns {Array<module:FRjs/data~Nest>|undefined} */
 export function nestSizesForBreeds(one, two) {
 	if (!(one in BREEDS && two in BREEDS && areBreedsCompatible(one, two))) {
 		return;
@@ -215,16 +282,8 @@ export function nestSizesForBreeds(one, two) {
 
 /** Yields all genes available to a breed in a specific slot. If no breed id or an invalid breed id is provided, ignores restrictions and yields all genes for this slot. If the slot is invalid, yields nothing.
  * @param {"primary"|"secondary"|"tertiary"} slot The slot to retrieve genes for.
- * @param {number} [breed] The index of the breed to retrieve genes for.
- * @yields {{index: number, name: string, rarity: string, modern: boolean, ancient: string[]}}
- * Genes available to the given breed in the given slot. Object structure is:
- * | Property | Type | Description |
- * |---|-|-|
- * | `index` | number | The index of the gene in {@link module:FRjs/data.GENES FRjs/data.GENES} |
- * | `name` | string | Name of the gene |
- * | `rarity` | {@link module:FRjs/data.Rarity} | Rarity of the gene |
- * | `modern` | boolean | Whether or not the gene is available on modern breeds |
- * | `ancient` | number[] | List of ancient breeds (by index) gene is available on | */
+ * @param {number} [breed] Index of the breed to retrieve genes for.
+ * @yields {module:FRjs/data~Gene} Genes available to the given breed in the given slot. See {@link module:FRjs/data~Gene}. */
 export function* genesForBreed(slot, breed) {
 	const anyBreed = !(breed in BREEDS);
 	if (!(slot in GENES)) {
@@ -239,16 +298,10 @@ export function* genesForBreed(slot, breed) {
 	}
 }
 
-/** Yields all colours in the shortest range between the two given colours. If either parameter is not an index in {@link module:FRjs/data.COLOURS FRjs/data.COLOURS}, yields nothing.
+/** Yields all colours in the shortest range between the two given colours. If either parameter is not an index in {@link module:FRjs/data.COLOURS}, yields nothing.
  * @param {number} one The index of the first colour in the range.
  * @param {number} two The index of the last colour in the range.
- * @yields {{index: number, name: string, hex: string}}
- * Colours in the given range. Object structure is:
- * | Property | Type | Description |
- * |---|-|-|
- * | `index` | number | The index of the colour in {@link module:FRjs/data.COLOURS FRjs/data.COLOURS} |
- * | `name` | string | Name of the colour |
- * | `hex` | string | The hex code for this colour. NOT hash-prefixed. | */
+ * @yields {module:FRjs/data~Colour} Colours in the given range. See {@link module:FRjs/data~Colour}. */
 export function* colourRange(one, two) {
 	if (!(one in COLOURS && two in COLOURS)) {
 		return;
@@ -296,78 +349,39 @@ export const BreedType = Object.freeze({ ANCIENT, MODERN });
  */
 export const Rarity = Object.freeze({ PLENTIFUL, COMMON, UNCOMMON, LIMITED, RARE });
 
-// Definitions ////////////////////////////////////////////////////////////////
-
-// Creating trait objects by returning generic objects from functions performs
-// well and saves a *lot* of file space.
-
-function element(name, sid) {
-	return { name, sid };
-}
-function eye(name, sid, probability) {
-	return { name, sid, probability };
-}
-function breed(name, sid, type, rarity) {
-	return { name, sid, type, rarity };
-}
-function gene(name, rarity, sids) {
-	// The Basic genes are always Plentiful, available on every breed, and their SIDs are always 0.
-	if (name === "Basic") {
-		rarity = PLENTIFUL;
-		sids = {[MODERN]: 0};
-		BREEDS.forEach( (b, i) => {
-			if (b.type === ANCIENT) {
-				sids[i] = 0;
-			}
-		});
-	}
-
-	return {
-		name, rarity, sids,
-		isModern: () => Object.keys(sids).includes(MODERN),
-		ancients: () => Object.keys(sids).filter(k => k !== MODERN).map(k => parseInt(k)),
-		sidForBreed: (breed) => BREEDS[breed]?.type === MODERN ? sids[MODERN] : sids[breed]
-	};
-}
-function colour(name, sid, hex) {
-	return { name, sid, hex };
-}
-function nest(size, probability) {
-	return { size, probability };
-}
-
-// Data ///////////////////////////////////////////////////////////////////////
-
-/** The two possible dragon ages and their IDs on Flight Rising. Ordered as they are in-game. */
+/** The two possible dragon ages in Flight Rising. See {@link module:FRjs/data~BasicTrait} for object structure. Ordered as they are in-game.
+ * @type {Array.<module:FRjs/data~BasicTrait>} */
 export const AGES = deepFreeze([
-	{name: "Dragon", sid: 1},
-	{name: "Hatchling", sid: 0}
+	basicTrait("Dragon", 1),
+	basicTrait("Hatchling", 0)
 ]);
 
-/** The two possible dragon genders and their IDs on Flight Rising. Ordered as they are in-game. */
+/** The two possible dragon genders in Flight Rising. See {@link module:FRjs/data~BasicTrait} for object structure. Ordered as they are in-game.
+ * @type {Array.<module:FRjs/data~BasicTrait>} */
 export const GENDERS = deepFreeze([
-	{name: "Male", sid: 0},
-	{name: "Female", sid: 1}
+	basicTrait("Male", 0),
+	basicTrait("Female", 1)
 ]);
 
-/** All possible elements and their ID on Flight Rising. Ordered as they are in-game. */
+/** All possible elements (flights) in Flight Rising. See {@link module:FRjs/data~BasicTrait} for object structure. Ordered as they are in-game.
+ * @type {Array.<module:FRjs/data~BasicTrait>} */
 export const ELEMENTS = deepFreeze([
-	element("Earth", 1),
-	element("Plague", 2),
-	element("Wind", 3),
-	element("Water", 4),
-	element("Lightning", 5),
-	element("Ice", 6),
-	element("Shadow", 7),
-	element("Light", 8),
-	element("Arcane", 9),
-	element("Nature", 10),
-	element("Fire", 11)
+	basicTrait("Earth", 1),
+	basicTrait("Plague", 2),
+	basicTrait("Wind", 3),
+	basicTrait("Water", 4),
+	basicTrait("Lightning", 5),
+	basicTrait("Ice", 6),
+	basicTrait("Shadow", 7),
+	basicTrait("Light", 8),
+	basicTrait("Arcane", 9),
+	basicTrait("Nature", 10),
+	basicTrait("Fire", 11)
 ]);
 
-/** All possible eye types, their ID on Flight Rising, and their probabilities of occurring through breeding. Sorted by probability (descending). [Data Source]{@link https://flightrising.fandom.com/wiki/Eye_Types#Odds}
+/** All possible eye types in Flight Rising. See {@link module:FRjs/data~EyeType} for object structure. Sorted by probability (descending). [Data Source]{@link https://flightrising.fandom.com/wiki/Eye_Types#Odds}
  * @readonly
- * @type {Array<{name:string,sid:number,probability:number}>} */
+ * @type {Array<module:FRjs/data~EyeType>} */
 export const EYES = deepFreeze([
 	eye("Common", 0, 0.458),
 	eye("Uncommon", 1, 0.242),
@@ -385,9 +399,192 @@ export const EYES = deepFreeze([
 	eye("Innocent", 11, 0)
 ]);
 
-/** All available breeds, their ID on Flight Rising, their rarities, and a type specifying if they're ancient or modern. Sorted by name (ascending). [Data Source]{@link https://www1.flightrising.com/wiki/wiki}
+/** All available colours in Flight Rising. See {@link module:FRjs/data~Colour} for object structure. Ordered as they are in-game. This should be treated as a circular array.
  * @readonly
- * @type {Array<{name: string, sid: number, type: module:FRjs/data.BreedType, rarity: module:FRjs/data.Rarity}>} */
+ * @type {Array<module:FRjs/data~Colour>} */
+export const COLOURS = deepFreeze([
+	colour("Maize", 1, "fffdea"),
+	colour("Cream", 163, "ffefdc"),
+	colour("Antique", 97, "d8d6cd"),
+	colour("White", 2, "ffffff"),
+	colour("Moon", 74, "d8d7d8"),
+	colour("Ice", 3, "ebefff"),
+	colour("Orca", 131, "e0dfff"),
+	colour("Platinum", 4, "c8bece"),
+	colour("Silver", 5, "bbbabf"),
+	colour("Dust", 146, "9c9c9e"),
+	colour("Grey", 6, "808080"),
+	colour("Smoke", 91, "9494a9"),
+	colour("Gloom", 98, "535264"),
+	colour("Lead", 118, "413c3f"),
+	colour("Shale", 177, "4d4850"),
+	colour("Flint", 129, "626268"),
+	colour("Charcoal", 7, "545454"),
+	colour("Coal", 8, "4b4946"),
+	colour("Oilslick", 70, "342b25"),
+	colour("Black", 9, "333333"),
+	colour("Obsidian", 10, "1d2224"),
+	colour("Eldritch", 176, "252a25"),
+	colour("Midnight", 11, "252735"),
+	colour("Shadow", 12, "3a2e44"),
+	colour("Blackberry", 127, "4b294f"),
+	colour("Mulberry", 13, "6e235d"),
+	colour("Plum", 92, "853390"),
+	colour("Wisteria", 119, "724e7b"),
+	colour("Thistle", 14, "8f7c8b"),
+	colour("Fog", 137, "a593b0"),
+	colour("Mist", 150, "e1ceff"),
+	colour("Lavender", 15, "cca4e0"),
+	colour("Heather", 68, "9777bd"),
+	colour("Purple", 16, "a261cf"),
+	colour("Orchid", 69, "d950ff"),
+	colour("Amethyst", 114, "993bd0"),
+	colour("Nightshade", 175, "782eb2"),
+	colour("Violet", 17, "643f9c"),
+	colour("Grape", 147, "570fc0"),
+	colour("Royal", 18, "4d2c89"),
+	colour("Eggplant", 111, "332b65"),
+	colour("Iris", 82, "535195"),
+	colour("Storm", 19, "757adb"),
+	colour("Twilight", 174, "474aa0"),
+	colour("Indigo", 112, "2d237a"),
+	colour("Sapphire", 71, "0d095b"),
+	colour("Navy", 20, "212b5f"),
+	colour("Cobalt", 136, "003484"),
+	colour("Ultramarine", 90, "1c51e7"),
+	colour("Blue", 21, "324ba9"),
+	colour("Periwinkle", 135, "4866d5"),
+	colour("Lapis", 148, "2b84ff"),
+	colour("Splash", 22, "6392df"),
+	colour("Cornflower", 145, "75a8ff"),
+	colour("Sky", 23, "aec8ff"),
+	colour("Stonewash", 24, "7895c1"),
+	colour("Overcast", 126, "444f69"),
+	colour("Steel", 25, "556979"),
+	colour("Denim", 26, "2f4557"),
+	colour("Abyss", 96, "0d1e24"),
+	colour("Phthalo", 151, "0b2d46"),
+	colour("Azure", 27, "0a3d67"),
+	colour("Caribbean", 28, "0086ce"),
+	colour("Teal", 29, "2b768f"),
+	colour("Cerulean", 117, "00b4d6"),
+	colour("Cyan", 89, "00fff0"),
+	colour("Robin", 99, "9aeaef"),
+	colour("Aqua", 30, "72c4c4"),
+	colour("Turquoise", 149, "3aa0a1"),
+	colour("Spruce", 100, "8bbbb2"),
+	colour("Pistachio", 125, "e2ffe6"),
+	colour("Seafoam", 31, "b2e2bd"),
+	colour("Mint", 152, "9affc7"),
+	colour("Jade", 32, "61ab89"),
+	colour("Spearmint", 78, "148e67"),
+	colour("Thicket", 141, "005e48"),
+	colour("Peacock", 134, "1f4739"),
+	colour("Emerald", 33, "20603f"),
+	colour("Shamrock", 80, "236925"),
+	colour("Jungle", 34, "1e361a"),
+	colour("Hunter", 81, "1d2715"),
+	colour("Forest", 35, "425035"),
+	colour("Camo", 154, "51684c"),
+	colour("Algae", 153, "97af8b"),
+	colour("Swamp", 36, "687f67"),
+	colour("Avocado", 37, "567c34"),
+	colour("Green", 38, "629c3f"),
+	colour("Fern", 113, "7ece73"),
+	colour("Mantis", 79, "99ff9c"),
+	colour("Pear", 101, "8ecd55"),
+	colour("Leaf", 39, "a5e32d"),
+	colour("Radioactive", 130, "c6ff00"),
+	colour("Honeydew", 102, "d0e672"),
+	colour("Peridot", 144, "e8ffb5"),
+	colour("Chartreuse", 155, "b4cd3c"),
+	colour("Spring", 40, "a9a832"),
+	colour("Crocodile", 173, "828335"),
+	colour("Olive", 123, "697135"),
+	colour("Murk", 142, "4b4420"),
+	colour("Moss", 115, "7e7745"),
+	colour("Goldenrod", 41, "bea55d"),
+	colour("Amber", 103, "c18e1b"),
+	colour("Honey", 93, "d1b300"),
+	colour("Lemon", 42, "ffe63b"),
+	colour("Yellow", 104, "f9e255"),
+	colour("Grapefruit", 128, "f7ff6f"),
+	colour("Banana", 43, "ffec80"),
+	colour("Sanddollar", 110, "ebe7ae"),
+	colour("Flaxen", 139, "fde9ae"),
+	colour("Ivory", 44, "ffd297"),
+	colour("Buttercup", 167, "f6bf6b"),
+	colour("Gold", 45, "e8af49"),
+	colour("Metals", 140, "d1b046"),
+	colour("Marigold", 75, "ffb43b"),
+	colour("Sunshine", 46, "fa912b"),
+	colour("Saffron", 84, "ff8400"),
+	colour("Sunset", 172, "ffa248"),
+	colour("Peach", 105, "ffb576"),
+	colour("Cantaloupe", 171, "ff984f"),
+	colour("Orange", 47, "d5602b"),
+	colour("Bronze", 83, "b2560d"),
+	colour("Terracotta", 108, "b23b07"),
+	colour("Carrot", 133, "ff5500"),
+	colour("Fire", 48, "ef5c23"),
+	colour("Pumpkin", 158, "ff6840"),
+	colour("Tangerine", 49, "ff7360"),
+	colour("Cinnamon", 77, "c05a39"),
+	colour("Caramel", 156, "c67047"),
+	colour("Sand", 50, "b27749"),
+	colour("Tan", 76, "c49a70"),
+	colour("Beige", 51, "cabba2"),
+	colour("Stone", 52, "827a64"),
+	colour("Taupe", 95, "6d665a"),
+	colour("Slate", 53, "564d48"),
+	colour("Driftwood", 165, "766359"),
+	colour("Latte", 143, "977b6c"),
+	colour("Dirt", 162, "76483f"),
+	colour("Clay", 106, "603f3d"),
+	colour("Sable", 138, "57372c"),
+	colour("Umber", 157, "2f1e1a"),
+	colour("Soil", 54, "5a4534"),
+	colour("Hickory", 88, "725639"),
+	colour("Tarnish", 124, "855c32"),
+	colour("Ginger", 122, "90532b"),
+	colour("Brown", 55, "8e5b3f"),
+	colour("Chocolate", 56, "563012"),
+	colour("Auburn", 166, "7b3c1d"),
+	colour("Copper", 94, "a44b28"),
+	colour("Rust", 57, "8b3220"),
+	colour("Tomato", 58, "ba311c"),
+	colour("Vermilion", 169, "e22d17"),
+	colour("Ruby", 86, "cd000e"),
+	colour("Cherry", 116, "aa0024"),
+	colour("Crimson", 59, "850012"),
+	colour("Garnet", 161, "5b0f14"),
+	colour("Sanguine", 121, "2e0002"),
+	colour("Blood", 60, "451717"),
+	colour("Maroon", 61, "652127"),
+	colour("Berry", 87, "8b272c"),
+	colour("Red", 62, "c1272d"),
+	colour("Strawberry", 168, "de3235"),
+	colour("Cerise", 132, "a22929"),
+	colour("Carmine", 63, "b13a3a"),
+	colour("Brick", 107, "9a534d"),
+	colour("Coral", 64, "cc6f6f"),
+	colour("Blush", 159, "ffa2a2"),
+	colour("Cottoncandy", 164, "eb7997"),
+	colour("Watermelon", 120, "db518d"),
+	colour("Magenta", 65, "e934aa"),
+	colour("Fuchsia", 170, "ec0089"),
+	colour("Raspberry", 160, "8a0249"),
+	colour("Wine", 72, "4d0f28"),
+	colour("Mauve", 73, "9c4875"),
+	colour("Pink", 66, "e77fbf"),
+	colour("Bubblegum", 109, "eaa9ff"),
+	colour("Rose", 67, "ffd6f6"),
+	colour("Pearl", 85, "fbe9f8")
+]);
+
+/** All available breeds in Flight Rising. See {@link module:FRjs/data~Breed} for object structure. Sorted by name (ascending). [Data Source]{@link https://www1.flightrising.com/wiki/wiki}
+ * @readonly
+ * @type {Array<module:FRjs/data~Breed>} */
 export const BREEDS = deepFreeze([
 	breed("Aberration", 20, ANCIENT, COMMON),
 	breed("Aether", 22, ANCIENT, COMMON),
@@ -427,29 +624,18 @@ const [
 	VEILSPUN
 ] = BREEDS.map((x, i) => i).filter(i => BREEDS[i].type === ANCIENT);
 
-/** All available genes, organized into primary, secondary, and tertiary slots. Each gene has a name, rarity, a dictionary of all IDs it may have on Flight Rising, and functions which can tell you if the gene is available on modern breeds, what ancient breeds it's available on, and what the correct on-site ID is for a specific breed. Each slot is sorted by name (ascending). [Data Source]{@link https://www1.flightrising.com/forums/gde/3109561}
+/** All available genes, organized into primary, secondary, and tertiary slots. See {@link module:FRjs/data~Gene} for the structure of individual gene objects. Each slot is sorted by name (ascending). [Data Source]{@link https://www1.flightrising.com/forums/gde/3109561}
  *
  * This object has the following structure:
  * ```js
  * {
- * 	primary: Object[],
- * 	secondary: Object[],
- * 	tertiary: Object[]
+ * 	primary: Gene[],
+ * 	secondary: Gene[],
+ * 	tertiary: Gene[]
  * }
  * ```
- *
- * The **individual gene objects** populating each of the `primary`, `secondary`, and `tertiary` arrays have the following structure:
- *
- * | Property | Type | Description |
- * |---|-|-|
- * | `name` | string | Name of the gene |
- * | `rarity` | {@link module:FRjs/data.Rarity Rarity} | Rarity of the gene |
- * | `sids` | Object | All on-site IDs that this gene may have. The {@link module:FRjs/data.BreedType BreedType.MODERN} (`M`) key, if present, corresponds to the site ID for the gene on modern breeds. All other keys, if present, are an index in {@link module:FRjs/data.BREEDS BREEDS} and correspond to the site ID for the gene on that ancient breed. |
- * | `isModern()` | boolean | Returns whether or not the gene is available on modern breeds. |
- * | `ancients()` | number[] | Returns an array of ancient breeds (by index) that this gene is available on. |
- * | `sidForBreed(breed)` | number \| undefined | Returns the site ID of this gene when on the given breed, provided it's available on that breed. The parameter should be an index in {@link module:FRjs/data.BREEDS BREEDS}. |
  * @readonly
- * @type {{primary:Array<{name:string,rarity:Rarity,sids:Object,isModern:Function,ancients:Function,sidForBreed:Function}>,secondary:Array<{name:string,rarity:Rarity,sids:Object,isModern:Function,ancients:Function,sidForBreed:Function}>,tertiary:Array<{name:string,rarity:Rarity,sids:Object,isModern:Function,ancients:Function,sidForBreed:Function}>}} */
+ * @type {{primary:Array<Gene>,secondary:Array<Gene>,tertiary:Array<Gene>}} */
 export const GENES = deepFreeze({
 	primary: [
 		gene("Arapaima", COMMON, { [SANDSURGE]: 194 }),
@@ -700,186 +886,3 @@ export const GENES = deepFreeze({
 		gene("Wraith", RARE, { [BANESCALE]: 48 })
 	]
 });
-
-/** All available colours, their IDs on Flight Rising, and their hex codes. Hex codes are NOT prefixed. Ordered as they are in-game. Should be treated as a circular array.
- * @readonly
- * @type {Array<{name: string, sid: number, hex: string}>} */
-export const COLOURS = deepFreeze([
-	colour("Maize", 1, "fffdea"),
-	colour("Cream", 163, "ffefdc"),
-	colour("Antique", 97, "d8d6cd"),
-	colour("White", 2, "ffffff"),
-	colour("Moon", 74, "d8d7d8"),
-	colour("Ice", 3, "ebefff"),
-	colour("Orca", 131, "e0dfff"),
-	colour("Platinum", 4, "c8bece"),
-	colour("Silver", 5, "bbbabf"),
-	colour("Dust", 146, "9c9c9e"),
-	colour("Grey", 6, "808080"),
-	colour("Smoke", 91, "9494a9"),
-	colour("Gloom", 98, "535264"),
-	colour("Lead", 118, "413c3f"),
-	colour("Shale", 177, "4d4850"),
-	colour("Flint", 129, "626268"),
-	colour("Charcoal", 7, "545454"),
-	colour("Coal", 8, "4b4946"),
-	colour("Oilslick", 70, "342b25"),
-	colour("Black", 9, "333333"),
-	colour("Obsidian", 10, "1d2224"),
-	colour("Eldritch", 176, "252a25"),
-	colour("Midnight", 11, "252735"),
-	colour("Shadow", 12, "3a2e44"),
-	colour("Blackberry", 127, "4b294f"),
-	colour("Mulberry", 13, "6e235d"),
-	colour("Plum", 92, "853390"),
-	colour("Wisteria", 119, "724e7b"),
-	colour("Thistle", 14, "8f7c8b"),
-	colour("Fog", 137, "a593b0"),
-	colour("Mist", 150, "e1ceff"),
-	colour("Lavender", 15, "cca4e0"),
-	colour("Heather", 68, "9777bd"),
-	colour("Purple", 16, "a261cf"),
-	colour("Orchid", 69, "d950ff"),
-	colour("Amethyst", 114, "993bd0"),
-	colour("Nightshade", 175, "782eb2"),
-	colour("Violet", 17, "643f9c"),
-	colour("Grape", 147, "570fc0"),
-	colour("Royal", 18, "4d2c89"),
-	colour("Eggplant", 111, "332b65"),
-	colour("Iris", 82, "535195"),
-	colour("Storm", 19, "757adb"),
-	colour("Twilight", 174, "474aa0"),
-	colour("Indigo", 112, "2d237a"),
-	colour("Sapphire", 71, "0d095b"),
-	colour("Navy", 20, "212b5f"),
-	colour("Cobalt", 136, "003484"),
-	colour("Ultramarine", 90, "1c51e7"),
-	colour("Blue", 21, "324ba9"),
-	colour("Periwinkle", 135, "4866d5"),
-	colour("Lapis", 148, "2b84ff"),
-	colour("Splash", 22, "6392df"),
-	colour("Cornflower", 145, "75a8ff"),
-	colour("Sky", 23, "aec8ff"),
-	colour("Stonewash", 24, "7895c1"),
-	colour("Overcast", 126, "444f69"),
-	colour("Steel", 25, "556979"),
-	colour("Denim", 26, "2f4557"),
-	colour("Abyss", 96, "0d1e24"),
-	colour("Phthalo", 151, "0b2d46"),
-	colour("Azure", 27, "0a3d67"),
-	colour("Caribbean", 28, "0086ce"),
-	colour("Teal", 29, "2b768f"),
-	colour("Cerulean", 117, "00b4d6"),
-	colour("Cyan", 89, "00fff0"),
-	colour("Robin", 99, "9aeaef"),
-	colour("Aqua", 30, "72c4c4"),
-	colour("Turquoise", 149, "3aa0a1"),
-	colour("Spruce", 100, "8bbbb2"),
-	colour("Pistachio", 125, "e2ffe6"),
-	colour("Seafoam", 31, "b2e2bd"),
-	colour("Mint", 152, "9affc7"),
-	colour("Jade", 32, "61ab89"),
-	colour("Spearmint", 78, "148e67"),
-	colour("Thicket", 141, "005e48"),
-	colour("Peacock", 134, "1f4739"),
-	colour("Emerald", 33, "20603f"),
-	colour("Shamrock", 80, "236925"),
-	colour("Jungle", 34, "1e361a"),
-	colour("Hunter", 81, "1d2715"),
-	colour("Forest", 35, "425035"),
-	colour("Camo", 154, "51684c"),
-	colour("Algae", 153, "97af8b"),
-	colour("Swamp", 36, "687f67"),
-	colour("Avocado", 37, "567c34"),
-	colour("Green", 38, "629c3f"),
-	colour("Fern", 113, "7ece73"),
-	colour("Mantis", 79, "99ff9c"),
-	colour("Pear", 101, "8ecd55"),
-	colour("Leaf", 39, "a5e32d"),
-	colour("Radioactive", 130, "c6ff00"),
-	colour("Honeydew", 102, "d0e672"),
-	colour("Peridot", 144, "e8ffb5"),
-	colour("Chartreuse", 155, "b4cd3c"),
-	colour("Spring", 40, "a9a832"),
-	colour("Crocodile", 173, "828335"),
-	colour("Olive", 123, "697135"),
-	colour("Murk", 142, "4b4420"),
-	colour("Moss", 115, "7e7745"),
-	colour("Goldenrod", 41, "bea55d"),
-	colour("Amber", 103, "c18e1b"),
-	colour("Honey", 93, "d1b300"),
-	colour("Lemon", 42, "ffe63b"),
-	colour("Yellow", 104, "f9e255"),
-	colour("Grapefruit", 128, "f7ff6f"),
-	colour("Banana", 43, "ffec80"),
-	colour("Sanddollar", 110, "ebe7ae"),
-	colour("Flaxen", 139, "fde9ae"),
-	colour("Ivory", 44, "ffd297"),
-	colour("Buttercup", 167, "f6bf6b"),
-	colour("Gold", 45, "e8af49"),
-	colour("Metals", 140, "d1b046"),
-	colour("Marigold", 75, "ffb43b"),
-	colour("Sunshine", 46, "fa912b"),
-	colour("Saffron", 84, "ff8400"),
-	colour("Sunset", 172, "ffa248"),
-	colour("Peach", 105, "ffb576"),
-	colour("Cantaloupe", 171, "ff984f"),
-	colour("Orange", 47, "d5602b"),
-	colour("Bronze", 83, "b2560d"),
-	colour("Terracotta", 108, "b23b07"),
-	colour("Carrot", 133, "ff5500"),
-	colour("Fire", 48, "ef5c23"),
-	colour("Pumpkin", 158, "ff6840"),
-	colour("Tangerine", 49, "ff7360"),
-	colour("Cinnamon", 77, "c05a39"),
-	colour("Caramel", 156, "c67047"),
-	colour("Sand", 50, "b27749"),
-	colour("Tan", 76, "c49a70"),
-	colour("Beige", 51, "cabba2"),
-	colour("Stone", 52, "827a64"),
-	colour("Taupe", 95, "6d665a"),
-	colour("Slate", 53, "564d48"),
-	colour("Driftwood", 165, "766359"),
-	colour("Latte", 143, "977b6c"),
-	colour("Dirt", 162, "76483f"),
-	colour("Clay", 106, "603f3d"),
-	colour("Sable", 138, "57372c"),
-	colour("Umber", 157, "2f1e1a"),
-	colour("Soil", 54, "5a4534"),
-	colour("Hickory", 88, "725639"),
-	colour("Tarnish", 124, "855c32"),
-	colour("Ginger", 122, "90532b"),
-	colour("Brown", 55, "8e5b3f"),
-	colour("Chocolate", 56, "563012"),
-	colour("Auburn", 166, "7b3c1d"),
-	colour("Copper", 94, "a44b28"),
-	colour("Rust", 57, "8b3220"),
-	colour("Tomato", 58, "ba311c"),
-	colour("Vermilion", 169, "e22d17"),
-	colour("Ruby", 86, "cd000e"),
-	colour("Cherry", 116, "aa0024"),
-	colour("Crimson", 59, "850012"),
-	colour("Garnet", 161, "5b0f14"),
-	colour("Sanguine", 121, "2e0002"),
-	colour("Blood", 60, "451717"),
-	colour("Maroon", 61, "652127"),
-	colour("Berry", 87, "8b272c"),
-	colour("Red", 62, "c1272d"),
-	colour("Strawberry", 168, "de3235"),
-	colour("Cerise", 132, "a22929"),
-	colour("Carmine", 63, "b13a3a"),
-	colour("Brick", 107, "9a534d"),
-	colour("Coral", 64, "cc6f6f"),
-	colour("Blush", 159, "ffa2a2"),
-	colour("Cottoncandy", 164, "eb7997"),
-	colour("Watermelon", 120, "db518d"),
-	colour("Magenta", 65, "e934aa"),
-	colour("Fuchsia", 170, "ec0089"),
-	colour("Raspberry", 160, "8a0249"),
-	colour("Wine", 72, "4d0f28"),
-	colour("Mauve", 73, "9c4875"),
-	colour("Pink", 66, "e77fbf"),
-	colour("Bubblegum", 109, "eaa9ff"),
-	colour("Rose", 67, "ffd6f6"),
-	colour("Pearl", 85, "fbe9f8")
-]);
