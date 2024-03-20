@@ -301,6 +301,9 @@ export const Rarity = Object.freeze({ PLENTIFUL, COMMON, UNCOMMON, LIMITED, RARE
 // Creating trait objects by returning generic objects from functions performs
 // well and saves a *lot* of file space.
 
+function element(name, sid) {
+	return { name, sid };
+}
 function eye(name, sid, probability) {
 	return { name, sid, probability };
 }
@@ -334,6 +337,33 @@ function nest(size, probability) {
 }
 
 // Data ///////////////////////////////////////////////////////////////////////
+
+/** The two possible dragon ages and their IDs on Flight Rising. Ordered as they are in-game. */
+export const AGES = deepFreeze([
+	{name: "Dragon", sid: 1},
+	{name: "Hatchling", sid: 0}
+]);
+
+/** The two possible dragon genders and their IDs on Flight Rising. Ordered as they are in-game. */
+export const GENDERS = deepFreeze([
+	{name: "Male", sid: 0},
+	{name: "Female", sid: 1}
+]);
+
+/** All possible elements and their ID on Flight Rising. Ordered as they are in-game. */
+export const ELEMENTS = deepFreeze([
+	element("Earth", 1),
+	element("Plague", 2),
+	element("Wind", 3),
+	element("Water", 4),
+	element("Lightning", 5),
+	element("Ice", 6),
+	element("Shadow", 7),
+	element("Light", 8),
+	element("Arcane", 9),
+	element("Nature", 10),
+	element("Fire", 11)
+]);
 
 /** All possible eye types, their ID on Flight Rising, and their probabilities of occurring through breeding. Sorted by probability (descending). [Data Source]{@link https://flightrising.fandom.com/wiki/Eye_Types#Odds}
  * @readonly

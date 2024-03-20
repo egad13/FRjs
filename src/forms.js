@@ -89,6 +89,43 @@ class PubSub {
  * @private */
 const bgPubSub = new PubSub();
 
+/** Base class for very simple self-populating dropdowns with no extra behaviour. When extending, override the dataArray getter to return an array of objects with a name property; these will become options in the dropdown.
+ * @private */
+class BasicSelect extends HTMLSelectElement {
+	#isPopulated = false;
+
+	get dataArray() { return []; }
+
+	connectedCallback() {
+		if (this.#isPopulated) { return; }
+		this.#isPopulated = true;
+
+		for (const [i, elt] of this.dataArray.entries()) {
+			const op = document.createElement("option");
+			[op.value, op.text] = [i, elt.name];
+			this.add(op);
+		}
+	}
+}
+
+/** A customized `<select>` element which self-populates with options representing Flight Rising's dragon ages; i.e., Dragon and Hatchling. Registered as `fr-ages`.
+ */
+class AgeSelect extends BasicSelect {
+	get dataArray() { return FR.AGES; }
+}
+
+/** A customized `<select>` element which self-populates with options representing all Flight Rising's dragon genders; i.e., Male and Female. Registered as `fr-genders`.
+ */
+class GenderSelect extends BasicSelect {
+	get dataArray() { return FR.GENDERS; }
+}
+
+/** A customized `<select>` element which self-populates with options representing all of Flight Rising's flight elements, in the order they appear on-site. Registered as `fr-elements`.
+ */
+class ElementSelect extends BasicSelect {
+	get dataArray() { return FR.ELEMENTS; }
+}
+
 /** A customized `<select>` element which self-populates with options representing all of Flight Rising's eye types, in order of increasing rarity. Registered as `fr-eyes`.
  * @tutorial 03-eyeselect */
 class EyeSelect extends HTMLSelectElement {
@@ -344,6 +381,9 @@ class GeneSelect extends HTMLSelectElement {
 	}
 }
 
+customElements.define("fr-ages", AgeSelect, { extends: "select" });
+customElements.define("fr-genders", GenderSelect, { extends: "select" });
+customElements.define("fr-elements", ElementSelect, { extends: "select" });
 customElements.define("fr-eyes", EyeSelect, { extends: "select" });
 customElements.define("fr-colours", ColourSelect, { extends: "select" });
 customElements.define("fr-breeds", BreedSelect, { extends: "select" });

@@ -17,6 +17,9 @@ import * as FR from "./data.js";
 export class DragonTraits {
 	#breed = 0;
 	#eye = 0;
+	#element = 0;
+	#gender = 0;
+	#age = 0;
 	#colour = {primary: 0, secondary: 0, tertiary: 0};
 	#gene = {primary: 0, secondary: 0, tertiary: 0};
 
@@ -38,6 +41,9 @@ export class DragonTraits {
 		return new DragonTraits({
 			breed: breed,
 			eye: FR.EYES.findIndex(x => url.eyetype === x.sid),
+			element: FR.ELEMENTS.findIndex(x => url.element === x.sid),
+			age: FR.AGES.findIndex(x => url.age === x.sid),
+			gender: FR.GENDERS.findIndex(x => url.gender === x.sid),
 			colour: {
 				primary: FR.COLOURS.findIndex(x => url.body === x.sid),
 				secondary: FR.COLOURS.findIndex(x => url.wings === x.sid),
@@ -53,20 +59,19 @@ export class DragonTraits {
 
 	/**
 	 * @param {string} profile The text contents of a dragon's profile page. NOT the page HTML; what you get by selecting all text on the page in the browser window and copying it.
-	 * @returns {DragonTraits} Object containing all the traits defined in the given profile.
+	 * @returns {DragonTraits} Object containing all the traits defined in the given profile. Note: gender is not present in text on dragon profiles, and will be the default of Male.
 	 */
 	static fromProfile(profile) {
-		// UNUSED MATCHES:
-		// 7 = age
-		// 9 = element
-		// cannot grab gender from this, because it's not present in a profile page copy-paste
-
 		const profileRegex = /Primary Gene\n(\w+)\n(\w+)\nSecondary Gene\n(\w+)\n(\w+)\nTertiary Gene\n(\w+)\n(\w+).*(?:Breed\n){2}(\w+)\n(\w+)\n(?:Eye Type\n){2}(\w+)\n(\w+)/s;
 		const matches = profileRegex.exec(profile.replace(/\r/g, ""));
+		// For some reason this age is "Dragon" in the scryshop, and "Adult" on profiles.
+		matches[7] = matches[7] === "Adult" ? "Dragon" : matches[7];
 
 		return new DragonTraits({
 			breed: FR.BREEDS.findIndex(x => matches[8] === x.name),
 			eye: FR.EYES.findIndex(x => matches[10] === x.name),
+			element: FR.ELEMENTS.findIndex(x => matches[9] === x.name),
+			age: FR.AGES.findIndex(x => matches[7] === x.name),
 			colour: {
 				primary: FR.COLOURS.findIndex(x => matches[1] === x.name),
 				secondary: FR.COLOURS.findIndex(x => matches[3] === x.name),
@@ -83,7 +88,7 @@ export class DragonTraits {
 	/** Constructs a formal DragonTraits object from a generic object containing indices in FRjs/data arrays for any/all of a single dragon's traits. Calling the constructor directly is useful for ensuring all traits are possible to have on one dragon, converting traits into scrying workshop links, or for quickly getting the actual data objects for all traits.
 	 *
 	 * Any traits that are left undefined, or which are invalid, will be set to a default value; index 0 for most traits, and for genes the index of Basic.
-	 * @param {Object} indices An object defining any/all of a single dragon's traits. The structure is the same as the objects returned by {@link module:FRjs/convert.DragonTraits#indices .indices() method}
+	 * @param {Object} indices An object defining any/all of a single dragon's traits. The structure is the same as the objects returned by {@link module:FRjs/convert.DragonTraits#indices .indices}
 	 */
 	constructor(indices) {
 		if (indices.breed in FR.BREEDS) {
@@ -91,6 +96,15 @@ export class DragonTraits {
 		}
 		if (indices.eye in FR.EYES) {
 			this.#eye = indices.eye;
+		}
+		if (indices.element in FR.ELEMENTS) {
+			this.#element = indices.element;
+		}
+		if (indices.gender in FR.GENDERS) {
+			this.#gender = indices.gender;
+		}
+		if (indices.age in FR.AGES) {
+			this.#age = indices.age;
 		}
 
 		// set colours and genes, ignoring any keys in the input that we can't actually use
@@ -129,40 +143,27 @@ export class DragonTraits {
 	 * }
 	 * ```
 	 */
-	indices() {
+	get indices() {
 		return {
 			breed: this.#breed,
 			eye: this.#eye,
+			element: this.#element,
+			gender: this.#gender,
+			age: this.#age,
 			colour: {...this.#colour},
 			gene: {...this.#gene}
 		};
 	}
 
-	/** @returns {Object} An object containing all dragon traits as **data objects** from {@link module:FRjs/data FRjs/data}. For the exact structure of each data object, see the documentation of the arrays in {@link module:FRjs/data FRjs/data}.
-	 *
-	 * The structure of the returned object is:
-	 * ```js
-	 * {
-	 * 	breed: Object
-	 * 	eye: Object
-	 * 	colour: {
-	 * 		primary: Object
-	 * 		secondary: Object
-	 * 		tertiary: Object
-	 * 	}
-	 * 	gene: {
-	 * 		primary: Object
-	 * 		secondary: Object
-	 * 		tertiary: Object
-	 * 	}
-	 * }
-	 * ```
-	 */
-	values() {
-		const idxs = this.indices();
+	/** @returns {Object} An object containing all dragon traits as **data objects** from {@link module:FRjs/data FRjs/data}. For the structure of the return object, see {@link module:FRjs/convert.DragonTraits#indices .indices}. For the  structure of each data object it contains, see the documentation of the arrays in {@link module:FRjs/data FRjs/data}. */
+	get values() {
+		const idxs = this.indices;
 		return {
 			breed: FR.BREEDS[idxs.breed],
 			eye: FR.EYES[idxs.eye],
+			element: FR.ELEMENTS[idxs.element],
+			gender: FR.GENDERS[idxs.gender],
+			age: FR.AGES[idxs.age],
 			colour: {
 				primary: FR.COLOURS[idxs.colour.primary],
 				secondary: FR.COLOURS[idxs.colour.secondary],
@@ -177,20 +178,20 @@ export class DragonTraits {
 	}
 
 	/** @returns {string} A link to the scrying workshop for a dragon with all defined traits. */
-	scrylink() {
-		const bi = this.indices().breed;
-		const {breed, eye, colour, gene} = this.values();
+	get scrylink() {
+		const bi = this.indices.breed;
+		const {breed, eye, element, gender, age, colour, gene} = this.values;
 		const params = new URLSearchParams({
 			breed: breed.sid,
-			gender: 0,
-			age: 0,
+			gender: gender.sid,
+			age: age.sid,
 			bodygene: gene.primary.sidForBreed(bi),
 			body: colour.primary.sid,
 			winggene: gene.secondary.sidForBreed(bi),
 			wings: colour.secondary.sid,
 			tertgene: gene.tertiary.sidForBreed(bi),
 			tert: colour.tertiary.sid,
-			element: 0,
+			element: element.sid,
 			eyetype: eye.sid
 		});
 		return `https://www1.flightrising.com/scrying/predict?${params}`;
