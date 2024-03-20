@@ -280,10 +280,10 @@ export function nestSizesForBreeds(one, two) {
 		: NEST_SIZES.diffBreeds;
 }
 
-/** Yields all genes available to a breed in a specific slot. If no breed id or an invalid breed id is provided, ignores restrictions and yields all genes for this slot. If the slot is invalid, yields nothing.
+/** Yields indices on {@link module:FRjs/data.GENES GENES} of all genes available to a breed in a specific slot. If no breed id or an invalid breed id is provided, ignores restrictions and yields all genes for this slot. If the slot is invalid, yields nothing.
  * @param {"primary"|"secondary"|"tertiary"} slot The slot to retrieve genes for.
  * @param {number} [breed] Index of the breed to retrieve genes for.
- * @yields {module:FRjs/data~Gene} Genes available to the given breed in the given slot. See {@link module:FRjs/data~Gene}. */
+ * @yields {number} */
 export function* genesForBreed(slot, breed) {
 	const anyBreed = !(breed in BREEDS);
 	if (!(slot in GENES)) {
@@ -292,39 +292,37 @@ export function* genesForBreed(slot, breed) {
 	let i = 0;
 	for (const gene of GENES[slot]) {
 		if (anyBreed || gene.sidForBreed(breed) !== undefined) {
-			yield { index: i, ...gene };
+			yield i;
 		}
 		i++;
 	}
 }
 
-/** Yields all colours in the shortest range between the two given colours. If either parameter is not an index in {@link module:FRjs/data.COLOURS}, yields nothing.
- * @param {number} one The index of the first colour in the range.
- * @param {number} two The index of the last colour in the range.
- * @yields {module:FRjs/data~Colour} Colours in the given range. See {@link module:FRjs/data~Colour}. */
+/** Yields indices on {@link module:FRjs/data.COLOURS COLOURS} of all colours in the shortest range between the two given colours. If either parameter is not an index in {@link module:FRjs/data.COLOURS}, yields nothing.
+ * @param {number} one Index of the first colour in the range.
+ * @param {number} two Index of the last colour in the range.
+ * @yields {number} */
 export function* colourRange(one, two) {
 	if (!(one in COLOURS && two in COLOURS)) {
 		return;
 	}
 	const absDist = Math.abs(one - two),
 		first = Math.min(one, two),
-		last = Math.max(one, two),
-		out = [];
+		last = Math.max(one, two);
 
 	// range does NOT cross array ends
 	if (absDist <= COLOURS.length - absDist) {
 		for (let i = first; i <= last; i++) {
-			yield { index: i, ...COLOURS[i] };
+			yield i;
 		}
 	} else { // range DOES cross array ends
 		for (let i = last; i < COLOURS.length; i++) {
-			yield { index: i, ...COLOURS[i] };
+			yield i;
 		}
 		for (let i = 0; i <= first; i++) {
-			yield { index: i, ...COLOURS[i] };
+			yield i;
 		}
 	}
-	return out;
 }
 
 

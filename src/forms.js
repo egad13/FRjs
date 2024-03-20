@@ -351,15 +351,16 @@ class GeneSelect extends HTMLSelectElement {
 			}
 		}
 
-		for (const { index, name } of FR.genesForBreed(this.#slot, breedVal)) {
-			if (!oldVal && index.toString() === oldSelectedVal) {
-				oldVal = index;
+		for (const i of FR.genesForBreed(this.#slot, breedVal)) {
+			const name = FR.GENES[this.#slot][i].name;
+			if (!oldVal && i.toString() === oldSelectedVal) {
+				oldVal = i;
 			}
 			if (!defVal && name.toLowerCase() === this.#defaultName) {
-				defVal = index;
+				defVal = i;
 			}
 			const op = document.createElement("option");
-			[op.value, op.text] = [index, name];
+			[op.value, op.text] = [i, name];
 			op.dataset.auto = true;
 			this.add(op);
 		}
