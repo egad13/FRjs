@@ -47,6 +47,10 @@ If you choose to create a breed dropdown with a script instead, for best perform
 
 For more information on how linking works, see {@tutorial 06-geneselect}.
 
+<p class="warning">
+When changing the value of a breed dropdown in javascript, you <strong>MUST</strong> manually dispatch a <code>change</code> event from the breed dropdown. This step is necessary for causing any linked gene dropdowns to update.
+</p>
+
 ## Examples
 
 ### HTML

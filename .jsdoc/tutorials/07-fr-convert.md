@@ -14,7 +14,7 @@ const url = "https://www1.flightrising.com/scrying/predict?breed=7&gender=0&age=
 
 const traits = DragonTraits.fromScrylink(url);
 
-console.log(traits.indices());
+console.log(traits.indices);
 /* Expected output: all traits as indices on the arrays in FRjs/data
 {
 	breed: 18,
@@ -24,7 +24,7 @@ console.log(traits.indices());
 }
 */
 
-console.log(traits.values());
+console.log(traits.values);
 /* Expected output: all traits as data objects from FRjs/data
 {
 	breed: { name: "Spiral", sid: 7, type: "M", rarity: "C" },
@@ -76,9 +76,7 @@ const traits = new DragonTraits({
 	colour: { primary: pistachioIndex }
 });
 
-const link = traits.scrylink();
-
-console.log(link);
+console.log(traits.scrylink);
 // Expected output:
 // https://www1.flightrising.com/scrying/predict?breed=22&gender=0&age=0&bodygene=0&body=125&winggene=0&wings=1&tertgene=0&tert=1&element=0&eyetype=0
 ```
@@ -89,7 +87,7 @@ These are complete, working examples of some potential uses for the `FRjs/conver
 
 Make sure to run these through a local testing server, as per the [note on the docs homepage](/#a-note-on-local-testing).
 
-If your browser doesn't support import maps, you'll have to change the import statements in the code to use the full URL of each file for it to work. (Or, you can add a link to a polyfill for import maps just before the import map script: `<script type="text/javascript" async="" src="https://unpkg.com/es-module-shims@1.8/dist/es-module-shims.js"></script>`)
+If your browser doesn't support import maps, you'll have to remove the import map and change the import statements in the code to use the full URL of each file for it to work. (Or, you can add a link to a polyfill for import maps just before the import map script: `<script type="text/javascript" async="" src="https://unpkg.com/es-module-shims@1.8/dist/es-module-shims.js"></script>`)
 
 ### Convert `FRjs/forms` dropdowns into a scrying link
 
@@ -163,7 +161,7 @@ This example creates a set of trait dropdowns similar to the ones in the scrying
 				}
 			});
 
-			output.innerHTML = traits.scrylink();
+			output.innerHTML = traits.scrylink;
 		});
 	</script>
 </body>
@@ -228,15 +226,20 @@ This example creates a set of trait dropdowns similar to the ones in the scrying
 
 		// Make the button set the values of the dropdowns
 		button.addEventListener("click", () => {
-			const indices = DragonTraits.fromScrylink(input.value)?.indices();
+			const indices = DragonTraits.fromScrylink(input.value)?.indices;
 
+			// ALWAYS fire a change event when programmatically changing the value of a breed dropdown!
 			breed.value = indices.breed;
+			breed.dispatchEvent(new Event("change"));
+
 			eye.value = indices.eye;
+
 			priCol.value = indices.colour.primary;
-			priGene.value = indices.gene.primary;
 			secCol.value = indices.colour.secondary;
-			secGene.value = indices.gene.secondary;
 			terCol.value = indices.colour.tertiary;
+
+			priGene.value = indices.gene.primary;
+			secGene.value = indices.gene.secondary;
 			terGene.value = indices.gene.tertiary;
 		});
 	</script>
