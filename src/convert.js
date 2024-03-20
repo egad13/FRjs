@@ -62,7 +62,7 @@ export class DragonTraits {
 	 * @returns {DragonTraits} Object containing all the traits defined in the given profile. Note: gender is not present in text on dragon profiles, and will be the default of Male.
 	 */
 	static fromProfile(profile) {
-		const profileRegex = /Primary Gene\n(\w+)\n(\w+)\nSecondary Gene\n(\w+)\n(\w+)\nTertiary Gene\n(\w+)\n(\w+).*(?:Breed\n){2}(\w+)\n(\w+)\n(?:Eye Type\n){2}(\w+)\n(\w+)/s;
+		const profileRegex = /Primary Gene\n(\w+)\n(\w+)(?: \(\w+\))*\nSecondary Gene\n(\w+)\n(\w+)(?: \(\w+\))*\nTertiary Gene\n(\w+)\n(\w+).*(?:Breed\n){2}(\w+)\n(\w+)\nEye Type\n(?:Special )*Eye Type\n(\w+)\n(\w+)/s;
 		const matches = profileRegex.exec(profile.replace(/\r/g, ""));
 		// For some reason this age is "Dragon" in the scryshop, and "Adult" on profiles.
 		matches[7] = matches[7] === "Adult" ? "Dragon" : matches[7];
