@@ -3,6 +3,19 @@
  * @module FRjs/data
  */
 
+// Used to make all data objects immutable
+const { keys, freeze } = Object;
+function deepFreeze(obj) {
+	const propNames = Reflect.ownKeys(obj);
+	for (const name of propNames) {
+		const value = obj[name];
+		if ((value && typeof value === "object") || typeof value === "function") {
+			deepFreeze(value);
+		}
+	}
+	return freeze(obj);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // TYPE DEFINITIONS
 ///////////////////////////////////////////////////////////////////////////////
@@ -13,23 +26,40 @@
 /** @typedef {Object} Gene
  * @property {string} name
  * @property {module:FRjs/data.Rarity} rarity
- * @property {Object} sids Map of all on-site IDs that this gene may have. The {@link module:FRjs/data.BreedType BreedType.MODERN} (`M`) key, if present, corresponds to the site ID for the gene on modern breeds. All other keys, if present, are an index in {@link module:FRjs/data.BREEDS} and correspond to the site ID for the gene on that ancient breed. */
-function gene(name, rarity, sids) {
-	if (name === "Basic") { // all basic genes are plentiful and available on all breeds
+ * @property {Object} sids Map of all on-site IDs that this gene may have. The {@link module:FRjs/data.BreedType BreedType.MODERN} (`M`) key, if present, corresponds to the site ID for the gene on modern breeds. All other keys, if present, are an index in {@link module:FRjs/data.BREEDS} and correspond to the site ID for the gene on that ancient breed.
+ * @property {boolean} isModern Whether or not this gene is available on modern breeds.
+ * @property {number[]} ancients Array of indexes in {@link module:FRjs/data.BREEDS} for all ancient breeds this gene is available on.
+ * @property {function(number): number|undefined} sidForBreed1 Given the index of a breed in {@link module:FRjs/data.BREEDS}, returns the site ID for this gene on that breed, if it's available.
+ *
+ * **Parameters:**
+ * | Name | Type | Description |
+ * |---|-|-|
+ * | `breed` | number | Index of a breed in {@link module:FRjs/data.BREEDS} |
+ *
+ * **Returns:**
+ * **Type:** number \| undefined */
+function gene(name, rarity, ...sidPairs) {
+	let sids = {};
+	if (name === "Basic") {
 		rarity = PLENTIFUL;
-		sids = {[MODERN]: 0};
+		sids[MODERN] = 0;
 		BREEDS.forEach( (b, i) => {
 			if (b.type === ANCIENT) {
 				sids[i] = 0;
 			}
 		});
 	}
-	return {
+	else {
+		for (let i = 0; i < sidPairs.length; i += 2) {
+			sids[sidPairs[i]] = sidPairs[i+1];
+		}
+	}
+	return deepFreeze({
 		name, rarity, sids,
-		isModern: () => Object.keys(sids).includes(MODERN),
-		ancients: () => Object.keys(sids).filter(k => k !== MODERN).map(k => parseInt(k)),
+		get isModern() { return keys(sids).includes(MODERN); },
+		get ancients() { return keys(sids).filter(k => k !== MODERN).map(k => parseInt(k)); },
 		sidForBreed: breed => BREEDS[breed]?.type === MODERN ? sids[MODERN] : sids[breed]
-	};
+	});
 }
 
 /** @typedef {Object} Breed
@@ -38,7 +68,7 @@ function gene(name, rarity, sids) {
  * @property {module:FRjs/data.BreedType} type
  * @property {module:FRjs/data.Rarity} rarity */
 function breed(name, sid, type, rarity) {
-	return { name, sid, type, rarity };
+	return freeze({ name, sid, type, rarity });
 }
 
 /** @typedef {Object} EyeType
@@ -46,7 +76,7 @@ function breed(name, sid, type, rarity) {
  * @property {number} sid The eye type's on-site ID.
  * @property {number} probability The eye type's probability of showing up on a hatchling when breeding dragons. */
 function eye(name, sid, probability) {
-	return { name, sid, probability };
+	return freeze({ name, sid, probability });
 }
 
 /** @typedef {Object} Colour
@@ -54,7 +84,7 @@ function eye(name, sid, probability) {
  * @property {number} sid The colour's on-site ID.
  * @property {string} hex The colour's main hex code. NOT prefixed. */
 function colour(name, sid, hex) {
-	return { name, sid, hex };
+	return freeze({ name, sid, hex });
 }
 
 /** @typedef {Object} BasicTrait
@@ -77,18 +107,6 @@ function nest(size, probability) {
 //
 // (As in not relevant to anyone using the module.)
 ///////////////////////////////////////////////////////////////////////////////
-
-// Used to make all data objects immutable
-function deepFreeze(obj) {
-	const propNames = Reflect.ownKeys(obj);
-	for (const name of propNames) {
-		const value = obj[name];
-		if ((value && typeof value === "object") || typeof value === "function") {
-			deepFreeze(value);
-		}
-	}
-	return Object.freeze(obj);
-}
 
 // Internal breed type "enum" whose usage minifies smaller than the exported one
 const ANCIENT = "A", MODERN = "M";
@@ -335,7 +353,7 @@ export function* colourRange(one, two) {
  * @prop {string} ANCIENT
  * @prop {string} MODERN
  */
-export const BreedType = Object.freeze({ ANCIENT, MODERN });
+export const BreedType = freeze({ ANCIENT, MODERN });
 
 /** Enum for rarities. Every breed and gene has a rarity.
  * @enum {string}
@@ -345,7 +363,7 @@ export const BreedType = Object.freeze({ ANCIENT, MODERN });
  * @prop {string} LIMITED
  * @prop {string} RARE
  */
-export const Rarity = Object.freeze({ PLENTIFUL, COMMON, UNCOMMON, LIMITED, RARE });
+export const Rarity = freeze({ PLENTIFUL, COMMON, UNCOMMON, LIMITED, RARE });
 
 /** The two possible dragon ages in Flight Rising. See {@link module:FRjs/data~BasicTrait} for object structure. Ordered as they are in-game.
  * @type {Array.<module:FRjs/data~BasicTrait>} */
@@ -380,7 +398,7 @@ export const ELEMENTS = deepFreeze([
 /** All possible eye types in Flight Rising. See {@link module:FRjs/data~EyeType} for object structure. Sorted by probability (descending). [Data Source]{@link https://flightrising.fandom.com/wiki/Eye_Types#Odds}
  * @readonly
  * @type {Array<module:FRjs/data~EyeType>} */
-export const EYES = deepFreeze([
+export const EYES = freeze([
 	eye("Common", 0, 0.458),
 	eye("Uncommon", 1, 0.242),
 	eye("Unusual", 2, 0.139),
@@ -400,7 +418,7 @@ export const EYES = deepFreeze([
 /** All available colours in Flight Rising. See {@link module:FRjs/data~Colour} for object structure. Ordered as they are in-game. This should be treated as a circular array.
  * @readonly
  * @type {Array<module:FRjs/data~Colour>} */
-export const COLOURS = deepFreeze([
+export const COLOURS = freeze([
 	colour("Maize", 1, "fffdea"),
 	colour("Cream", 163, "ffefdc"),
 	colour("Antique", 97, "d8d6cd"),
@@ -583,7 +601,7 @@ export const COLOURS = deepFreeze([
 /** All available breeds in Flight Rising. See {@link module:FRjs/data~Breed} for object structure. Sorted by name (ascending). [Data Source]{@link https://www1.flightrising.com/wiki/wiki}
  * @readonly
  * @type {Array<module:FRjs/data~Breed>} */
-export const BREEDS = deepFreeze([
+export const BREEDS = freeze([
 	breed("Aberration", 20, ANCIENT, COMMON),
 	breed("Aether", 22, ANCIENT, COMMON),
 	breed("Auraboa", 24, ANCIENT, COMMON),
@@ -634,253 +652,253 @@ const [
  * ```
  * @readonly
  * @type {{primary:Array<Gene>,secondary:Array<Gene>,tertiary:Array<Gene>}} */
-export const GENES = deepFreeze({
-	primary: [
-		gene("Arapaima", COMMON, { [SANDSURGE]: 194 }),
-		gene("Arc", UNCOMMON, { [VEILSPUN]: 70 }),
-		gene("Bar", UNCOMMON, { [MODERN]: 6, [ABERRATION]: 89, [AETHER]: 150, [AURABOA]: 238, [BANESCALE]: 181, [GAOLER]: 34, [UNDERTIDE]: 117, [VEILSPUN]: 145 }),
+export const GENES = freeze({
+	primary: freeze([
+		gene("Arapaima", COMMON, SANDSURGE, 194),
+		gene("Arc", UNCOMMON, VEILSPUN, 70),
+		gene("Bar", UNCOMMON, MODERN, 6, ABERRATION, 89, AETHER, 150, AURABOA, 238, BANESCALE, 181, GAOLER, 34, UNDERTIDE, 117, VEILSPUN, 145),
 		gene("Basic"),
-		gene("Boa", UNCOMMON, { [MODERN]: 232, [ABERRATION]: 233, [AETHER]: 234, [AURABOA]: 239, [BANESCALE]: 235, [GAOLER]: 171, [SANDSURGE]: 189, [UNDERTIDE]: 128, [VEILSPUN]: 236 }),
-		gene("Boulder", LIMITED, { [MODERN]: 110, [ABERRATION]: 220, [AETHER]: 151, [AURABOA]: 240, [SANDSURGE]: 188, [UNDERTIDE]: 135 }),
-		gene("Bright", UNCOMMON, { [VEILSPUN]: 69 }),
-		gene("Candy", LIMITED, { [AETHER]: 167 }),
-		gene("Candycane", LIMITED, { [BANESCALE]: 55 }),
-		gene("Caterpillar", COMMON, { [AURABOA]: 241 }),
-		gene("Checkers", COMMON, { [UNDERTIDE]: 127 }),
-		gene("Cherub", UNCOMMON, { [MODERN]: 10, [ABERRATION]: 221, [BANESCALE]: 43, [SANDSURGE]: 190, [UNDERTIDE]: 119 }),
-		gene("Chevron", UNCOMMON, { [BANESCALE]: 54 }),
-		gene("Chrysocolla", LIMITED, { [MODERN]: 237, [SANDSURGE]: 195, [UNDERTIDE]: 264 }),
-		gene("Cinder", UNCOMMON, { [MODERN]: 213, [ABERRATION]: 214, [AETHER]: 163, [BANESCALE]: 215, [GAOLER]: 216, [SANDSURGE]: 217, [UNDERTIDE]: 218, [VEILSPUN]: 219 }),
-		gene("Clown", COMMON, { [MODERN]: 3, [ABERRATION]: 222, [AETHER]: 169, [BANESCALE]: 75, [GAOLER]: 77, [SANDSURGE]: 196, [UNDERTIDE]: 265, [VEILSPUN]: 76 }),
-		gene("Crystal", RARE, { [MODERN]: 7, [ABERRATION]: 91, [BANESCALE]: 182, [GAOLER]: 37, [UNDERTIDE]: 118, [VEILSPUN]: 146 }),
-		gene("Diamond", LIMITED, { [ABERRATION]: 93 }),
-		gene("Fade", COMMON, { [MODERN]: 42, [ABERRATION]: 90, [AETHER]: 148, [AURABOA]: 242, [BANESCALE]: 85, [GAOLER]: 86, [SANDSURGE]: 191, [UNDERTIDE]: 115, [VEILSPUN]: 60 }),
-		gene("Falcon", COMMON, { [MODERN]: 16, [ABERRATION]: 92, [AURABOA]: 243, [BANESCALE]: 80, [GAOLER]: 30, [UNDERTIDE]: 122, [VEILSPUN]: 139 }),
-		gene("Fern", LIMITED, { [MODERN]: 136, [ABERRATION]: 223, [AURABOA]: 244, [BANESCALE]: 137, [UNDERTIDE]: 266, [VEILSPUN]: 138 }),
-		gene("Flaunt", UNCOMMON, { [MODERN]: 82, [ABERRATION]: 112, [AETHER]: 149, [AURABOA]: 245, [GAOLER]: 111, [SANDSURGE]: 193, [UNDERTIDE]: 267 }),
-		gene("Giraffe", UNCOMMON, { [MODERN]: 12, [ABERRATION]: 94, [AURABOA]: 246, [BANESCALE]: 81, [GAOLER]: 27, [UNDERTIDE]: 123, [VEILSPUN]: 83 }),
-		gene("Ground", LIMITED, { [MODERN]: 88, [ABERRATION]: 97, [SANDSURGE]: 186, [UNDERTIDE]: 268 }),
-		gene("Harlequin", RARE, { [MODERN]: 170, [ABERRATION]: 224, [AURABOA]: 247, [SANDSURGE]: 192, [UNDERTIDE]: 280 }),
-		gene("Iridescent", RARE, { [MODERN]: 1 }),
-		gene("Jaguar", UNCOMMON, { [MODERN]: 19, [ABERRATION]: 99, [AETHER]: 152, [AURABOA]: 248, [BANESCALE]: 44, [GAOLER]: 33, [SANDSURGE]: 198, [UNDERTIDE]: 269 }),
-		gene("Jupiter", UNCOMMON, { [MODERN]: 14, [AETHER]: 153, [SANDSURGE]: 197, [UNDERTIDE]: 270, [VEILSPUN]: 64 }),
-		gene("Laced", COMMON, { [MODERN]: 26, [AETHER]: 156, [AURABOA]: 249, [BANESCALE]: 48, [GAOLER]: 73, [VEILSPUN]: 61 }),
-		gene("Leopard", COMMON, { [MODERN]: 40, [ABERRATION]: 225, [BANESCALE]: 109, [GAOLER]: 173, [VEILSPUN]: 142 }),
-		gene("Lionfish", UNCOMMON, { [MODERN]: 25, [ABERRATION]: 100, [AETHER]: 158, [SANDSURGE]: 199, [UNDERTIDE]: 126 }),
-		gene("Love", LIMITED, { [AURABOA]: 279 }),
-		gene("Marble", COMMON, { [BANESCALE]: 47 }),
-		gene("Metallic", RARE, { [MODERN]: 17, [AETHER]: 157, [AURABOA]: 250, [BANESCALE]: 49, [UNDERTIDE]: 278 }),
-		gene("Mochlus", UNCOMMON, { [AURABOA]: 251 }),
-		gene("Mosaic", UNCOMMON, { [MODERN]: 58, [AETHER]: 155, [AURABOA]: 252, [GAOLER]: 38, [SANDSURGE]: 200 }),
-		gene("Octopus", LIMITED, { [UNDERTIDE]: 133 }),
-		gene("Orb", LIMITED, { [ABERRATION]: 102, [AURABOA]: 253, [UNDERTIDE]: 271 }),
-		gene("Petals", RARE, { [MODERN]: 13, [AETHER]: 154, [BANESCALE]: 51, [UNDERTIDE]: 281, [VEILSPUN]: 143 }),
-		gene("Phantom", LIMITED, { [GAOLER]: 39 }),
-		gene("Pharaoh", RARE, { [MODERN]: 87, [ABERRATION]: 101, [BANESCALE]: 185, [UNDERTIDE]: 120 }),
-		gene("Piebald", COMMON, { [MODERN]: 9, [AETHER]: 159, [AURABOA]: 254, [GAOLER]: 31, [SANDSURGE]: 201, [UNDERTIDE]: 272 }),
-		gene("Pinstripe", LIMITED, { [MODERN]: 22, [ABERRATION]: 226, [BANESCALE]: 45, [GAOLER]: 32, [SANDSURGE]: 202, [UNDERTIDE]: 121 }),
-		gene("Poison", LIMITED, { [MODERN]: 11, [ABERRATION]: 227, [BANESCALE]: 53, [GAOLER]: 174, [UNDERTIDE]: 131, [VEILSPUN]: 140 }),
-		gene("Python", LIMITED, { [MODERN]: 23, [AETHER]: 160, [AURABOA]: 255, [SANDSURGE]: 203 }),
-		gene("Ragged", UNCOMMON, { [BANESCALE]: 56 }),
-		gene("Rattlesnake", UNCOMMON, { [AURABOA]: 256, [SANDSURGE]: 206 }),
-		gene("Ribbon", UNCOMMON, { [MODERN]: 84, [ABERRATION]: 105, [BANESCALE]: 183, [GAOLER]: 175, [UNDERTIDE]: 124 }),
-		gene("Ripple", UNCOMMON, { [MODERN]: 5, [ABERRATION]: 228, [AURABOA]: 257, [BANESCALE]: 79, [GAOLER]: 78, [UNDERTIDE]: 130 }),
-		gene("Sailfish", LIMITED, { [SANDSURGE]: 212 }),
-		gene("Savannah", COMMON, { [MODERN]: 18, [ABERRATION]: 103, [BANESCALE]: 50, [GAOLER]: 176, [SANDSURGE]: 204, [UNDERTIDE]: 129 }),
-		gene("Shaggy", COMMON, { [GAOLER]: 29 }),
-		gene("Shell", UNCOMMON, { [VEILSPUN]: 71 }),
-		gene("Skink", LIMITED, { [MODERN]: 15, [ABERRATION]: 229, [AETHER]: 161, [BANESCALE]: 52, [GAOLER]: 177, [VEILSPUN]: 67 }),
-		gene("Slime", LIMITED, { [MODERN]: 41, [ABERRATION]: 106, [GAOLER]: 178, [SANDSURGE]: 208, [VEILSPUN]: 141 }),
-		gene("Speckle", COMMON, { [MODERN]: 4, [ABERRATION]: 98, [BANESCALE]: 147, [UNDERTIDE]: 132, [VEILSPUN]: 144 }),
-		gene("Sphinxmoth", UNCOMMON, { [VEILSPUN]: 72 }),
-		gene("Spool", COMMON, { [AETHER]: 162 }),
-		gene("Starmap", RARE, { [MODERN]: 24, [ABERRATION]: 230, [AETHER]: 168, [AURABOA]: 263, [UNDERTIDE]: 273, [VEILSPUN]: 65 }),
-		gene("Stitched", LIMITED, { [MODERN]: 59, [ABERRATION]: 107, [AETHER]: 165, [GAOLER]: 180, [UNDERTIDE]: 282, [VEILSPUN]: 66 }),
-		gene("Swirl", COMMON, { [MODERN]: 57, [ABERRATION]: 104, [GAOLER]: 179, [SANDSURGE]: 209, [UNDERTIDE]: 134 }),
-		gene("Tapir", COMMON, { [MODERN]: 21, [ABERRATION]: 95, [AURABOA]: 258, [BANESCALE]: 74, [GAOLER]: 35, [SANDSURGE]: 210, [UNDERTIDE]: 274, [VEILSPUN]: 62 }),
-		gene("Tide", LIMITED, { [MODERN]: 114, [ABERRATION]: 231, [AETHER]: 164, [BANESCALE]: 184, [GAOLER]: 172, [UNDERTIDE]: 113 }),
-		gene("Tiger", COMMON, { [MODERN]: 2, [AURABOA]: 259, [BANESCALE]: 46, [GAOLER]: 36, [SANDSURGE]: 211, [UNDERTIDE]: 275 }),
-		gene("Twinkle", RARE, { [AETHER]: 166 }),
-		gene("Varnish", COMMON, { [AURABOA]: 261, [UNDERTIDE]: 276 }),
-		gene("Vipera", UNCOMMON, { [MODERN]: 8, [ABERRATION]: 96, [AURABOA]: 260, [VEILSPUN]: 63 }),
-		gene("Wasp", RARE, { [MODERN]: 20, [ABERRATION]: 108, [GAOLER]: 28, [SANDSURGE]: 207, [UNDERTIDE]: 125, [VEILSPUN]: 68 }),
-		gene("Wicker", RARE, { [AURABOA]: 262 }),
-		gene("Wolf", UNCOMMON, { [UNDERTIDE]: 116 }),
-		gene("Wrought", COMMON, { [SANDSURGE]: 187, [UNDERTIDE]: 277 })
-	],
-	secondary: [
-		gene("Affection", LIMITED, { [AURABOA]: 279 }),
-		gene("Alloy", RARE, { [MODERN]: 17, [AETHER]: 157, [AURABOA]: 250, [BANESCALE]: 49, [UNDERTIDE]: 278 }),
-		gene("Arowana", COMMON, { [SANDSURGE]: 194 }),
-		gene("Arrow", UNCOMMON, { [BANESCALE]: 54 }),
+		gene("Boa", UNCOMMON, MODERN, 232, ABERRATION, 233, AETHER, 234, AURABOA, 239, BANESCALE, 235, GAOLER, 171, SANDSURGE, 189, UNDERTIDE, 128, VEILSPUN, 236),
+		gene("Boulder", LIMITED, MODERN, 110, ABERRATION, 220, AETHER, 151, AURABOA, 240, SANDSURGE, 188, UNDERTIDE, 135),
+		gene("Bright", UNCOMMON, VEILSPUN, 69),
+		gene("Candy", LIMITED, AETHER, 167),
+		gene("Candycane", LIMITED, BANESCALE, 55),
+		gene("Caterpillar", COMMON, AURABOA, 241),
+		gene("Checkers", COMMON, UNDERTIDE, 127),
+		gene("Cherub", UNCOMMON, MODERN, 10, ABERRATION, 221, BANESCALE, 43, SANDSURGE, 190, UNDERTIDE, 119),
+		gene("Chevron", UNCOMMON, BANESCALE, 54),
+		gene("Chrysocolla", LIMITED, MODERN, 237, SANDSURGE, 195, UNDERTIDE, 264),
+		gene("Cinder", UNCOMMON, MODERN, 213, ABERRATION, 214, AETHER, 163, BANESCALE, 215, GAOLER, 216, SANDSURGE, 217, UNDERTIDE, 218, VEILSPUN, 219),
+		gene("Clown", COMMON, MODERN, 3, ABERRATION, 222, AETHER, 169, BANESCALE, 75, GAOLER, 77, SANDSURGE, 196, UNDERTIDE, 265, VEILSPUN, 76),
+		gene("Crystal", RARE, MODERN, 7, ABERRATION, 91, BANESCALE, 182, GAOLER, 37, UNDERTIDE, 118, VEILSPUN, 146),
+		gene("Diamond", LIMITED, ABERRATION, 93),
+		gene("Fade", COMMON, MODERN, 42, ABERRATION, 90, AETHER, 148, AURABOA, 242, BANESCALE, 85, GAOLER, 86, SANDSURGE, 191, UNDERTIDE, 115, VEILSPUN, 60),
+		gene("Falcon", COMMON, MODERN, 16, ABERRATION, 92, AURABOA, 243, BANESCALE, 80, GAOLER, 30, UNDERTIDE, 122, VEILSPUN, 139),
+		gene("Fern", LIMITED, MODERN, 136, ABERRATION, 223, AURABOA, 244, BANESCALE, 137, UNDERTIDE, 266, VEILSPUN, 138),
+		gene("Flaunt", UNCOMMON, MODERN, 82, ABERRATION, 112, AETHER, 149, AURABOA, 245, GAOLER, 111, SANDSURGE, 193, UNDERTIDE, 267),
+		gene("Giraffe", UNCOMMON, MODERN, 12, ABERRATION, 94, AURABOA, 246, BANESCALE, 81, GAOLER, 27, UNDERTIDE, 123, VEILSPUN, 83),
+		gene("Ground", LIMITED, MODERN, 88, ABERRATION, 97, SANDSURGE, 186, UNDERTIDE, 268),
+		gene("Harlequin", RARE, MODERN, 170, ABERRATION, 224, AURABOA, 247, SANDSURGE, 192, UNDERTIDE, 280),
+		gene("Iridescent", RARE, MODERN, 1),
+		gene("Jaguar", UNCOMMON, MODERN, 19, ABERRATION, 99, AETHER, 152, AURABOA, 248, BANESCALE, 44, GAOLER, 33, SANDSURGE, 198, UNDERTIDE, 269),
+		gene("Jupiter", UNCOMMON, MODERN, 14, AETHER, 153, SANDSURGE, 197, UNDERTIDE, 270, VEILSPUN, 64),
+		gene("Laced", COMMON, MODERN, 26, AETHER, 156, AURABOA, 249, BANESCALE, 48, GAOLER, 73, VEILSPUN, 61),
+		gene("Leopard", COMMON, MODERN, 40, ABERRATION, 225, BANESCALE, 109, GAOLER, 173, VEILSPUN, 142),
+		gene("Lionfish", UNCOMMON, MODERN, 25, ABERRATION, 100, AETHER, 158, SANDSURGE, 199, UNDERTIDE, 126),
+		gene("Love", LIMITED, AURABOA, 279),
+		gene("Marble", COMMON, BANESCALE, 47),
+		gene("Metallic", RARE, MODERN, 17, AETHER, 157, AURABOA, 250, BANESCALE, 49, UNDERTIDE, 278),
+		gene("Mochlus", UNCOMMON, AURABOA, 251),
+		gene("Mosaic", UNCOMMON, MODERN, 58, AETHER, 155, AURABOA, 252, GAOLER, 38, SANDSURGE, 200),
+		gene("Octopus", LIMITED, UNDERTIDE, 133),
+		gene("Orb", LIMITED, ABERRATION, 102, AURABOA, 253, UNDERTIDE, 271),
+		gene("Petals", RARE, MODERN, 13, AETHER, 154, BANESCALE, 51, UNDERTIDE, 281, VEILSPUN, 143),
+		gene("Phantom", LIMITED, GAOLER, 39),
+		gene("Pharaoh", RARE, MODERN, 87, ABERRATION, 101, BANESCALE, 185, UNDERTIDE, 120),
+		gene("Piebald", COMMON, MODERN, 9, AETHER, 159, AURABOA, 254, GAOLER, 31, SANDSURGE, 201, UNDERTIDE, 272),
+		gene("Pinstripe", LIMITED, MODERN, 22, ABERRATION, 226, BANESCALE, 45, GAOLER, 32, SANDSURGE, 202, UNDERTIDE, 121),
+		gene("Poison", LIMITED, MODERN, 11, ABERRATION, 227, BANESCALE, 53, GAOLER, 174, UNDERTIDE, 131, VEILSPUN, 140),
+		gene("Python", LIMITED, MODERN, 23, AETHER, 160, AURABOA, 255, SANDSURGE, 203),
+		gene("Ragged", UNCOMMON, BANESCALE, 56),
+		gene("Rattlesnake", UNCOMMON, AURABOA, 256, SANDSURGE, 206),
+		gene("Ribbon", UNCOMMON, MODERN, 84, ABERRATION, 105, BANESCALE, 183, GAOLER, 175, UNDERTIDE, 124),
+		gene("Ripple", UNCOMMON, MODERN, 5, ABERRATION, 228, AURABOA, 257, BANESCALE, 79, GAOLER, 78, UNDERTIDE, 130),
+		gene("Sailfish", LIMITED, SANDSURGE, 212),
+		gene("Savannah", COMMON, MODERN, 18, ABERRATION, 103, BANESCALE, 50, GAOLER, 176, SANDSURGE, 204, UNDERTIDE, 129),
+		gene("Shaggy", COMMON, GAOLER, 29),
+		gene("Shell", UNCOMMON, VEILSPUN, 71),
+		gene("Skink", LIMITED, MODERN, 15, ABERRATION, 229, AETHER, 161, BANESCALE, 52, GAOLER, 177, VEILSPUN, 67),
+		gene("Slime", LIMITED, MODERN, 41, ABERRATION, 106, GAOLER, 178, SANDSURGE, 208, VEILSPUN, 141),
+		gene("Speckle", COMMON, MODERN, 4, ABERRATION, 98, BANESCALE, 147, UNDERTIDE, 132, VEILSPUN, 144),
+		gene("Sphinxmoth", UNCOMMON, VEILSPUN, 72),
+		gene("Spool", COMMON, AETHER, 162),
+		gene("Starmap", RARE, MODERN, 24, ABERRATION, 230, AETHER, 168, AURABOA, 263, UNDERTIDE, 273, VEILSPUN, 65),
+		gene("Stitched", LIMITED, MODERN, 59, ABERRATION, 107, AETHER, 165, GAOLER, 180, UNDERTIDE, 282, VEILSPUN, 66),
+		gene("Swirl", COMMON, MODERN, 57, ABERRATION, 104, GAOLER, 179, SANDSURGE, 209, UNDERTIDE, 134),
+		gene("Tapir", COMMON, MODERN, 21, ABERRATION, 95, AURABOA, 258, BANESCALE, 74, GAOLER, 35, SANDSURGE, 210, UNDERTIDE, 274, VEILSPUN, 62),
+		gene("Tide", LIMITED, MODERN, 114, ABERRATION, 231, AETHER, 164, BANESCALE, 184, GAOLER, 172, UNDERTIDE, 113),
+		gene("Tiger", COMMON, MODERN, 2, AURABOA, 259, BANESCALE, 46, GAOLER, 36, SANDSURGE, 211, UNDERTIDE, 275),
+		gene("Twinkle", RARE, AETHER, 166),
+		gene("Varnish", COMMON, AURABOA, 261, UNDERTIDE, 276),
+		gene("Vipera", UNCOMMON, MODERN, 8, ABERRATION, 96, AURABOA, 260, VEILSPUN, 63),
+		gene("Wasp", RARE, MODERN, 20, ABERRATION, 108, GAOLER, 28, SANDSURGE, 207, UNDERTIDE, 125, VEILSPUN, 68),
+		gene("Wicker", RARE, AURABOA, 262),
+		gene("Wolf", UNCOMMON, UNDERTIDE, 116),
+		gene("Wrought", COMMON, SANDSURGE, 187, UNDERTIDE, 277)
+	]),
+	secondary: freeze([
+		gene("Affection", LIMITED, AURABOA, 279),
+		gene("Alloy", RARE, MODERN, 17, AETHER, 157, AURABOA, 250, BANESCALE, 49, UNDERTIDE, 278),
+		gene("Arowana", COMMON, SANDSURGE, 194),
+		gene("Arrow", UNCOMMON, BANESCALE, 54),
 		gene("Basic"),
-		gene("Bee", RARE, { [MODERN]: 20, [ABERRATION]: 108, [GAOLER]: 28, [SANDSURGE]: 207, [UNDERTIDE]: 125, [VEILSPUN]: 60 }),
-		gene("Blaze", UNCOMMON, { [MODERN]: 213, [ABERRATION]: 214, [AETHER]: 163, [BANESCALE]: 215, [GAOLER]: 216, [SANDSURGE]: 217, [UNDERTIDE]: 218, [VEILSPUN]: 219 }),
-		gene("Blend", COMMON, { [MODERN]: 42, [ABERRATION]: 91, [AETHER]: 148, [AURABOA]: 242, [BANESCALE]: 85, [GAOLER]: 86, [SANDSURGE]: 191, [UNDERTIDE]: 115, [VEILSPUN]: 61 }),
-		gene("Breakup", UNCOMMON, { [MODERN]: 58, [AETHER]: 155, [AURABOA]: 252, [GAOLER]: 38, [SANDSURGE]: 200 }),
-		gene("Butterfly", RARE, { [MODERN]: 13, [AETHER]: 154, [BANESCALE]: 51, [UNDERTIDE]: 281, [VEILSPUN]: 144 }),
-		gene("Chess", COMMON, { [UNDERTIDE]: 127 }),
-		gene("Clouded", COMMON, { [MODERN]: 40, [ABERRATION]: 220, [BANESCALE]: 109, [GAOLER]: 180, [VEILSPUN]: 142 }),
-		gene("Constellation", RARE, { [MODERN]: 25, [ABERRATION]: 221, [AETHER]: 168, [AURABOA]: 263, [UNDERTIDE]: 273, [VEILSPUN]: 66 }),
-		gene("Current", UNCOMMON, { [MODERN]: 6, [ABERRATION]: 222, [AURABOA]: 257, [BANESCALE]: 79, [GAOLER]: 78, [UNDERTIDE]: 130 }),
-		gene("Daub", UNCOMMON, { [MODERN]: 7, [ABERRATION]: 89, [AETHER]: 150, [AURABOA]: 238, [BANESCALE]: 181, [GAOLER]: 34, [UNDERTIDE]: 117, [VEILSPUN]: 145 }),
-		gene("Diamondback", UNCOMMON, { [AURABOA]: 256, [SANDSURGE]: 206 }),
-		gene("Edged", COMMON, { [MODERN]: 26, [AETHER]: 156, [AURABOA]: 249, [BANESCALE]: 48, [GAOLER]: 73, [VEILSPUN]: 62 }),
-		gene("Eel", UNCOMMON, { [MODERN]: 84, [ABERRATION]: 105, [BANESCALE]: 183, [GAOLER]: 174, [UNDERTIDE]: 124 }),
-		gene("Eye Spots", COMMON, { [MODERN]: 3, [ABERRATION]: 223, [AETHER]: 169, [BANESCALE]: 75, [GAOLER]: 77, [SANDSURGE]: 196, [UNDERTIDE]: 265, [VEILSPUN]: 76 }),
-		gene("Facet", RARE, { [MODERN]: 8, [ABERRATION]: 90, [BANESCALE]: 182, [GAOLER]: 37, [UNDERTIDE]: 118, [VEILSPUN]: 146 }),
-		gene("Fissure", LIMITED, { [MODERN]: 88, [ABERRATION]: 97, [SANDSURGE]: 186, [UNDERTIDE]: 268 }),
-		gene("Flair", UNCOMMON, { [MODERN]: 82, [ABERRATION]: 112, [AETHER]: 149, [AURABOA]: 245, [GAOLER]: 111, [SANDSURGE]: 193, [UNDERTIDE]: 267 }),
-		gene("Flicker", RARE, { [AETHER]: 166 }),
-		gene("Foam", LIMITED, { [MODERN]: 113, [ABERRATION]: 224, [AETHER]: 164, [BANESCALE]: 184, [GAOLER]: 172, [UNDERTIDE]: 114 }),
-		gene("Freckle", COMMON, { [MODERN]: 4, [ABERRATION]: 98, [BANESCALE]: 147, [UNDERTIDE]: 132, [VEILSPUN]: 143 }),
-		gene("Hawkmoth", UNCOMMON, { [VEILSPUN]: 72 }),
-		gene("Hex", UNCOMMON, { [MODERN]: 14, [ABERRATION]: 94, [AURABOA]: 246, [BANESCALE]: 81, [GAOLER]: 27, [UNDERTIDE]: 123, [VEILSPUN]: 83 }),
-		gene("Hypnotic", UNCOMMON, { [MODERN]: 9, [ABERRATION]: 96, [AURABOA]: 260, [VEILSPUN]: 64 }),
-		gene("Icing", LIMITED, { [AETHER]: 167 }),
-		gene("Jester", RARE, { [MODERN]: 170, [ABERRATION]: 225, [AURABOA]: 247, [SANDSURGE]: 192, [UNDERTIDE]: 282 }),
-		gene("Larvae", COMMON, { [AURABOA]: 261, [UNDERTIDE]: 276 }),
-		gene("Lacquer", COMMON, { [AURABOA]: 241 }),
-		gene("Loop", UNCOMMON, { [VEILSPUN]: 70 }),
-		gene("Malachite", LIMITED, { [MODERN]: 237, [SANDSURGE]: 195, [UNDERTIDE]: 264 }),
-		gene("Marbled", COMMON, { [MODERN]: 57, [ABERRATION]: 103, [GAOLER]: 178, [SANDSURGE]: 209, [UNDERTIDE]: 134 }),
-		gene("Marlin", LIMITED, { [SANDSURGE]: 212 }),
-		gene("Morph", LIMITED, { [MODERN]: 23, [AETHER]: 160, [AURABOA]: 255, [SANDSURGE]: 203 }),
-		gene("Mottle", COMMON, { [BANESCALE]: 47 }),
-		gene("Myrid", LIMITED, { [MODERN]: 110, [ABERRATION]: 226, [AETHER]: 151, [AURABOA]: 240, [SANDSURGE]: 188, [UNDERTIDE]: 135 }),
-		gene("Noxtide", UNCOMMON, { [MODERN]: 24, [ABERRATION]: 100, [AETHER]: 158, [SANDSURGE]: 199, [UNDERTIDE]: 126 }),
-		gene("Pack", UNCOMMON, { [UNDERTIDE]: 116 }),
-		gene("Paint", COMMON, { [MODERN]: 10, [AETHER]: 159, [AURABOA]: 254, [GAOLER]: 31, [SANDSURGE]: 201, [UNDERTIDE]: 272 }),
-		gene("Paisley", LIMITED, { [MODERN]: 136, [ABERRATION]: 227, [AURABOA]: 244, [BANESCALE]: 137, [UNDERTIDE]: 266, [VEILSPUN]: 138 }),
-		gene("Patchwork", LIMITED, { [MODERN]: 59, [ABERRATION]: 107, [AETHER]: 165, [GAOLER]: 179, [UNDERTIDE]: 280, [VEILSPUN]: 67 }),
-		gene("Peregrine", COMMON, { [MODERN]: 11, [ABERRATION]: 92, [AURABOA]: 243, [BANESCALE]: 80, [GAOLER]: 30, [UNDERTIDE]: 122, [VEILSPUN]: 139 }),
-		gene("Rings", LIMITED, { [UNDERTIDE]: 133 }),
-		gene("Riopa", UNCOMMON, { [AURABOA]: 251 }),
-		gene("Rosette", UNCOMMON, { [MODERN]: 19, [ABERRATION]: 99, [AETHER]: 152, [AURABOA]: 248, [BANESCALE]: 44, [GAOLER]: 33, [SANDSURGE]: 198, [UNDERTIDE]: 269 }),
-		gene("Saddle", UNCOMMON, { [MODERN]: 232, [ABERRATION]: 233, [AETHER]: 234, [AURABOA]: 239, [BANESCALE]: 235, [GAOLER]: 171, [SANDSURGE]: 189, [UNDERTIDE]: 128, [VEILSPUN]: 236 }),
-		gene("Safari", COMMON, { [MODERN]: 18, [ABERRATION]: 104, [BANESCALE]: 50, [GAOLER]: 175, [SANDSURGE]: 204, [UNDERTIDE]: 129 }),
-		gene("Sarcophagus", RARE, { [MODERN]: 87, [ABERRATION]: 101, [BANESCALE]: 185, [UNDERTIDE]: 120 }),
-		gene("Saturn", UNCOMMON, { [MODERN]: 15, [AETHER]: 153, [SANDSURGE]: 197, [UNDERTIDE]: 270, [VEILSPUN]: 65 }),
-		gene("Seraph", UNCOMMON, { [MODERN]: 5, [ABERRATION]: 228, [BANESCALE]: 43, [SANDSURGE]: 190, [UNDERTIDE]: 119 }),
-		gene("Shimmer", RARE, { [MODERN]: 1 }),
-		gene("Sludge", LIMITED, { [MODERN]: 41, [ABERRATION]: 106, [GAOLER]: 177, [SANDSURGE]: 208, [VEILSPUN]: 141 }),
-		gene("Spade", LIMITED, { [ABERRATION]: 93 }),
-		gene("Spinner", LIMITED, { [MODERN]: 16, [ABERRATION]: 229, [AETHER]: 161, [BANESCALE]: 52, [GAOLER]: 176, [VEILSPUN]: 68 }),
-		gene("Spire", COMMON, { [SANDSURGE]: 187, [UNDERTIDE]: 277 }),
-		gene("Spirit", LIMITED, { [GAOLER]: 39 }),
-		gene("Streak", COMMON, { [GAOLER]: 29 }),
-		gene("Striation", COMMON, { [MODERN]: 21, [ABERRATION]: 95, [AURABOA]: 258, [BANESCALE]: 74, [GAOLER]: 35, [SANDSURGE]: 210, [UNDERTIDE]: 274, [VEILSPUN]: 63 }),
-		gene("Stripes", COMMON, { [MODERN]: 2, [AURABOA]: 259, [BANESCALE]: 46, [GAOLER]: 36, [SANDSURGE]: 211, [UNDERTIDE]: 275 }),
-		gene("Sugarplum", LIMITED, { [BANESCALE]: 55 }),
-		gene("Tear", UNCOMMON, { [BANESCALE]: 56 }),
-		gene("Thread", COMMON, { [AETHER]: 162 }),
-		gene("Toxin", LIMITED, { [MODERN]: 12, [ABERRATION]: 230, [BANESCALE]: 53, [GAOLER]: 173, [UNDERTIDE]: 131, [VEILSPUN]: 140 }),
-		gene("Trail", LIMITED, { [MODERN]: 22, [ABERRATION]: 231, [BANESCALE]: 45, [GAOLER]: 32, [SANDSURGE]: 202, [UNDERTIDE]: 121 }),
-		gene("Vivid", UNCOMMON, { [VEILSPUN]: 69 }),
-		gene("Weaver", LIMITED, { [ABERRATION]: 102, [AURABOA]: 253, [UNDERTIDE]: 271 }),
-		gene("Web", UNCOMMON, { [VEILSPUN]: 71 }),
-		gene("Woven", RARE, { [AURABOA]: 262 })
-	],
-	tertiary: [
-		gene("Angler", LIMITED, { [GAOLER]: 156, [UNDERTIDE]: 246, [VEILSPUN]: 78 }),
-		gene("Augment", RARE, { [ABERRATION]: 198, [SANDSURGE]: 173 }),
+		gene("Bee", RARE, MODERN, 20, ABERRATION, 108, GAOLER, 28, SANDSURGE, 207, UNDERTIDE, 125, VEILSPUN, 60),
+		gene("Blaze", UNCOMMON, MODERN, 213, ABERRATION, 214, AETHER, 163, BANESCALE, 215, GAOLER, 216, SANDSURGE, 217, UNDERTIDE, 218, VEILSPUN, 219),
+		gene("Blend", COMMON, MODERN, 42, ABERRATION, 91, AETHER, 148, AURABOA, 242, BANESCALE, 85, GAOLER, 86, SANDSURGE, 191, UNDERTIDE, 115, VEILSPUN, 61),
+		gene("Breakup", UNCOMMON, MODERN, 58, AETHER, 155, AURABOA, 252, GAOLER, 38, SANDSURGE, 200),
+		gene("Butterfly", RARE, MODERN, 13, AETHER, 154, BANESCALE, 51, UNDERTIDE, 281, VEILSPUN, 144),
+		gene("Chess", COMMON, UNDERTIDE, 127),
+		gene("Clouded", COMMON, MODERN, 40, ABERRATION, 220, BANESCALE, 109, GAOLER, 180, VEILSPUN, 142),
+		gene("Constellation", RARE, MODERN, 25, ABERRATION, 221, AETHER, 168, AURABOA, 263, UNDERTIDE, 273, VEILSPUN, 66),
+		gene("Current", UNCOMMON, MODERN, 6, ABERRATION, 222, AURABOA, 257, BANESCALE, 79, GAOLER, 78, UNDERTIDE, 130),
+		gene("Daub", UNCOMMON, MODERN, 7, ABERRATION, 89, AETHER, 150, AURABOA, 238, BANESCALE, 181, GAOLER, 34, UNDERTIDE, 117, VEILSPUN, 145),
+		gene("Diamondback", UNCOMMON, AURABOA, 256, SANDSURGE, 206),
+		gene("Edged", COMMON, MODERN, 26, AETHER, 156, AURABOA, 249, BANESCALE, 48, GAOLER, 73, VEILSPUN, 62),
+		gene("Eel", UNCOMMON, MODERN, 84, ABERRATION, 105, BANESCALE, 183, GAOLER, 174, UNDERTIDE, 124),
+		gene("Eye Spots", COMMON, MODERN, 3, ABERRATION, 223, AETHER, 169, BANESCALE, 75, GAOLER, 77, SANDSURGE, 196, UNDERTIDE, 265, VEILSPUN, 76),
+		gene("Facet", RARE, MODERN, 8, ABERRATION, 90, BANESCALE, 182, GAOLER, 37, UNDERTIDE, 118, VEILSPUN, 146),
+		gene("Fissure", LIMITED, MODERN, 88, ABERRATION, 97, SANDSURGE, 186, UNDERTIDE, 268),
+		gene("Flair", UNCOMMON, MODERN, 82, ABERRATION, 112, AETHER, 149, AURABOA, 245, GAOLER, 111, SANDSURGE, 193, UNDERTIDE, 267),
+		gene("Flicker", RARE, AETHER, 166),
+		gene("Foam", LIMITED, MODERN, 113, ABERRATION, 224, AETHER, 164, BANESCALE, 184, GAOLER, 172, UNDERTIDE, 114),
+		gene("Freckle", COMMON, MODERN, 4, ABERRATION, 98, BANESCALE, 147, UNDERTIDE, 132, VEILSPUN, 143),
+		gene("Hawkmoth", UNCOMMON, VEILSPUN, 72),
+		gene("Hex", UNCOMMON, MODERN, 14, ABERRATION, 94, AURABOA, 246, BANESCALE, 81, GAOLER, 27, UNDERTIDE, 123, VEILSPUN, 83),
+		gene("Hypnotic", UNCOMMON, MODERN, 9, ABERRATION, 96, AURABOA, 260, VEILSPUN, 64),
+		gene("Icing", LIMITED, AETHER, 167),
+		gene("Jester", RARE, MODERN, 170, ABERRATION, 225, AURABOA, 247, SANDSURGE, 192, UNDERTIDE, 282),
+		gene("Larvae", COMMON, AURABOA, 261, UNDERTIDE, 276),
+		gene("Lacquer", COMMON, AURABOA, 241),
+		gene("Loop", UNCOMMON, VEILSPUN, 70),
+		gene("Malachite", LIMITED, MODERN, 237, SANDSURGE, 195, UNDERTIDE, 264),
+		gene("Marbled", COMMON, MODERN, 57, ABERRATION, 103, GAOLER, 178, SANDSURGE, 209, UNDERTIDE, 134),
+		gene("Marlin", LIMITED, SANDSURGE, 212),
+		gene("Morph", LIMITED, MODERN, 23, AETHER, 160, AURABOA, 255, SANDSURGE, 203),
+		gene("Mottle", COMMON, BANESCALE, 47),
+		gene("Myrid", LIMITED, MODERN, 110, ABERRATION, 226, AETHER, 151, AURABOA, 240, SANDSURGE, 188, UNDERTIDE, 135),
+		gene("Noxtide", UNCOMMON, MODERN, 24, ABERRATION, 100, AETHER, 158, SANDSURGE, 199, UNDERTIDE, 126),
+		gene("Pack", UNCOMMON, UNDERTIDE, 116),
+		gene("Paint", COMMON, MODERN, 10, AETHER, 159, AURABOA, 254, GAOLER, 31, SANDSURGE, 201, UNDERTIDE, 272),
+		gene("Paisley", LIMITED, MODERN, 136, ABERRATION, 227, AURABOA, 244, BANESCALE, 137, UNDERTIDE, 266, VEILSPUN, 138),
+		gene("Patchwork", LIMITED, MODERN, 59, ABERRATION, 107, AETHER, 165, GAOLER, 179, UNDERTIDE, 280, VEILSPUN, 67),
+		gene("Peregrine", COMMON, MODERN, 11, ABERRATION, 92, AURABOA, 243, BANESCALE, 80, GAOLER, 30, UNDERTIDE, 122, VEILSPUN, 139),
+		gene("Rings", LIMITED, UNDERTIDE, 133),
+		gene("Riopa", UNCOMMON, AURABOA, 251),
+		gene("Rosette", UNCOMMON, MODERN, 19, ABERRATION, 99, AETHER, 152, AURABOA, 248, BANESCALE, 44, GAOLER, 33, SANDSURGE, 198, UNDERTIDE, 269),
+		gene("Saddle", UNCOMMON, MODERN, 232, ABERRATION, 233, AETHER, 234, AURABOA, 239, BANESCALE, 235, GAOLER, 171, SANDSURGE, 189, UNDERTIDE, 128, VEILSPUN, 236),
+		gene("Safari", COMMON, MODERN, 18, ABERRATION, 104, BANESCALE, 50, GAOLER, 175, SANDSURGE, 204, UNDERTIDE, 129),
+		gene("Sarcophagus", RARE, MODERN, 87, ABERRATION, 101, BANESCALE, 185, UNDERTIDE, 120),
+		gene("Saturn", UNCOMMON, MODERN, 15, AETHER, 153, SANDSURGE, 197, UNDERTIDE, 270, VEILSPUN, 65),
+		gene("Seraph", UNCOMMON, MODERN, 5, ABERRATION, 228, BANESCALE, 43, SANDSURGE, 190, UNDERTIDE, 119),
+		gene("Shimmer", RARE, MODERN, 1),
+		gene("Sludge", LIMITED, MODERN, 41, ABERRATION, 106, GAOLER, 177, SANDSURGE, 208, VEILSPUN, 141),
+		gene("Spade", LIMITED, ABERRATION, 93),
+		gene("Spinner", LIMITED, MODERN, 16, ABERRATION, 229, AETHER, 161, BANESCALE, 52, GAOLER, 176, VEILSPUN, 68),
+		gene("Spire", COMMON, SANDSURGE, 187, UNDERTIDE, 277),
+		gene("Spirit", LIMITED, GAOLER, 39),
+		gene("Streak", COMMON, GAOLER, 29),
+		gene("Striation", COMMON, MODERN, 21, ABERRATION, 95, AURABOA, 258, BANESCALE, 74, GAOLER, 35, SANDSURGE, 210, UNDERTIDE, 274, VEILSPUN, 63),
+		gene("Stripes", COMMON, MODERN, 2, AURABOA, 259, BANESCALE, 46, GAOLER, 36, SANDSURGE, 211, UNDERTIDE, 275),
+		gene("Sugarplum", LIMITED, BANESCALE, 55),
+		gene("Tear", UNCOMMON, BANESCALE, 56),
+		gene("Thread", COMMON, AETHER, 162),
+		gene("Toxin", LIMITED, MODERN, 12, ABERRATION, 230, BANESCALE, 53, GAOLER, 173, UNDERTIDE, 131, VEILSPUN, 140),
+		gene("Trail", LIMITED, MODERN, 22, ABERRATION, 231, BANESCALE, 45, GAOLER, 32, SANDSURGE, 202, UNDERTIDE, 121),
+		gene("Vivid", UNCOMMON, VEILSPUN, 69),
+		gene("Weaver", LIMITED, ABERRATION, 102, AURABOA, 253, UNDERTIDE, 271),
+		gene("Web", UNCOMMON, VEILSPUN, 71),
+		gene("Woven", RARE, AURABOA, 262)
+	]),
+	tertiary: freeze([
+		gene("Angler", LIMITED, GAOLER, 156, UNDERTIDE, 246, VEILSPUN, 78),
+		gene("Augment", RARE, ABERRATION, 198, SANDSURGE, 173),
 		gene("Basic"),
-		gene("Batty", LIMITED, { [AURABOA]: 214 }),
-		gene("Beard", UNCOMMON, { [SANDSURGE]: 174 }),
-		gene("Beetle", LIMITED, { [VEILSPUN]: 65 }),
-		gene("Blossom", LIMITED, { [GAOLER]: 36, [UNDERTIDE]: 267 }),
-		gene("Braids", UNCOMMON, { [ABERRATION]: 199, [GAOLER]: 55 }),
-		gene("Branches", LIMITED, { [AURABOA]: 217, [SANDSURGE]: 189, [UNDERTIDE]: 248, [VEILSPUN]: 63 }),
-		gene("Brightshine", LIMITED, { [UNDERTIDE]: 170, [VEILSPUN]: 169 }),
-		gene("Capsule", LIMITED, { [MODERN]: 18, [ABERRATION]: 83, [AURABOA]: 229, [BANESCALE]: 74, [GAOLER]: 75, [UNDERTIDE]: 111, [VEILSPUN]: 56 }),
-		gene("Carnivore", LIMITED, { [ABERRATION]: 162, [AETHER]: 163, [BANESCALE]: 164, [GAOLER]: 166, [UNDERTIDE]: 165, [VEILSPUN]: 167 }),
-		gene("Chitin", COMMON, { [SANDSURGE]: 183 }),
-		gene("Circuit", RARE, { [MODERN]: 1, [AETHER]: 135, [UNDERTIDE]: 117 }),
-		gene("Contour", COMMON, { [MODERN]: 13, [ABERRATION]: 200, [AETHER]: 136, [AURABOA]: 230, [BANESCALE]: 46, [GAOLER]: 157, [UNDERTIDE]: 249 }),
-		gene("Crackle", UNCOMMON, { [MODERN]: 6, [AURABOA]: 231, [BANESCALE]: 50, [UNDERTIDE]: 115, [VEILSPUN]: 58 }),
-		gene("Crest", UNCOMMON, { [AURABOA]: 215, [SANDSURGE]: 184, [UNDERTIDE]: 250 }),
-		gene("Crystalline", LIMITED, { [AURABOA]: 266, [GAOLER]: 265 }),
-		gene("Darts", COMMON, { [SANDSURGE]: 177 }),
-		gene("Diaphanous", RARE, { [VEILSPUN]: 66 }),
-		gene("Fangs", UNCOMMON, { [ABERRATION]: 84 }),
-		gene("Fans", RARE, { [ABERRATION]: 201, [BANESCALE]: 41, [GAOLER]: 3, [UNDERTIDE]: 251 }),
-		gene("Featherbeard", LIMITED, { [UNDERTIDE]: 118 }),
-		gene("Filigree", RARE, { [MODERN]: 21, [BANESCALE]: 43, [UNDERTIDE]: 116, [VEILSPUN]: 133 }),
-		gene("Firebreather", LIMITED, { [MODERN]: 161, [ABERRATION]: 202, [AURABOA]: 233, [UNDERTIDE]: 252 }),
-		gene("Firefly", LIMITED, { [MODERN]: 22, [ABERRATION]: 85, [AURABOA]: 232, [UNDERTIDE]: 253, [VEILSPUN]: 61 }),
-		gene("Fishbone", UNCOMMON, { [AURABOA]: 216, [SANDSURGE]: 185 }),
-		gene("Flameforger", LIMITED, { [ABERRATION]: 197, [BANESCALE]: 196 }),
-		gene("Flecks", LIMITED, { [MODERN]: 103, [ABERRATION]: 104, [UNDERTIDE]: 112, [VEILSPUN]: 64 }),
-		gene("Flutter", LIMITED, { [AETHER]: 141 }),
-		gene("Frills", RARE, { [ABERRATION]: 86 }),
-		gene("Gembond", UNCOMMON, { [MODERN]: 4, [AETHER]: 137, [SANDSURGE]: 176, [UNDERTIDE]: 123 }),
-		gene("Ghost", UNCOMMON, { [MODERN]: 20, [ABERRATION]: 88, [BANESCALE]: 47, [GAOLER]: 25, [UNDERTIDE]: 121, [VEILSPUN]: 131 }),
-		gene("Gliders", LIMITED, { [BANESCALE]: 76 }),
-		gene("Glimmer", RARE, { [MODERN]: 10, [ABERRATION]: 94, [BANESCALE]: 95, [GAOLER]: 101, [VEILSPUN]: 102 }),
-		gene("Glowtail", RARE, { [MODERN]: 54, [ABERRATION]: 89, [AETHER]: 138 }),
-		gene("Gnarlhorns", RARE, { [GAOLER]: 27 }),
-		gene("Jellyfish", UNCOMMON, { [UNDERTIDE]: 269 }),
-		gene("Jewels", RARE, { [ABERRATION]: 87 }),
-		gene("Keel", LIMITED, { [MODERN]: 53, [AETHER]: 139, [AURABOA]: 234, [SANDSURGE]: 186, [UNDERTIDE]: 268 }),
-		gene("Koi", RARE, { [MODERN]: 73, [ABERRATION]: 203, [AURABOA]: 235, [UNDERTIDE]: 254, [VEILSPUN]: 108 }),
-		gene("Kumo", COMMON, { [ABERRATION]: 80, [SANDSURGE]: 175 }),
-		gene("Lace", UNCOMMON, { [MODERN]: 16, [AETHER]: 142, [BANESCALE]: 44, [SANDSURGE]: 187 }),
-		gene("Mandibles", LIMITED, { [AETHER]: 143 }),
-		gene("Medusa", RARE, { [AURABOA]: 218, [UNDERTIDE]: 255 }),
-		gene("Monarch", RARE, { [AETHER]: 140, [BANESCALE]: 158 }),
-		gene("Mop", RARE, { [VEILSPUN]: 67 }),
-		gene("Mucous", LIMITED, { [ABERRATION]: 81 }),
-		gene("Nudibranch", LIMITED, { [UNDERTIDE]: 126 }),
-		gene("Okapi", UNCOMMON, { [MODERN]: 9, [SANDSURGE]: 182, [UNDERTIDE]: 129, [VEILSPUN]: 59 }),
-		gene("Opal", RARE, { [MODERN]: 17, [AURABOA]: 236, [GAOLER]: 37, [UNDERTIDE]: 247, [VEILSPUN]: 62 }),
-		gene("Paradise", UNCOMMON, { [AURABOA]: 219 }),
-		gene("Peacock", COMMON, { [MODERN]: 24, [ABERRATION]: 90, [AURABOA]: 237, [BANESCALE]: 106, [SANDSURGE]: 191, [VEILSPUN]: 60 }),
-		gene("Pinions", RARE, { [GAOLER]: 77 }),
-		gene("Plating", UNCOMMON, { [UNDERTIDE]: 128 }),
-		gene("Plumage", RARE, { [AURABOA]: 220, [BANESCALE]: 51 }),
-		gene("Points", COMMON, { [MODERN]: 107, [AETHER]: 146 }),
-		gene("Polkadot", LIMITED, { [MODERN]: 168, [ABERRATION]: 79, [AURABOA]: 238 }),
-		gene("Polypore", LIMITED, { [ABERRATION]: 82 }),
-		gene("Porcupine", LIMITED, { [AURABOA]: 221, [BANESCALE]: 49, [UNDERTIDE]: 256 }),
-		gene("Pufferfish", UNCOMMON, { [UNDERTIDE]: 127 }),
-		gene("Remora", RARE, { [UNDERTIDE]: 119 }),
-		gene("Ringlets", UNCOMMON, { [MODERN]: 23, [BANESCALE]: 40, [GAOLER]: 30, [UNDERTIDE]: 120 }),
-		gene("Riot", LIMITED, { [ABERRATION]: 211, [GAOLER]: 212 }),
-		gene("Rockbreaker", LIMITED, { [AURABOA]: 244, [SANDSURGE]: 245 }),
-		gene("Runes", UNCOMMON, { [MODERN]: 14, [GAOLER]: 32, [SANDSURGE]: 178, [UNDERTIDE]: 114, [VEILSPUN]: 57 }),
-		gene("Sailfin", RARE, { [AURABOA]: 222, [UNDERTIDE]: 130 }),
-		gene("Scales", LIMITED, { [MODERN]: 15, [ABERRATION]: 92, [AETHER]: 147, [AURABOA]: 239, [UNDERTIDE]: 257 }),
-		gene("Scorpion", LIMITED, { [GAOLER]: 33 }),
-		gene("Scuttle", LIMITED, { [AURABOA]: 223 }),
-		gene("Shardflank", COMMON, { [GAOLER]: 26 }),
-		gene("Shark", LIMITED, { [SANDSURGE]: 190, [UNDERTIDE]: 258 }),
-		gene("Skeletal", LIMITED, { [ABERRATION]: 204, [BANESCALE]: 45 }),
-		gene("Smirch", LIMITED, { [MODERN]: 19, [ABERRATION]: 205, [AETHER]: 150, [SANDSURGE]: 192, [UNDERTIDE]: 259 }),
-		gene("Smoke", UNCOMMON, { [MODERN]: 7, [AETHER]: 151, [AURABOA]: 240, [GAOLER]: 28, [UNDERTIDE]: 260 }),
-		gene("Soap", RARE, { [MODERN]: 105, [BANESCALE]: 159, [SANDSURGE]: 180, [UNDERTIDE]: 124 }),
-		gene("Space", RARE, { [AETHER]: 149 }),
-		gene("Sparkle", UNCOMMON, { [MODERN]: 97, [ABERRATION]: 96, [AETHER]: 152, [BANESCALE]: 98, [GAOLER]: 99, [SANDSURGE]: 193, [UNDERTIDE]: 122, [VEILSPUN]: 100 }),
-		gene("Spectre", RARE, { [SANDSURGE]: 188 }),
-		gene("Spines", UNCOMMON, { [MODERN]: 8, [ABERRATION]: 206, [AETHER]: 153, [AURABOA]: 241, [BANESCALE]: 160, [SANDSURGE]: 181, [UNDERTIDE]: 261 }),
-		gene("Squiggle", LIMITED, { [BANESCALE]: 42 }),
-		gene("Stained", RARE, { [MODERN]: 12, [ABERRATION]: 207, [AETHER]: 145, [AURABOA]: 242, [BANESCALE]: 69, [GAOLER]: 71, [SANDSURGE]: 172, [UNDERTIDE]: 110, [VEILSPUN]: 72 }),
-		gene("Starfall", LIMITED, { [AETHER]: 209, [SANDSURGE]: 210 }),
-		gene("Stinger", UNCOMMON, { [AETHER]: 148, [AURABOA]: 224, [UNDERTIDE]: 262 }),
-		gene("Tentacles", RARE, { [UNDERTIDE]: 125 }),
-		gene("Terracotta", COMMON, { [AURABOA]: 225 }),
-		gene("Thorns", UNCOMMON, { [ABERRATION]: 208, [AURABOA]: 226, [UNDERTIDE]: 263, [VEILSPUN]: 68 }),
-		gene("Thundercrack", LIMITED, { [GAOLER]: 195, [SANDSURGE]: 194 }),
-		gene("Thylacine", COMMON, { [MODERN]: 11, [ABERRATION]: 93, [GAOLER]: 29, [SANDSURGE]: 179 }),
-		gene("Topcoat", COMMON, { [AURABOA]: 243, [UNDERTIDE]: 264 }),
-		gene("Trickmurk", LIMITED, { [AETHER]: 271, [VEILSPUN]: 270 }),
-		gene("Trimmings", COMMON, { [BANESCALE]: 39 }),
-		gene("Underbelly", COMMON, { [MODERN]: 5, [ABERRATION]: 132, [AETHER]: 144, [AURABOA]: 228, [BANESCALE]: 52, [GAOLER]: 31, [SANDSURGE]: 171, [UNDERTIDE]: 109, [VEILSPUN]: 70 }),
-		gene("Veined", LIMITED, { [MODERN]: 38, [ABERRATION]: 91, [GAOLER]: 2, [UNDERTIDE]: 113, [VEILSPUN]: 134 }),
-		gene("Weathered", LIMITED, { [GAOLER]: 35 }),
-		gene("Whiskers", UNCOMMON, { [AETHER]: 154 }),
-		gene("Willow", UNCOMMON, { [AURABOA]: 227 }),
-		gene("Wintercoat", UNCOMMON, { [GAOLER]: 34 }),
-		gene("Wish", RARE, { [MODERN]: 213, [AETHER]: 155 }),
-		gene("Wraith", RARE, { [BANESCALE]: 48 })
-	]
+		gene("Batty", LIMITED, AURABOA, 214),
+		gene("Beard", UNCOMMON, SANDSURGE, 174),
+		gene("Beetle", LIMITED, VEILSPUN, 65),
+		gene("Blossom", LIMITED, GAOLER, 36, UNDERTIDE, 267),
+		gene("Braids", UNCOMMON, ABERRATION, 199, GAOLER, 55),
+		gene("Branches", LIMITED, AURABOA, 217, SANDSURGE, 189, UNDERTIDE, 248, VEILSPUN, 63),
+		gene("Brightshine", LIMITED, UNDERTIDE, 170, VEILSPUN, 169),
+		gene("Capsule", LIMITED, MODERN, 18, ABERRATION, 83, AURABOA, 229, BANESCALE, 74, GAOLER, 75, UNDERTIDE, 111, VEILSPUN, 56),
+		gene("Carnivore", LIMITED, ABERRATION, 162, AETHER, 163, BANESCALE, 164, GAOLER, 166, UNDERTIDE, 165, VEILSPUN, 167),
+		gene("Chitin", COMMON, SANDSURGE, 183),
+		gene("Circuit", RARE, MODERN, 1, AETHER, 135, UNDERTIDE, 117),
+		gene("Contour", COMMON, MODERN, 13, ABERRATION, 200, AETHER, 136, AURABOA, 230, BANESCALE, 46, GAOLER, 157, UNDERTIDE, 249),
+		gene("Crackle", UNCOMMON, MODERN, 6, AURABOA, 231, BANESCALE, 50, UNDERTIDE, 115, VEILSPUN, 58),
+		gene("Crest", UNCOMMON, AURABOA, 215, SANDSURGE, 184, UNDERTIDE, 250),
+		gene("Crystalline", LIMITED, AURABOA, 266, GAOLER, 265),
+		gene("Darts", COMMON, SANDSURGE, 177),
+		gene("Diaphanous", RARE, VEILSPUN, 66),
+		gene("Fangs", UNCOMMON, ABERRATION, 84),
+		gene("Fans", RARE, ABERRATION, 201, BANESCALE, 41, GAOLER, 3, UNDERTIDE, 251),
+		gene("Featherbeard", LIMITED, UNDERTIDE, 118),
+		gene("Filigree", RARE, MODERN, 21, BANESCALE, 43, UNDERTIDE, 116, VEILSPUN, 133),
+		gene("Firebreather", LIMITED, MODERN, 161, ABERRATION, 202, AURABOA, 233, UNDERTIDE, 252),
+		gene("Firefly", LIMITED, MODERN, 22, ABERRATION, 85, AURABOA, 232, UNDERTIDE, 253, VEILSPUN, 61),
+		gene("Fishbone", UNCOMMON, AURABOA, 216, SANDSURGE, 185),
+		gene("Flameforger", LIMITED, ABERRATION, 197, BANESCALE, 196),
+		gene("Flecks", LIMITED, MODERN, 103, ABERRATION, 104, UNDERTIDE, 112, VEILSPUN, 64),
+		gene("Flutter", LIMITED, AETHER, 141),
+		gene("Frills", RARE, ABERRATION, 86),
+		gene("Gembond", UNCOMMON, MODERN, 4, AETHER, 137, SANDSURGE, 176, UNDERTIDE, 123),
+		gene("Ghost", UNCOMMON, MODERN, 20, ABERRATION, 88, BANESCALE, 47, GAOLER, 25, UNDERTIDE, 121, VEILSPUN, 131),
+		gene("Gliders", LIMITED, BANESCALE, 76),
+		gene("Glimmer", RARE, MODERN, 10, ABERRATION, 94, BANESCALE, 95, GAOLER, 101, VEILSPUN, 102),
+		gene("Glowtail", RARE, MODERN, 54, ABERRATION, 89, AETHER, 138),
+		gene("Gnarlhorns", RARE, GAOLER, 27),
+		gene("Jellyfish", UNCOMMON, UNDERTIDE, 269),
+		gene("Jewels", RARE, ABERRATION, 87),
+		gene("Keel", LIMITED, MODERN, 53, AETHER, 139, AURABOA, 234, SANDSURGE, 186, UNDERTIDE, 268),
+		gene("Koi", RARE, MODERN, 73, ABERRATION, 203, AURABOA, 235, UNDERTIDE, 254, VEILSPUN, 108),
+		gene("Kumo", COMMON, ABERRATION, 80, SANDSURGE, 175),
+		gene("Lace", UNCOMMON, MODERN, 16, AETHER, 142, BANESCALE, 44, SANDSURGE, 187),
+		gene("Mandibles", LIMITED, AETHER, 143),
+		gene("Medusa", RARE, AURABOA, 218, UNDERTIDE, 255),
+		gene("Monarch", RARE, AETHER, 140, BANESCALE, 158),
+		gene("Mop", RARE, VEILSPUN, 67),
+		gene("Mucous", LIMITED, ABERRATION, 81),
+		gene("Nudibranch", LIMITED, UNDERTIDE, 126),
+		gene("Okapi", UNCOMMON, MODERN, 9, SANDSURGE, 182, UNDERTIDE, 129, VEILSPUN, 59),
+		gene("Opal", RARE, MODERN, 17, AURABOA, 236, GAOLER, 37, UNDERTIDE, 247, VEILSPUN, 62),
+		gene("Paradise", UNCOMMON, AURABOA, 219),
+		gene("Peacock", COMMON, MODERN, 24, ABERRATION, 90, AURABOA, 237, BANESCALE, 106, SANDSURGE, 191, VEILSPUN, 60),
+		gene("Pinions", RARE, GAOLER, 77),
+		gene("Plating", UNCOMMON, UNDERTIDE, 128),
+		gene("Plumage", RARE, AURABOA, 220, BANESCALE, 51),
+		gene("Points", COMMON, MODERN, 107, AETHER, 146),
+		gene("Polkadot", LIMITED, MODERN, 168, ABERRATION, 79, AURABOA, 238),
+		gene("Polypore", LIMITED, ABERRATION, 82),
+		gene("Porcupine", LIMITED, AURABOA, 221, BANESCALE, 49, UNDERTIDE, 256),
+		gene("Pufferfish", UNCOMMON, UNDERTIDE, 127),
+		gene("Remora", RARE, UNDERTIDE, 119),
+		gene("Ringlets", UNCOMMON, MODERN, 23, BANESCALE, 40, GAOLER, 30, UNDERTIDE, 120),
+		gene("Riot", LIMITED, ABERRATION, 211, GAOLER, 212),
+		gene("Rockbreaker", LIMITED, AURABOA, 244, SANDSURGE, 245),
+		gene("Runes", UNCOMMON, MODERN, 14, GAOLER, 32, SANDSURGE, 178, UNDERTIDE, 114, VEILSPUN, 57),
+		gene("Sailfin", RARE, AURABOA, 222, UNDERTIDE, 130),
+		gene("Scales", LIMITED, MODERN, 15, ABERRATION, 92, AETHER, 147, AURABOA, 239, UNDERTIDE, 257),
+		gene("Scorpion", LIMITED, GAOLER, 33),
+		gene("Scuttle", LIMITED, AURABOA, 223),
+		gene("Shardflank", COMMON, GAOLER, 26),
+		gene("Shark", LIMITED, SANDSURGE, 190, UNDERTIDE, 258),
+		gene("Skeletal", LIMITED, ABERRATION, 204, BANESCALE, 45),
+		gene("Smirch", LIMITED, MODERN, 19, ABERRATION, 205, AETHER, 150, SANDSURGE, 192, UNDERTIDE, 259),
+		gene("Smoke", UNCOMMON, MODERN, 7, AETHER, 151, AURABOA, 240, GAOLER, 28, UNDERTIDE, 260),
+		gene("Soap", RARE, MODERN, 105, BANESCALE, 159, SANDSURGE, 180, UNDERTIDE, 124),
+		gene("Space", RARE, AETHER, 149),
+		gene("Sparkle", UNCOMMON, MODERN, 97, ABERRATION, 96, AETHER, 152, BANESCALE, 98, GAOLER, 99, SANDSURGE, 193, UNDERTIDE, 122, VEILSPUN, 100),
+		gene("Spectre", RARE, SANDSURGE, 188),
+		gene("Spines", UNCOMMON, MODERN, 8, ABERRATION, 206, AETHER, 153, AURABOA, 241, BANESCALE, 160, SANDSURGE, 181, UNDERTIDE, 261),
+		gene("Squiggle", LIMITED, BANESCALE, 42),
+		gene("Stained", RARE, MODERN, 12, ABERRATION, 207, AETHER, 145, AURABOA, 242, BANESCALE, 69, GAOLER, 71, SANDSURGE, 172, UNDERTIDE, 110, VEILSPUN, 72),
+		gene("Starfall", LIMITED, AETHER, 209, SANDSURGE, 210),
+		gene("Stinger", UNCOMMON, AETHER, 148, AURABOA, 224, UNDERTIDE, 262),
+		gene("Tentacles", RARE, UNDERTIDE, 125),
+		gene("Terracotta", COMMON, AURABOA, 225),
+		gene("Thorns", UNCOMMON, ABERRATION, 208, AURABOA, 226, UNDERTIDE, 263, VEILSPUN, 68),
+		gene("Thundercrack", LIMITED, GAOLER, 195, SANDSURGE, 194),
+		gene("Thylacine", COMMON, MODERN, 11, ABERRATION, 93, GAOLER, 29, SANDSURGE, 179),
+		gene("Topcoat", COMMON, AURABOA, 243, UNDERTIDE, 264),
+		gene("Trickmurk", LIMITED, AETHER, 271, VEILSPUN, 270),
+		gene("Trimmings", COMMON, BANESCALE, 39),
+		gene("Underbelly", COMMON, MODERN, 5, ABERRATION, 132, AETHER, 144, AURABOA, 228, BANESCALE, 52, GAOLER, 31, SANDSURGE, 171, UNDERTIDE, 109, VEILSPUN, 70),
+		gene("Veined", LIMITED, MODERN, 38, ABERRATION, 91, GAOLER, 2, UNDERTIDE, 113, VEILSPUN, 134),
+		gene("Weathered", LIMITED, GAOLER, 35),
+		gene("Whiskers", UNCOMMON, AETHER, 154),
+		gene("Willow", UNCOMMON, AURABOA, 227),
+		gene("Wintercoat", UNCOMMON, GAOLER, 34),
+		gene("Wish", RARE, MODERN, 213, AETHER, 155),
+		gene("Wraith", RARE, BANESCALE, 48)
+	])
 });
