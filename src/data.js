@@ -25,19 +25,22 @@ function deepFreeze(obj) {
 
 /** @typedef {Object} Gene
  * @property {string} name
- * @property {module:FRjs/data.Rarity} rarity
- * @property {Object} sids Map of all on-site IDs that this gene may have. The {@link module:FRjs/data.BreedType BreedType.MODERN} (`M`) key, if present, corresponds to the site ID for the gene on modern breeds. All other keys, if present, are an index in {@link module:FRjs/data.BREEDS} and correspond to the site ID for the gene on that ancient breed.
+ * @property {Rarity} rarity
+ * @property {Object} sids Map of all on-site IDs that this gene may have. The `BreedType.MODERN` (`M`) key, if present, corresponds to the site ID for the gene on modern breeds. All other keys, if present, are an index in `BREEDS` and correspond to the site ID for the gene on that ancient breed.
  * @property {boolean} isModern Whether or not this gene is available on modern breeds.
- * @property {number[]} ancients Array of indexes in {@link module:FRjs/data.BREEDS} for all ancient breeds this gene is available on.
- * @property {function(number): number|undefined} sidForBreed1 Given the index of a breed in {@link module:FRjs/data.BREEDS}, returns the site ID for this gene on that breed, if it's available.
+ * @property {number[]} ancients Array of indices in `BREEDS` for all ancient breeds this gene is available on.
+ * @property {function(number): number|undefined} sidForBreed Given the index of a breed in `BREEDS`, returns the site ID for this gene on that breed, if it's available.
  *
  * **Parameters:**
  * | Name | Type | Description |
  * |---|-|-|
- * | `breed` | number | Index of a breed in {@link module:FRjs/data.BREEDS} |
+ * | `breed` | number | Index of a breed in `BREEDS` |
  *
  * **Returns:**
- * **Type:** number \| undefined */
+ * **Type:** number \| undefined
+ * @see {@link module:FRjs/data.Rarity Rarity}
+ * @see {@link module:FRjs/data.BreedType BreedType}
+ * @see {@link module:FRjs/data.BREEDS BREEDS} */
 function gene(name, rarity, ...sidPairs) {
 	let sids = {};
 	if (name === "Basic") {
@@ -65,8 +68,10 @@ function gene(name, rarity, ...sidPairs) {
 /** @typedef {Object} Breed
  * @property {string} name
  * @property {number} sid The breed's on-site ID.
- * @property {module:FRjs/data.BreedType} type
- * @property {module:FRjs/data.Rarity} rarity */
+ * @property {BreedType} type
+ * @property {Rarity} rarity
+ * @see {@link module:FRjs/data.BreedType BreedType}
+ * @see {@link module:FRjs/data.Rarity Rarity} */
 function breed(name, sid, type, rarity) {
 	return freeze({ name, sid, type, rarity });
 }
@@ -151,6 +156,7 @@ const RARITY_TABLE = deepFreeze({
 
 /** Possible nest sizes and their probabilities of happening.
  * [Data Source]{@link https://flightrising.fandom.com/wiki/Nesting_Grounds#Number_of_Eggs}
+ * @type {{sameBreeds: Nest[], diffBreeds: Nest[]}}
  * @private */
 const NEST_SIZES = deepFreeze({
 	sameBreeds: [
@@ -173,9 +179,10 @@ const NEST_SIZES = deepFreeze({
 ///////////////////////////////////////////////////////////////////////////////
 
 /** Given two rarities to compare, returns an array containing, in order, the probability that `rarity1` occurs and the probability that `rarity2` occurs. If invalid rarities are given, returns `undefined`.
- * @param {module:FRjs/data.Rarity} rarity1
- * @param {module:FRjs/data.Rarity} rarity2
- * @returns {number[]|undefined} */
+ * @param {Rarity} rarity1
+ * @param {Rarity} rarity2
+ * @returns {number[]|undefined}
+ * @see {@link module:FRjs/data.Rarity Rarity} */
 export function rarityTableLookup(rarity1, rarity2) {
 	return RARITY_TABLE[rarity1][rarity2]
 		?? [...RARITY_TABLE[rarity2][rarity1]].reverse();
@@ -184,11 +191,12 @@ export function rarityTableLookup(rarity1, rarity2) {
 }
 
 /** Compares two objects with rarities from the given array, and returns the probability of the given `target` outcome occurring. If the indexes aren't in the array, or the array members don't have rarities, returns `undefined`.
- * @param {Array<{rarity: module:FRjs/data.Rarity}>} arr Array of objects with a `rarity` property.
+ * @param {Array.<{rarity: Rarity}>} arr Array of objects with a `rarity` property.
  * @param {number} one Index in `arr` of the first possible outcome.
  * @param {number} two Index in `arr` of the second possible outcome.
  * @param {number} target Index in `arr` of the target outcome. Should be identical to either `one` or `two`.
- * @returns {number|undefined} */
+ * @returns {number|undefined}
+ * @see {@link module:FRjs/data.Rarity Rarity} */
 export function calcRarityProb(arr, one, two, target) {
 	if (!(arr instanceof Array && one in arr && two in arr
 		&& "rarity" in arr[one] && "rarity" in arr[two])) {
@@ -202,7 +210,7 @@ export function calcRarityProb(arr, one, two, target) {
 	return lookup[(target === one) ? 0 : 1];
 }
 
-/** Calculates the length of the shortest range between two colours. If either parameter is not an index in {@link module:FRjs/data.COLOURS}, returns `undefined`.
+/** Calculates the length of the shortest range between two colours. If either parameter is not an index in {@link module:FRjs/data.COLOURS COLOURS}, returns `undefined`.
  * @param {number} one Index of the first colour in the range.
  * @param {number} two Index of the last colour in the range.
  * @returns {number|undefined} */
@@ -214,7 +222,7 @@ export function colourRangeLength(one, two) {
 	return 1 + Math.min(COLOURS.length - absDist, absDist);
 }
 
-/** Returns `true` if the target colour is in the shortest range between two given colours, and `false` if it isn't. If any parameter is not an index in {@link module:FRjs/data.COLOURS}, returns `undefined`. Range includes both end colours.
+/** Returns `true` if the target colour is in the shortest range between two given colours, and `false` if it isn't. If any parameter is not an index in {@link module:FRjs/data.COLOURS COLOURS}, returns `undefined`. Range includes both end colours.
  * @param {number} one Index of the first colour in the range.
  * @param {number} two Index of the last colour in the range.
  * @param {number} target Index of the target colour.
@@ -235,7 +243,7 @@ export function isColourInRange(one, two, target) {
 	return target <= first || target >= last;
 }
 
-/** Returns `true` if the colour range from `target1` to `target2` is a sub-range of the colour range from `range1` to `range2`, and `false` if not. If any parameter is not an index in {@link module:FRjs/data.COLOURS}, returns `undefined`. Both ranges include both their end colours.
+/** Returns `true` if the colour range from `target1` to `target2` is a sub-range of the colour range from `range1` to `range2`, and `false` if not. If any parameter is not an index in {@link module:FRjs/data.COLOURS COLOURS}, returns `undefined`. Both ranges include both their end colours.
  * @param {number} range1 Index of the first colour in the parent range.
  * @param {number} range2 Index of the last colour in the parent range.
  * @param {number} target1 Index of the first colour in the target range.
@@ -269,7 +277,7 @@ export function isColourSubrangeInRange(range1, range2, target1, target2) {
 	}
 }
 
-/** Returns `true` if the two given breeds are compatible for breeding -- meaning either they're both modern breeds, or they're the same ancient breed -- and `false` if they aren't. If either parameter is not an index in {@link module:FRjs/data.BREEDS}, returns `undefined`.
+/** Returns `true` if the two given breeds are compatible for breeding -- meaning either they're both modern breeds, or they're the same ancient breed -- and `false` if they aren't. If either parameter is not an index in {@link module:FRjs/data.BREEDS BREEDS}, returns `undefined`.
  * @param {number} one Index of the first breed.
  * @param {number} two Index of the second breed.
  * @returns {boolean|undefined} */
@@ -284,10 +292,11 @@ export function areBreedsCompatible(one, two) {
 		|| (b1 === b2);
 }
 
-/** Returns an array containing possible nest sizes and their probabilities if dragons of the two given breeds are nested. See {@link module:FRjs/data~Nest} for structure. If the given breeds are incompatible, or if either parameter is not an index in {@link module:FRjs/data.BREEDS}, returns `undefined`.
+/** Returns an array containing possible nest sizes and their probabilities if dragons of the two given breeds are nested. If the given breeds are incompatible, or if either parameter is not an index in {@link module:FRjs/data.BREEDS BREEDS}, returns `undefined`.
  * @param {number} one Index of the first breed.
  * @param {number} two Index of the second breed.
- * @returns {Array<module:FRjs/data~Nest>|undefined} */
+ * @returns {Nest[]|undefined}
+ * @see {@link module:FRjs/data~Nest Nest} */
 export function nestSizesForBreeds(one, two) {
 	if (!(one in BREEDS && two in BREEDS && areBreedsCompatible(one, two))) {
 		return;
@@ -316,7 +325,7 @@ export function* genesForBreed(slot, breed) {
 	}
 }
 
-/** Yields indices on {@link module:FRjs/data.COLOURS COLOURS} of all colours in the shortest range between the two given colours. If either parameter is not an index in {@link module:FRjs/data.COLOURS}, yields nothing.
+/** Yields indices on {@link module:FRjs/data.COLOURS COLOURS} of all colours in the shortest range between the two given colours. If either parameter is not an index in `COLOURS`, yields nothing.
  * @param {number} one Index of the first colour in the range.
  * @param {number} two Index of the last colour in the range.
  * @yields {number} */
@@ -348,14 +357,14 @@ export function* colourRange(one, two) {
 // PUBLIC DATA
 ///////////////////////////////////////////////////////////////////////////////
 
-/** Enum for breed types; ie Ancient and Modern.
+/** Enum for breed types. This effects which genes are available on a breed, and which breed(s) it can be paired with.
  * @enum {string}
  * @prop {string} ANCIENT
  * @prop {string} MODERN
  */
 export const BreedType = freeze({ ANCIENT, MODERN });
 
-/** Enum for rarities. Every breed and gene has a rarity.
+/** Enum for rarities. Every breed and gene has a rarity which affects it's probability of occurring through breeding.
  * @enum {string}
  * @prop {string} PLENTIFUL
  * @prop {string} COMMON
@@ -365,22 +374,25 @@ export const BreedType = freeze({ ANCIENT, MODERN });
  */
 export const Rarity = freeze({ PLENTIFUL, COMMON, UNCOMMON, LIMITED, RARE });
 
-/** The two possible dragon ages in Flight Rising. See {@link module:FRjs/data~BasicTrait} for object structure. Ordered as they are in-game.
- * @type {Array.<module:FRjs/data~BasicTrait>} */
+/** The two possible dragon ages in Flight Rising. Ordered as they are in-game.
+ * @type {BasicTrait[]}
+ * @see {@link module:FRjs/data~BasicTrait BasicTrait} */
 export const AGES = deepFreeze([
 	basicTrait("Dragon", 1),
 	basicTrait("Hatchling", 0)
 ]);
 
-/** The two possible dragon genders in Flight Rising. See {@link module:FRjs/data~BasicTrait} for object structure. Ordered as they are in-game.
- * @type {Array.<module:FRjs/data~BasicTrait>} */
+/** The two possible dragon genders in Flight Rising. Ordered as they are in-game.
+ * @type {BasicTrait[]}
+ * @see {@link module:FRjs/data~BasicTrait BasicTrait} */
 export const GENDERS = deepFreeze([
 	basicTrait("Male", 0),
 	basicTrait("Female", 1)
 ]);
 
-/** All possible elements (flights) in Flight Rising. See {@link module:FRjs/data~BasicTrait} for object structure. Ordered as they are in-game.
- * @type {Array.<module:FRjs/data~BasicTrait>} */
+/** All possible elements (flights) in Flight Rising. Ordered as they are in-game.
+ * @type {BasicTrait[]}
+ * @see {@link module:FRjs/data~BasicTrait BasicTrait} */
 export const ELEMENTS = deepFreeze([
 	basicTrait("Earth", 1),
 	basicTrait("Plague", 2),
@@ -395,9 +407,9 @@ export const ELEMENTS = deepFreeze([
 	basicTrait("Fire", 11)
 ]);
 
-/** All possible eye types in Flight Rising. See {@link module:FRjs/data~EyeType} for object structure. Sorted by probability (descending). [Data Source]{@link https://flightrising.fandom.com/wiki/Eye_Types#Odds}
- * @readonly
- * @type {Array<module:FRjs/data~EyeType>} */
+/** All possible eye types in Flight Rising. Sorted by probability (descending). [Data Source]{@link https://flightrising.fandom.com/wiki/Eye_Types#Odds}
+ * @type {EyeType[]}
+ * @see {@link module:FRjs/data~EyeType EyeType} */
 export const EYES = freeze([
 	eye("Common", 0, 0.458),
 	eye("Uncommon", 1, 0.242),
@@ -415,9 +427,9 @@ export const EYES = freeze([
 	eye("Innocent", 11, 0)
 ]);
 
-/** All available colours in Flight Rising. See {@link module:FRjs/data~Colour} for object structure. Ordered as they are in-game. This should be treated as a circular array.
- * @readonly
- * @type {Array<module:FRjs/data~Colour>} */
+/** All available colours in Flight Rising. Ordered as they are in-game. This should be treated as a circular array.
+ * @type {Colour[]}
+ * @see {@link module:FRjs/data~Colour Colour} */
 export const COLOURS = freeze([
 	colour("Maize", 1, "fffdea"),
 	colour("Cream", 163, "ffefdc"),
@@ -598,9 +610,9 @@ export const COLOURS = freeze([
 	colour("Pearl", 85, "fbe9f8")
 ]);
 
-/** All available breeds in Flight Rising. See {@link module:FRjs/data~Breed} for object structure. Sorted by name (ascending). [Data Source]{@link https://www1.flightrising.com/wiki/wiki}
- * @readonly
- * @type {Array<module:FRjs/data~Breed>} */
+/** All available breeds in Flight Rising. Sorted by name (ascending). [Data Source]{@link https://www1.flightrising.com/wiki/wiki}
+ * @type {Breed[]}
+ * @see {@link module:FRjs/data~Breed Breed} */
 export const BREEDS = freeze([
 	breed("Aberration", 20, ANCIENT, COMMON),
 	breed("Aether", 22, ANCIENT, COMMON),
@@ -640,7 +652,7 @@ const [
 	VEILSPUN
 ] = BREEDS.map((x, i) => i).filter(i => BREEDS[i].type === ANCIENT);
 
-/** All available genes, organized into primary, secondary, and tertiary slots. See {@link module:FRjs/data~Gene} for the structure of individual gene objects. Each slot is sorted by name (ascending). [Data Source]{@link https://www1.flightrising.com/forums/gde/3109561}
+/** All available genes, organized into primary, secondary, and tertiary slots. Each slot is sorted by name (ascending). [Data Source]{@link https://www1.flightrising.com/forums/gde/3109561}
  *
  * This object has the following structure:
  * ```js
@@ -650,8 +662,8 @@ const [
  * 	tertiary: Gene[]
  * }
  * ```
- * @readonly
- * @type {{primary:Array<Gene>,secondary:Array<Gene>,tertiary:Array<Gene>}} */
+ * @type {{primary: Gene[], secondary: Gene[], tertiary: Gene[]}}
+ * @see {@link module:FRjs/data~Gene Gene} */
 export const GENES = freeze({
 	primary: freeze([
 		gene("Arapaima", COMMON, SANDSURGE, 194),

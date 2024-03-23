@@ -1,5 +1,5 @@
 /**
- * Contains a class for converting the relevant data in scrying workshop links and dragon profile pages into indices in the arrays of module:FRjs/data, and for converting those indices into a functioning scrying workshop link. See the `DragonTraits` class' documentation for more details. See the tutorial for usage examples.
+ * A class for converting the relevant data in scrying workshop links and dragon profile pages into indices in the arrays of module:FRjs/data, and for converting those indices into a functioning scrying workshop link. See the `DragonTraits` class' documentation for more details. See the tutorial for usage examples.
  *
  * @module FRjs/convert
  * @tutorial 07-fr-convert
@@ -9,12 +9,10 @@
 import * as FR from "./data.js";
 
 
-/**
- * A class representing the traits of a single dragon within the context of FRjs. The class is intended to convert between indices in FRjs/data arrays, dragon profile pages, and scrying workshop links; hence, the trait data is immutable after object construction and all objects should be short-lived.
+/** A class representing the traits of a single dragon within the context of FRjs. The class is intended to convert between indices in FRjs/data arrays, dragon profile pages, and scrying workshop links; hence, the trait data is immutable after object construction and all objects should be short-lived.
  *
- * See {@tutorial 07-fr-convert}.
- * @tutorial 07-fr-convert
- */
+ * | Tutorials | {@tutorial 07-fr-convert} |
+ * |---|-| */
 export class DragonTraits {
 	#breed = 0;
 	#eye = 0;
@@ -24,10 +22,9 @@ export class DragonTraits {
 	#colour = {primary: 0, secondary: 0, tertiary: 0};
 	#gene = {primary: 0, secondary: 0, tertiary: 0};
 
-	/**
+	/** Returns a {@link module:FRjs/convert.DragonTraits DragonTraits} object containing all the traits defined in the given scrying workshop link.
 	 * @param {string} link A scrying workshop link. NOT a link to a saved morphology; a URL for exact morphology parameters.
-	 * @returns {module:FRjs/convert.DragonTraits} Object containing all the traits defined in the given scrying link.
-	 */
+	 * @returns {DragonTraits} */
 	static fromScrylink(link) {
 		// UNUSED TRAITS:
 		// gender, age, element
@@ -58,10 +55,9 @@ export class DragonTraits {
 		});
 	}
 
-	/**
+	/** Returns a {@link module:FRjs/convert.DragonTraits DragonTraits} object containing all traits defined in the contents of the given dragon profile. Note: gender is not present in text on dragon profiles, and will be the default of Male.
 	 * @param {string} profile The text contents of a dragon's profile page. NOT the page HTML; what you get by selecting all text on the page in the browser window and copying it.
-	 * @returns {module:FRjs/convert.DragonTraits} Object containing all the traits defined in the given profile. Note: gender is not present in text on dragon profiles, and will be the default of Male.
-	 */
+	 * @returns {DragonTraits} */
 	static fromProfile(profile) {
 		const profileRegex = /Primary Gene\n(\w+)\n(\w+)(?: \(\w+\))*\nSecondary Gene\n(\w+)\n(\w+)(?: \(\w+\))*\nTertiary Gene\n(\w+)\n(\w+).*(?:Breed\n){2}(\w+)\n(\w+)\nEye Type\n(?:Special )*Eye Type\n(\w+)\n(\w+)/s;
 		const matches = profileRegex.exec(profile.replace(/\r/g, ""));
@@ -86,11 +82,28 @@ export class DragonTraits {
 		});
 	}
 
-	/** Constructs a formal DragonTraits object from a generic object containing indices in FRjs/data arrays for any/all of a single dragon's traits. Calling the constructor directly is useful for ensuring all traits are possible to have on one dragon, converting traits into scrying workshop links, or for quickly getting the actual data objects for all traits.
+	/** Constructs a formal DragonTraits object from a generic object containing indices in FRjs/data arrays for any/all of a single dragon's traits. Calling the constructor directly is useful for converting traits into scrying workshop links, and for quickly getting the actual data objects for all traits.
 	 *
 	 * Any traits that are left undefined, or which are invalid, will be set to a default value; index 0 for most traits, and for genes the index of Basic.
-	 * @param {Object} indices An object defining any/all of a single dragon's traits. The structure is the same as the objects returned by {@link module:FRjs/convert.DragonTraits#indices .indices}
-	 */
+	 * @param {{breed: number, eye: number, element: number, gender: number, age: number, colour: {primary: number, secondary: number, tertiary: number}, gene: {primary: number, secondary: number, tertiary: number}}} indices An object defining any/all of a single dragon's traits. It may contain any of the following keys, with values being indices in the appropriate array from {@link module:FRjs/data FRjs/data}:
+	 * ```js
+	 * {
+	 * 	breed: number,
+	 * 	eye: number,
+	 * 	element: number,
+	 * 	gender: number,
+	 * 	age: number,
+	 * 	colour: {
+	 * 		primary: number,
+	 * 		secondary: number,
+	 * 		tertiary: number
+	 * 	},
+	 * 	gene: {
+	 * 		primary: number,
+	 * 		secondary: number,
+	 * 		tertiary: number
+	 * 	}
+	 * } */
 	constructor(indices) {
 		if (indices.breed in FR.BREEDS) {
 			this.#breed = indices.breed;
@@ -126,25 +139,27 @@ export class DragonTraits {
 
 	/** Object containing all traits as **indices** in the applicable array from {@link module:FRjs/data FRjs/data}.
 	 *
-	 * The structure of the returned object is:
+	 * The structure of the object is:
 	 * ```js
 	 * {
-	 * 	breed: number
-	 * 	eye: number
+	 * 	breed: number,
+	 * 	eye: number,
+	 * 	element: number,
+	 * 	gender: number,
+	 * 	age: number,
 	 * 	colour: {
-	 * 		primary: number
-	 * 		secondary: number
+	 * 		primary: number,
+	 * 		secondary: number,
 	 * 		tertiary: number
-	 * 	}
+	 * 	},
 	 * 	gene: {
-	 * 		primary: number
-	 * 		secondary: number
+	 * 		primary: number,
+	 * 		secondary: number,
 	 * 		tertiary: number
 	 * 	}
 	 * }
 	 * ```
-	 * @type {Object}
-	 */
+	 * @type {{breed: number, eye: number, element: number, gender: number, age: number, colour: {primary: number, secondary: number, tertiary: number}, gene: {primary: number, secondary: number, tertiary: number}}} */
 	get indices() {
 		return {
 			breed: this.#breed,
@@ -157,8 +172,29 @@ export class DragonTraits {
 		};
 	}
 
-	/** An object containing all traits as **data objects** from {@link module:FRjs/data FRjs/data}. For the structure of the return object, see {@link module:FRjs/convert.DragonTraits#indices .indices}. For the structure of each data object it contains, see the documentation of the arrays in {@link module:FRjs/data FRjs/data}.
-	 * @type {Object} */
+	/** An object containing all traits as **data objects** from {@link module:FRjs/data FRjs/data}.
+	 *
+	 * The structure of the object is:
+	 * ```js
+	 * {
+	 * 	breed: FR.Breed,
+	 * 	eye: FR.EyeType,
+	 * 	element: FR.BasicTrait,
+	 * 	gender: FR.BasicTrait,
+	 * 	age: FR.BasicTrait,
+	 * 	colour: {
+	 * 		primary: FR.Colour,
+	 * 		secondary: FR.Colour,
+	 * 		tertiary: FR.Colour
+	 * 	},
+	 * 	gene: {
+	 * 		primary: FR.Gene,
+	 * 		secondary: FR.Gene,
+	 * 		tertiary: FR.Gene
+	 * 	}
+	 * }
+	 * ```
+	 * @type {{breed: FR.Breed, eye: FR.EyeType, element: FR.BasicTrait, gender: FR.BasicTrait, age: FR.BasicTrait, colour: {primary: FR.Colour, secondary: FR.Colour, tertiary: FR.Colour}, gene: {primary: FR.Gene, secondary: FR.Gene, tertiary: FR.Gene}}} */
 	get values() {
 		const idxs = this.indices;
 		return {

@@ -113,19 +113,19 @@ class BasicSelect extends HTMLSelectElement {
 }
 
 /** A customized `<select>` element which self-populates with options representing Flight Rising's dragon ages; i.e., Dragon and Hatchling. Registered as `fr-ages`.
- */
+ * @tutorial 02-fr-forms */
 class AgeSelect extends BasicSelect {
 	get dataArray() { return FR.AGES; }
 }
 
 /** A customized `<select>` element which self-populates with options representing all Flight Rising's dragon genders; i.e., Male and Female. Registered as `fr-genders`.
- */
+ * @tutorial 02-fr-forms */
 class GenderSelect extends BasicSelect {
 	get dataArray() { return FR.GENDERS; }
 }
 
 /** A customized `<select>` element which self-populates with options representing all of Flight Rising's flight elements, in the order they appear on-site. Registered as `fr-elements`.
- */
+ * @tutorial 02-fr-forms */
 class ElementSelect extends BasicSelect {
 	get dataArray() { return FR.ELEMENTS; }
 }
