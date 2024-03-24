@@ -5,8 +5,11 @@ Since these are *extensions* of the native `<select>` tag, they look and functio
 
 ## Available Dropdowns
 
-There are four custom dropdowns available in this module:
+There are seven custom dropdowns available in this module:
 
+1. **Ages** (`"fr-ages"`): Auto-populates options for Flight Rising's dragon ages.
+1. **Genders** (`"fr-genders"`): Auto-populates options for Flight Rising's dragon genders.
+1. **Elements** (`"fr-elements"`): Auto-populates options for Flight Rising's elemental flights.
 1. **Eye Types** (`"fr-eyes"`): Auto-populates options for all of Flight Rising's eye types, ordered by increasing rarity.  See {@tutorial 03-eyeselect} for details.
 1. **Colours** (`"fr-colours"`): Auto-populates options for all of Flight Rising's colours, in on-site colour wheel order. Options may optionally be styled with the same background colours they have on site. See {@tutorial 04-colourselect} for details.
 1. **Breeds** (`"fr-breeds"`): Auto-populates options for all of Flight Rising's breeds, separated into Modern and Ancient `<optgroup>`s and ordered alphabetically. See {@tutorial 05-breedselect} for details.
@@ -22,13 +25,13 @@ The recommended way to load the module is to add it as either its own script tag
 
 ```html
 <head>
-    <script type="module" src="path/to/FRjs/forms.js"></script>
+    <script type="module" src="path/to/FRjs/forms.min.js"></script>
 
     <!-- OR -->
 
     <script type="module">
         //main page script
-        import("FRjs/forms.js");
+        import("FRjs/forms.min.js");
     </script>
     <!-- ...etc... -->
 ```
@@ -36,16 +39,10 @@ The recommended way to load the module is to add it as either its own script tag
 For a potential performance improvement in Firefox and chromium-based browsers, consider preloading FRjs/data and FRjs/forms:
 ```html
 <head>
-    <link rel="modulepreload" href="path/to/FRjs/data.js" />
-    <link rel="modulepreload" href="path/to/FRjs/forms.js" />
+    <link rel="modulepreload" href="path/to/FRjs/data.min.js" />
+    <link rel="modulepreload" href="path/to/FRjs/forms.min.js" />
 
     <!-- ...etc... -->
-```
-
-You should also consider using jsDelivr to bundle FRjs/data and FRjs/forms together to save on time and HTTP requests.
-```bash
-# Packages 'data' and 'forms' module into one file. Consider adding it to your import map.
-https://cdn.jsdelivr.net/combine/gh/egad13/FRjs@1/js/data.min.js,gh/egad13/FRjs@1/js/forms.min.js
 ```
 
 ### 2. Create your Dropdowns
@@ -85,7 +82,7 @@ For an example, here's a small web page that outputs the range of colours betwee
 ```html
 <html>
 <head>
-    <script type="module" src="path/to/FRjs/forms.js"></script>
+    <script type="module" src="path/to/FRjs/forms.min.js"></script>
     <script type="module" src="example.js"></script>
 </head>
 <body>

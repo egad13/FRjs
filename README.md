@@ -2,12 +2,13 @@
 
 ![Release version][badge_release_version] [![License][badge_license]][link_license] [![jsDelivr stats][badge_jsdelivr]][link_jsdelivr]
 
- A javascript library that makes developing external tools for [Flight Rising](https://www1.flightrising.com/) a breeze. Dragon attribute data, utility functions, and automatic form components.
+ A javascript library that makes developing external tools for [Flight Rising](https://www1.flightrising.com/) a breeze. Dragon trait data, utility functions, and automatic form components.
 
 Available modules include:
 
 - **FRjs/data**: Comprehensive data about Flight Rising's dragon attributes, and a suite of utility functions to make working with that data easier. Includes data on breeds, genes, colours, eye types, and nest sizes. Includes functions for getting colour ranges, working with breeding mechanics like rarity and breed compatibility, and more.
-- **FRjs/forms**: Custom form components to take the headache out of setting up user inputs for your tools. Just add an attribute or two to your HTML markup, and get dropdowns that self-populate with options for breeds, genes, colours, and eye types. Works effortlessly with FRjs/data arrays and functions.
+- **FRjs/forms**: Custom form components to take the headache out of setting up user inputs for your tools. Just add an attribute or two to your HTML markup, and get dropdowns that self-populate with options for breeds, genes, colours, eye types, and more. Works effortlessly with FRjs/data arrays and functions.
+- **FRjs/convert**: Contains a class for converting scrying workshop links and dragon profiles into FRjs-compatible data, and for converting FRjs data back into scrying links.
 
 ## Where do I get it?
 
@@ -32,8 +33,8 @@ For easiest usage, and minimal headaches from long import statements and version
 	</script>
 
 	<script type="module">
-		import * as FR from "FRjs/data.js";
-		import("FRjs/forms.js");
+		import * as FR from "FRjs/data.min.js";
+		import("FRjs/forms.min.js");
 		// ...
 	</script>
 ```
@@ -47,25 +48,27 @@ You can use any module in FRjs by just importing it in the script file you want 
 For example, to use FRjs/data:
 ```js
 // In an ES6 module
-import * as FRdata from "path/to/FRjs/data.js";
+import * as FRdata from "path/to/FRjs/data.min.js";
 
 // In a plain javascript file
-import("path/to/FRjs/data.js").then(FRdata => {
+import("path/to/FRjs/data.min.js").then(FRdata => {
     // ...code...
 });
 
 // In an async function
-const FRdata = await import("path/to/FRjs/data.js");
+const FRdata = await import("path/to/FRjs/data.min.js");
 ```
 
 For detailed usage of a particular module, see that module's tutorial and/or documentation:
 
 - **FRjs/data**:
-  - [Tutorial](https://egad13.github.io/FRjs/tutorial-01-fr-data.html)
   - [Docs](https://egad13.github.io/FRjs/docs/module-FRjs_data.html)
 - **FRjs/forms**:
   - [Tutorial](https://egad13.github.io/FRjs/tutorial-02-fr-forms.html)
   - [Docs](https://egad13.github.io/FRjs/docs/module-FRjs_forms.html)
+- **FRjs/convert**:
+  - [Tutorial](https://egad13.github.io/FRjs/tutorial-07-fr-convert.html)
+  - [Docs](https://egad13.github.io/FRjs/docs/module-FRjs_convert.DragonTraits.html)
 
 ## Browser Compatibility
 

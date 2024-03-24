@@ -35,3 +35,37 @@ document.body.append(eyeDropdown);
 </ol>
 <p>If you need to access the self-populated options in your code, you must either wait until the <code>DOMContentLoaded</code> event has fired, or do so in a script which imports <code>FRjs/forms</code>.</p>
 </div>
+
+## Custom Attributes
+
+In addition to all standard attributes available for `<select>` elements, colour dropdowns support the following custom attributes:
+
+| Attribute          | Type    | Value If Unset | Description     |
+|--------------------|---------|----------------|-----------------|
+| **`only-natural`** | boolean | n/a            | If this attribute is present, there will only be options for *natural eye types;* i.e., eye types that can be obtained through breeding. If this attribute is omitted, there will be options for all natural and non-natural eye types. |
+
+## Examples
+
+### HTML
+
+Create an eye type dropdown with a default value of "Pick an eye":
+```html
+<select is="fr-eyes">
+	<option>Pick an eye</option>
+</select>
+```
+
+Create two eye type dropdowns with ONLY natural eye types included:
+```html
+<select is="fr-eyes" only-natural></select>
+<select is="fr-eyes" only-natural="only-natural"></select>
+```
+
+### Javascript
+
+Create an eye type dropdown with ONLY natural eye types included:
+```js
+const eyeDropdown = document.createElement("select", { is: "fr-eyes" });
+eyeDropdown.setAttribute("only-natural", "");
+document.body.append(eyeDropdown);
+```
