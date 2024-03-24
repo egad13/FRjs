@@ -1,9 +1,8 @@
 /**
- * Defines extensions of the native HTML `<select>` element which self-populate with different kinds of Flight Rising data. Available elements are registered as `fr-eyes`, `fr-colours`, `fr-breeds`, and `fr-genes`. See the tutorials for usage.
+ * Defines extensions of the native HTML `<select>` element which self-populate with different kinds of Flight Rising data. Available elements are registered as `fr-eyes`, `fr-colours`, `fr-breeds`, `fr-genes`, `fr-ages`, `fr-genders`, and `fr-elements`. See the tutorials for usage.
  *
  * Customized Built-in Elements are not natively supported in Safari, but the custom dropdowns should work in Safari anyway because the module loads a polyfill if CBIE support is not detected.
  * @module FRjs/forms
- * @version 0.0.2
  * @tutorial 02-fr-forms
  * @requires module:FRjs/data
  */
@@ -89,31 +88,101 @@ class PubSub {
  * @private */
 const bgPubSub = new PubSub();
 
-/** A customized `<select>` element which self-populates with options representing all of Flight Rising's eye types, in order of increasing rarity. Registered as `fr-eyes`.
- * @tutorial 03-eyeselect */
-class EyeSelect extends HTMLSelectElement {
+/** Base class for very simple self-populating dropdowns with no extra behaviour. When extending:
+ * - Override `get dataArray()` to return an array of objects with a name property; these will become options in the dropdown.
+ * - Optionally, override `extraOptionInit(option, obj)` to do something extra to each option after it's created, but before it's added to the option list.
+ * @private */
+class BasicSelect extends HTMLSelectElement {
 	#isPopulated = false;
+
+	get dataArray() { return []; }
+
+	extraOptionInit(option, obj) { }
 
 	connectedCallback() {
 		if (this.#isPopulated) { return; }
 		this.#isPopulated = true;
 
-		for (const [i, elt] of FR.EYES.entries()) {
+		for (const [i, elt] of this.dataArray.entries()) {
 			const op = document.createElement("option");
 			[op.value, op.text] = [i, elt.name];
+			this.extraOptionInit(op, elt);
 			this.add(op);
+		}
+	}
+}
+
+/** A customized `<select>` element which self-populates with options representing Flight Rising's dragon ages; i.e., Dragon and Hatchling. Registered as `fr-ages`.
+ * @tutorial 02-fr-forms */
+class AgeSelect extends BasicSelect {
+	get dataArray() { return FR.AGES; }
+}
+
+/** A customized `<select>` element which self-populates with options representing all Flight Rising's dragon genders; i.e., Male and Female. Registered as `fr-genders`.
+ * @tutorial 02-fr-forms */
+class GenderSelect extends BasicSelect {
+	get dataArray() { return FR.GENDERS; }
+}
+
+/** A customized `<select>` element which self-populates with options representing all of Flight Rising's flight elements, in the order they appear on-site. Registered as `fr-elements`.
+ * @tutorial 02-fr-forms */
+class ElementSelect extends BasicSelect {
+	get dataArray() { return FR.ELEMENTS; }
+}
+
+/** A customized `<select>` element which self-populates with options representing all of Flight Rising's eye types, in order of increasing rarity. Registered as `fr-eyes`.
+ * @tutorial 03-eyeselect */
+class EyeSelect extends BasicSelect {
+	get dataArray() { return FR.EYES; }
+
+	extraOptionInit(op, obj) {
+		if (obj.probability === 0) {
+			op.dataset.notNat = true;
+			if (this.hasAttribute("only-natural")) {
+				op.disabled = true;
+				op.style = "display: none;";
+			}
+		}
+	}
+
+	static get observedAttributes() { return ["only-natural"] }
+
+	attributeChangedCallback(name) {
+		if (this.hasAttribute(name)) {
+			for (const op of this) {
+				if (op.dataset.notNat === "true") {
+					op.disabled = true;
+					op.style = "display: none;";
+				}
+			}
+		}
+		else {
+			for (const op of this) {
+				op.removeAttribute("disabled");
+				op.removeAttribute("style");
+			}
 		}
 	}
 }
 
 /** A customized `<select>` element which self-populates with options representing all of Flight Rising's colours, in order of the on-site colour wheel. Registered as `fr-colours`.
  * @tutorial 04-colourselect */
-class ColourSelect extends HTMLSelectElement {
-	#isPopulated = false;
+class ColourSelect extends BasicSelect {
 	/** Stores text colours for each possible colour option.
 	 * @private
 	 * @type {Map.<string, string>} */
 	static #styleCache = new Map();
+
+	get dataArray() { return FR.COLOURS; }
+
+	extraOptionInit(op, obj) {
+		if (!ColourSelect.#styleCache.has(op.value)) {
+			ColourSelect.#styleCache.set(op.value, `background:#${obj.hex};color:#${ColourSelect.#textColourForBg(obj.hex)}`);
+		}
+		if (!this.hasAttribute("no-opt-colours")) {
+			op.style = ColourSelect.#styleCache.get(op.value);
+		}
+	}
 
 	static get observedAttributes() { return ["no-opt-colours"]; }
 
@@ -126,25 +195,6 @@ class ColourSelect extends HTMLSelectElement {
 			for (const op of this) {
 				op.style = ColourSelect.#styleCache.get(op.value);
 			}
-		}
-	}
-
-	connectedCallback() {
-		if (this.#isPopulated) { return; }
-		this.#isPopulated = true;
-
-		const doStyle = !this.hasAttribute("no-opt-colours");
-
-		for (const [i, elt] of FR.COLOURS.entries()) {
-			const op = document.createElement("option");
-			[op.value, op.text] = [i, elt.name];
-			if (!ColourSelect.#styleCache.has(op.value)) {
-				ColourSelect.#styleCache.set(op.value, `background:#${elt.hex};color:#${ColourSelect.#textColourForBg(elt.hex)}`);
-			}
-			if (doStyle) {
-				op.style = ColourSelect.#styleCache.get(op.value);
-			}
-			this.add(op);
 		}
 	}
 
@@ -301,15 +351,16 @@ class GeneSelect extends HTMLSelectElement {
 			}
 		}
 
-		for (const { index, name } of FR.genesForBreed(this.#slot, breedVal)) {
-			if (!oldVal && index.toString() === oldSelectedVal) {
-				oldVal = index;
+		for (const i of FR.genesForBreed(this.#slot, breedVal)) {
+			const name = FR.GENES[this.#slot][i].name;
+			if (!oldVal && i.toString() === oldSelectedVal) {
+				oldVal = i;
 			}
 			if (!defVal && name.toLowerCase() === this.#defaultName) {
-				defVal = index;
+				defVal = i;
 			}
 			const op = document.createElement("option");
-			[op.value, op.text] = [index, name];
+			[op.value, op.text] = [i, name];
 			op.dataset.auto = true;
 			this.add(op);
 		}
@@ -317,6 +368,9 @@ class GeneSelect extends HTMLSelectElement {
 	}
 }
 
+customElements.define("fr-ages", AgeSelect, { extends: "select" });
+customElements.define("fr-genders", GenderSelect, { extends: "select" });
+customElements.define("fr-elements", ElementSelect, { extends: "select" });
 customElements.define("fr-eyes", EyeSelect, { extends: "select" });
 customElements.define("fr-colours", ColourSelect, { extends: "select" });
 customElements.define("fr-breeds", BreedSelect, { extends: "select" });
