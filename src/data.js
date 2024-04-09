@@ -407,24 +407,27 @@ export const ELEMENTS = deepFreeze([
 	basicTrait("Fire", 11)
 ]);
 
-/** All possible eye types in Flight Rising. Sorted by probability (descending). [Data Source]{@link https://flightrising.fandom.com/wiki/Eye_Types#Odds}
+/** All possible eye types in Flight Rising. Sorted by probability (descending). [Data Source (retrieved 2024-04-09 at 12:07 PM EST)]{@link https://docs.google.com/spreadsheets/d/1VOh1gwr-cCNMltfIFG8XHM-kEsBJLgVRg19HgiJ89ZA/edit#gid=0}
  * @type {EyeType[]}
  * @see {@link module:FRjs/data~EyeType EyeType} */
 export const EYES = freeze([
-	eye("Common", 0, 0.458),
-	eye("Uncommon", 1, 0.242),
-	eye("Unusual", 2, 0.139),
-	eye("Rare", 3, 0.091),
-	eye("Bright", 13, 0.022),
-	eye("Pastel", 12, 0.021),
-	eye("Goat", 9, 0.011),
-	eye("Faceted", 4, 0.007),
-	eye("Primal", 6, 0.005),
-	eye("Multi-Gaze", 5, 0.004),
+	eye("Common", 0, 0.409123),
+	eye("Uncommon", 1, 0.252662),
+	eye("Unusual", 2, 0.144391),
+	eye("Rare", 3, 0.088392),
+	eye("Dark", 16, 0.021299),
+	eye("Faded", 15, 0.019436),
+	eye("Pastel", 12, 0.018814),
+	eye("Bright", 13, 0.016596),
+	eye("Goat", 9, 0.010295),
+	eye("Faceted", 4, 0.00994),
+	eye("Multi-Gaze", 5, 0.004615),
+	eye("Primal", 6, 0.004437),
 	eye("Glowing", 7, 0),
 	eye("Dark Sclera", 8, 0),
 	eye("Swirl", 10, 0),
-	eye("Innocent", 11, 0)
+	eye("Innocent", 11, 0),
+	eye("Button", 14, 0)
 ]);
 
 /** All available colours in Flight Rising. Ordered as they are in-game. This should be treated as a circular array.
