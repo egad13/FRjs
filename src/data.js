@@ -625,6 +625,7 @@ export const BREEDS = freeze([
 	breed("Coatl", 12, MODERN, RARE),
 	breed("Dusthide", 25, ANCIENT, COMMON),
 	breed("Fae", 1, MODERN, PLENTIFUL),
+	breed("Fathom", 16, MODERN, UNCOMMON),
 	breed("Gaoler", 17, ANCIENT, COMMON),
 	breed("Guardian", 2, MODERN, PLENTIFUL),
 	breed("Imperial", 8, MODERN, LIMITED),
