@@ -862,6 +862,7 @@ export const GENES = freeze({
 		gene("Glimmer", RARE, MODERN, 10, ABERRATION, 94, BANESCALE, 95, GAOLER, 101, VEILSPUN, 102),
 		gene("Glowtail", RARE, MODERN, 54, ABERRATION, 89, AETHER, 138, DUSTHIDE, 279),
 		gene("Gnarlhorns", RARE, GAOLER, 27),
+		gene("Greenskeeper", LIMITED, AURABOA, 308, DUSTHIDE, 307),
 		gene("Jellyfish", UNCOMMON, UNDERTIDE, 269),
 		gene("Jewels", RARE, ABERRATION, 87),
 		gene("Keel", LIMITED, MODERN, 53, AETHER, 139, AURABOA, 234, SANDSURGE, 186, UNDERTIDE, 268),
