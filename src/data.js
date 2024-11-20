@@ -917,7 +917,7 @@ export const GENES = freeze({
 		gene("Tentacles", RARE, UNDERTIDE, 125),
 		gene("Terracotta", COMMON, AURABOA, 225),
 		gene("Thorns", UNCOMMON, ABERRATION, 208, AURABOA, 226, UNDERTIDE, 263, VEILSPUN, 68),
-		gene("Thundercrack", LIMITED, GAOLER, 195, SANDSURGE, 194),
+		gene("Thundercrack", LIMITED, ABERRATION, 311, GAOLER, 195, SANDSURGE, 194, VEILSPUN, 312),
 		gene("Thylacine", COMMON, MODERN, 11, ABERRATION, 93, GAOLER, 29, SANDSURGE, 179),
 		gene("Topcoat", COMMON, AURABOA, 243, DUSTHIDE, 299, UNDERTIDE, 264),
 		gene("Trickmurk", LIMITED, AETHER, 271, VEILSPUN, 270),
